@@ -19,6 +19,7 @@ type UseChessGame = {
   position: string
   selectedSquare: string | null
   possibleMoves: PossibleMove[]
+  checkedSquare: string | null
   onPieceDrop: (args: PieceDropArgs) => boolean
   onSquareClick: (args: SquareClickArgs) => void
 }
@@ -30,11 +31,20 @@ function legalMovesFrom(game: Chess, square: string): PossibleMove[] {
   }))
 }
 
+function kingSquareInCheck(game: Chess): string | null {
+  if (!game.isCheck()) {
+    return null
+  }
+
+  return game.findPiece({ type: 'k', color: game.turn() })[0] ?? null
+}
+
 export function useChessGame(initialPosition?: string): UseChessGame {
   const [game] = useState(() => new Chess(initialPosition))
   const [position, setPosition] = useState(() => game.fen())
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
   const [possibleMoves, setPossibleMoves] = useState<PossibleMove[]>([])
+  const [checkedSquare, setCheckedSquare] = useState<string | null>(() => kingSquareInCheck(game))
 
   const clearSelection = useCallback((): void => {
     setSelectedSquare(null)
@@ -50,6 +60,7 @@ export function useChessGame(initialPosition?: string): UseChessGame {
       }
 
       setPosition(game.fen())
+      setCheckedSquare(kingSquareInCheck(game))
       clearSelection()
       return true
     },
@@ -86,5 +97,12 @@ export function useChessGame(initialPosition?: string): UseChessGame {
     [applyMove]
   )
 
-  return { position, selectedSquare, possibleMoves, onPieceDrop, onSquareClick }
+  return {
+    position,
+    selectedSquare,
+    possibleMoves,
+    checkedSquare,
+    onPieceDrop,
+    onSquareClick
+  }
 }

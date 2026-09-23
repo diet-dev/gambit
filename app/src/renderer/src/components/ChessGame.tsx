@@ -6,6 +6,11 @@ const SELECTED_SQUARE_STYLE: CSSProperties = {
   backgroundColor: 'rgba(255, 255, 0, 0.4)'
 }
 
+const CHECKED_KING_STYLE: CSSProperties = {
+  backgroundImage:
+    'radial-gradient(circle, transparent 35%, rgba(255, 0, 0, 0.75) 65%, rgba(255, 0, 0, 0.75) 100%)'
+}
+
 function moveStyle(isCapture: boolean): CSSProperties {
   return {
     backgroundImage: isCapture
@@ -14,8 +19,13 @@ function moveStyle(isCapture: boolean): CSSProperties {
   }
 }
 
-function ChessGame(): React.JSX.Element {
-  const { position, selectedSquare, possibleMoves, onPieceDrop, onSquareClick } = useChessGame()
+type ChessGameProps = {
+  initialPosition?: string
+}
+
+function ChessGame({ initialPosition }: ChessGameProps): React.JSX.Element {
+  const { position, selectedSquare, possibleMoves, checkedSquare, onPieceDrop, onSquareClick } =
+    useChessGame(initialPosition)
 
   const squareStyles: Record<string, CSSProperties> = {}
   if (selectedSquare) {
@@ -23,6 +33,9 @@ function ChessGame(): React.JSX.Element {
   }
   for (const move of possibleMoves) {
     squareStyles[move.square] = moveStyle(move.isCapture)
+  }
+  if (checkedSquare) {
+    squareStyles[checkedSquare] = CHECKED_KING_STYLE
   }
 
   return (

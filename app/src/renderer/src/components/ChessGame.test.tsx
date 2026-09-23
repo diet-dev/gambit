@@ -27,4 +27,13 @@ describe('ChessGame', () => {
       backgroundImage: 'radial-gradient(circle, rgba(0, 0, 0, 0.2) 22%, transparent 23%)'
     })
   })
+
+  it('highlights the king square when it is in check', () => {
+    const { container } = render(<ChessGame initialPosition="4k3/8/8/8/8/8/8/4R1K1 b - - 0 1" />)
+
+    expect(container.querySelector('[data-square="e8"] > div')).toHaveStyle({
+      backgroundImage:
+        'radial-gradient(circle, transparent 35%, rgba(255, 0, 0, 0.75) 65%, rgba(255, 0, 0, 0.75) 100%)'
+    })
+  })
 })

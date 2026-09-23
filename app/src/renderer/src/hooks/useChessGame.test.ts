@@ -135,6 +135,40 @@ describe('useChessGame', () => {
     expect(result.current.possibleMoves).toEqual([])
   })
 
+  it('reports no check from the standard position', () => {
+    const { result } = renderHook(() => useChessGame())
+
+    expect(result.current.checkedSquare).toBeNull()
+  })
+
+  it('flags the king square when a move gives check', () => {
+    const { result } = renderHook(() => useChessGame('4k3/8/8/8/8/8/8/R5K1 w - - 0 1'))
+
+    act(() => {
+      result.current.onSquareClick({ square: 'a1' })
+    })
+    act(() => {
+      result.current.onSquareClick({ square: 'a8' })
+    })
+
+    expect(result.current.checkedSquare).toBe('e8')
+  })
+
+  it('clears the check when the king moves out of it', () => {
+    const { result } = renderHook(() => useChessGame('4k3/8/8/8/8/8/8/4R1K1 b - - 0 1'))
+
+    expect(result.current.checkedSquare).toBe('e8')
+
+    act(() => {
+      result.current.onSquareClick({ square: 'e8' })
+    })
+    act(() => {
+      result.current.onSquareClick({ square: 'd8' })
+    })
+
+    expect(result.current.checkedSquare).toBeNull()
+  })
+
   it('promotes a pawn to a queen', () => {
     const { result } = renderHook(() => useChessGame('8/P7/8/8/8/8/8/k6K w - - 0 1'))
 
