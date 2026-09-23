@@ -6,4 +6,5 @@
   Stockfish (https://github.com/official-stockfish/Stockfish).
 - Файлы: `stockfish-19-lite-single.js`, `stockfish-19-lite-single.wasm`.
 - sha256 (`stockfish-19-lite-single.wasm`): `57ac2d72312aba346760e3f173f687a8c211208e97a87268436f7f0e10bb5387`
+- sha256 (`stockfish-19-lite-single.js`): `d3344124ab067fb0b90ee77873bb8e9fbf5fc01bc525fe714b0f942581e889e6`
 - Лицензия: GPL-3.0 (см. `Copying.txt`).

@@ -9,7 +9,7 @@ let engine: Engine | null = null
 export function getDefaultEngine(): Engine {
   if (!engine) {
     engine = createStockfishEngine(createWorkerTransport(ENGINE_URL))
-    void engine.setSkillLevel(SKILL_LEVEL)
+    void engine.setSkillLevel(SKILL_LEVEL).catch(() => undefined)
   }
 
   return engine

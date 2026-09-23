@@ -5,20 +5,26 @@ import { type Engine } from '../engine/stockfish'
 
 const FEN = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
 
-function createFakeEngine(): { engine: Engine; resolveMove: (uci: string) => void } {
-  let resolveMove: (uci: string) => void = () => undefined
+function createFakeEngine(): {
+  engine: Engine
+  resolveMove: (uci: string, index?: number) => void
+} {
+  const resolvers: ((uci: string) => void)[] = []
   const engine: Engine = {
     setSkillLevel: vi.fn().mockResolvedValue(undefined),
     findBestMove: vi.fn(
       () =>
         new Promise<string>((resolve) => {
-          resolveMove = resolve
+          resolvers.push(resolve)
         })
     ),
     dispose: vi.fn()
   }
 
-  return { engine, resolveMove: (uci: string) => resolveMove(uci) }
+  return {
+    engine,
+    resolveMove: (uci: string, index = resolvers.length - 1) => resolvers[index](uci)
+  }
 }
 
 function setup(overrides: Partial<Parameters<typeof useEngineOpponent>[0]> = {}): {
@@ -88,5 +94,104 @@ describe('useEngineOpponent', () => {
     const { engine } = setup({ isGameOver: true })
 
     expect(engine.findBestMove).not.toHaveBeenCalled()
+  })
+
+  it('requests a new move when re-enabled on the same fen', async () => {
+    const { engine } = createFakeEngine()
+    const playMove = vi.fn().mockReturnValue(true)
+    const { rerender } = renderHook(
+      ({ enabled }: { enabled: boolean }) =>
+        useEngineOpponent({
+          enabled,
+          fen: FEN,
+          turn: 'b',
+          isGameOver: false,
+          playMove,
+          getEngine: () => engine
+        }),
+      { initialProps: { enabled: false } }
+    )
+
+    expect(engine.findBestMove).not.toHaveBeenCalled()
+
+    rerender({ enabled: true })
+    await waitFor(() => expect(engine.findBestMove).toHaveBeenCalledTimes(1))
+
+    rerender({ enabled: false })
+    rerender({ enabled: true })
+    await waitFor(() => expect(engine.findBestMove).toHaveBeenCalledTimes(2))
+  })
+
+  it('clears thinking when the search rejects', async () => {
+    const engine: Engine = {
+      setSkillLevel: vi.fn().mockResolvedValue(undefined),
+      findBestMove: vi.fn(async () => {
+        throw new Error('engine failed')
+      }),
+      dispose: vi.fn()
+    }
+    const { result } = renderHook(() =>
+      useEngineOpponent({
+        enabled: true,
+        fen: FEN,
+        turn: 'b',
+        isGameOver: false,
+        playMove: vi.fn().mockReturnValue(true),
+        getEngine: () => engine
+      })
+    )
+
+    await waitFor(() => expect(engine.findBestMove).toHaveBeenCalled())
+    await waitFor(() => expect(result.current.isThinking).toBe(false))
+  })
+
+  it('ignores a stale move when the fen changed before it resolved', async () => {
+    const { engine, resolveMove } = createFakeEngine()
+    const playMove = vi.fn().mockReturnValue(true)
+    const { rerender } = renderHook(
+      ({ fen }: { fen: string }) =>
+        useEngineOpponent({
+          enabled: true,
+          fen,
+          turn: 'b',
+          isGameOver: false,
+          playMove,
+          getEngine: () => engine
+        }),
+      { initialProps: { fen: FEN } }
+    )
+
+    await waitFor(() => expect(engine.findBestMove).toHaveBeenCalledWith(FEN))
+
+    const nextFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1'
+    rerender({ fen: nextFen })
+    await waitFor(() => expect(engine.findBestMove).toHaveBeenCalledWith(nextFen))
+
+    act(() => {
+      resolveMove('e7e5', 0)
+    })
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(playMove).not.toHaveBeenCalled()
+  })
+
+  it('does not throw when acquiring the engine fails', async () => {
+    const getEngine = (): Engine => {
+      throw new Error('worker failed')
+    }
+    const { result } = renderHook(() =>
+      useEngineOpponent({
+        enabled: true,
+        fen: FEN,
+        turn: 'b',
+        isGameOver: false,
+        playMove: vi.fn().mockReturnValue(true),
+        getEngine
+      })
+    )
+
+    await waitFor(() => expect(result.current.isThinking).toBe(false))
   })
 })

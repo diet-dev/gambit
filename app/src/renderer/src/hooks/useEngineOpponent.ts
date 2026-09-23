@@ -29,15 +29,27 @@ export function useEngineOpponent({
   latestRef.current = { fen, enabled }
 
   useEffect(() => {
-    if (!enabled || isGameOver || turn !== 'b' || requestedFenRef.current === fen) {
+    if (!enabled) {
+      requestedFenRef.current = null
+      return
+    }
+
+    if (isGameOver || turn !== 'b' || requestedFenRef.current === fen) {
       return
     }
 
     requestedFenRef.current = fen
     setIsThinking(true)
 
-    getEngine()
-      .findBestMove(fen)
+    let search: Promise<string>
+
+    try {
+      search = getEngine().findBestMove(fen)
+    } catch {
+      search = Promise.reject(new Error('Stockfish engine unavailable'))
+    }
+
+    search
       .then((uci) => {
         if (!latestRef.current.enabled || latestRef.current.fen !== fen) {
           return
@@ -45,11 +57,13 @@ export function useEngineOpponent({
 
         const move = parseUciMove(uci)
 
-        if (move) {
-          playMove(move)
+        if (!move || !playMove(move)) {
+          requestedFenRef.current = null
         }
       })
-      .catch(() => undefined)
+      .catch(() => {
+        requestedFenRef.current = null
+      })
       .finally(() => setIsThinking(false))
   }, [enabled, isGameOver, turn, fen, playMove, getEngine])
 

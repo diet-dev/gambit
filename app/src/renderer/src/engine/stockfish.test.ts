@@ -77,6 +77,38 @@ describe('createStockfishEngine', () => {
     expect(fake.terminate).toHaveBeenCalled()
   })
 
+  it('rejects a search that never receives a bestmove', async () => {
+    vi.useFakeTimers()
+
+    try {
+      const fake = createFakeTransport()
+      const engine = createStockfishEngine(fake.transport)
+
+      fake.emit('uciok')
+      const move = engine.findBestMove('8/8/8/8/8/8/8/K6k w - - 0 1')
+
+      await vi.advanceTimersByTimeAsync(5_000)
+
+      await expect(move).rejects.toThrow()
+      expect(fake.sent).toContain('stop')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('rejects a pending search on dispose', async () => {
+    const fake = createFakeTransport()
+    const engine = createStockfishEngine(fake.transport)
+
+    fake.emit('uciok')
+    const move = engine.findBestMove('8/8/8/8/8/8/8/K6k w - - 0 1')
+
+    engine.dispose()
+
+    await expect(move).rejects.toThrow()
+    expect(fake.terminate).toHaveBeenCalled()
+  })
+
   it('serializes overlapping searches so each receives its own move', async () => {
     const fake = createFakeTransport()
     const engine = createStockfishEngine(fake.transport)
