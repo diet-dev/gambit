@@ -49,6 +49,92 @@ describe('useChessGame', () => {
     expect(result.current.position).toBe(START_FEN)
   })
 
+  it('selects a piece and exposes its legal moves on click', () => {
+    const { result } = renderHook(() => useChessGame())
+
+    act(() => {
+      result.current.onSquareClick({ square: 'e2' })
+    })
+
+    expect(result.current.selectedSquare).toBe('e2')
+    expect(result.current.possibleMoves).toEqual([
+      { square: 'e3', isCapture: false },
+      { square: 'e4', isCapture: false }
+    ])
+  })
+
+  it('moves the selected piece when a highlighted square is clicked', () => {
+    const { result } = renderHook(() => useChessGame())
+
+    act(() => {
+      result.current.onSquareClick({ square: 'e2' })
+    })
+    act(() => {
+      result.current.onSquareClick({ square: 'e4' })
+    })
+
+    expect(result.current.position).toBe(
+      'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+    )
+    expect(result.current.selectedSquare).toBeNull()
+    expect(result.current.possibleMoves).toEqual([])
+  })
+
+  it('deselects when a square that is not a legal target is clicked', () => {
+    const { result } = renderHook(() => useChessGame())
+
+    act(() => {
+      result.current.onSquareClick({ square: 'e2' })
+    })
+    act(() => {
+      result.current.onSquareClick({ square: 'a3' })
+    })
+
+    expect(result.current.selectedSquare).toBeNull()
+    expect(result.current.possibleMoves).toEqual([])
+  })
+
+  it('reselects another own piece instead of moving', () => {
+    const { result } = renderHook(() => useChessGame())
+
+    act(() => {
+      result.current.onSquareClick({ square: 'e2' })
+    })
+    act(() => {
+      result.current.onSquareClick({ square: 'd2' })
+    })
+
+    expect(result.current.selectedSquare).toBe('d2')
+    expect(result.current.possibleMoves).toEqual([
+      { square: 'd3', isCapture: false },
+      { square: 'd4', isCapture: false }
+    ])
+  })
+
+  it('flags capturing moves', () => {
+    const { result } = renderHook(() => useChessGame('4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1'))
+
+    act(() => {
+      result.current.onSquareClick({ square: 'e4' })
+    })
+
+    expect(result.current.possibleMoves).toContainEqual({ square: 'd5', isCapture: true })
+  })
+
+  it('clears the selection after a drop', () => {
+    const { result } = renderHook(() => useChessGame())
+
+    act(() => {
+      result.current.onSquareClick({ square: 'e2' })
+    })
+    act(() => {
+      result.current.onPieceDrop({ sourceSquare: 'e2', targetSquare: 'e4' })
+    })
+
+    expect(result.current.selectedSquare).toBeNull()
+    expect(result.current.possibleMoves).toEqual([])
+  })
+
   it('promotes a pawn to a queen', () => {
     const { result } = renderHook(() => useChessGame('8/P7/8/8/8/8/8/k6K w - - 0 1'))
 
