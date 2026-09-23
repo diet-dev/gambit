@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -41,6 +41,9 @@ function createWindow(): void {
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.gambit.app')
+
+  // Remove the application menu so Alt no longer reveals a system menu.
+  Menu.setApplicationMenu(null)
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
