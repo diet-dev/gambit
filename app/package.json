@@ -27,7 +27,8 @@
     "@electron-toolkit/utils": "^4.0.0",
     "chess.js": "^1.4.0",
     "electron-updater": "^6.3.9",
-    "react-chessboard": "^5.12.1"
+    "react-chessboard": "^5.12.1",
+    "react-resizable-panels": "^4.13.2"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
