@@ -1,3 +1,9 @@
+## Project
+
+Gambit — настольное шахматное приложение (Electron + React + TypeScript). Весь код в `app/`; игровая логика — в `app/src/renderer/src`, процессы `main`/`preload` тонкие. Домен — `CONTEXT.md`, решения — `docs/adr/`.
+
+Проверки запускай из `app/`: `npm run lint`, `npm run typecheck`, `npm test`.
+
 ## Agent skills
 
 1. Always communicate with the user in Russian.
