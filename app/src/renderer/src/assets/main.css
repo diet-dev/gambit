@@ -35,7 +35,24 @@ code {
 
 .chess-game {
   width: min(90vmin, 640px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.board {
+  width: 100%;
   aspect-ratio: 1 / 1;
+}
+
+.status-bar {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background-color: var(--ev-c-black-soft);
+  color: var(--ev-c-text-1);
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
 }
 
 .logo {

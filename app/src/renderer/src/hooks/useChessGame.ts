@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { Chess, type Square } from 'chess.js'
+import { Chess, type Color, type Square } from 'chess.js'
 
 type PieceDropArgs = {
   sourceSquare: string
@@ -15,11 +15,19 @@ export type PossibleMove = {
   isCapture: boolean
 }
 
+export type GameStatus =
+  | { kind: 'turn'; turn: Color }
+  | { kind: 'check'; turn: Color }
+  | { kind: 'checkmate'; winner: Color }
+  | { kind: 'stalemate' }
+  | { kind: 'draw'; reason: 'insufficient-material' | 'threefold-repetition' | 'fifty-moves' }
+
 type UseChessGame = {
   position: string
   selectedSquare: string | null
   possibleMoves: PossibleMove[]
   checkedSquare: string | null
+  status: GameStatus
   onPieceDrop: (args: PieceDropArgs) => boolean
   onSquareClick: (args: SquareClickArgs) => void
 }
@@ -39,12 +47,38 @@ function kingSquareInCheck(game: Chess): string | null {
   return game.findPiece({ type: 'k', color: game.turn() })[0] ?? null
 }
 
+function statusOf(game: Chess): GameStatus {
+  const turn = game.turn()
+
+  if (game.isCheckmate()) {
+    return { kind: 'checkmate', winner: turn === 'w' ? 'b' : 'w' }
+  }
+  if (game.isStalemate()) {
+    return { kind: 'stalemate' }
+  }
+  if (game.isInsufficientMaterial()) {
+    return { kind: 'draw', reason: 'insufficient-material' }
+  }
+  if (game.isThreefoldRepetition()) {
+    return { kind: 'draw', reason: 'threefold-repetition' }
+  }
+  if (game.isDrawByFiftyMoves()) {
+    return { kind: 'draw', reason: 'fifty-moves' }
+  }
+  if (game.isCheck()) {
+    return { kind: 'check', turn }
+  }
+
+  return { kind: 'turn', turn }
+}
+
 export function useChessGame(initialPosition?: string): UseChessGame {
   const [game] = useState(() => new Chess(initialPosition))
   const [position, setPosition] = useState(() => game.fen())
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
   const [possibleMoves, setPossibleMoves] = useState<PossibleMove[]>([])
   const [checkedSquare, setCheckedSquare] = useState<string | null>(() => kingSquareInCheck(game))
+  const [status, setStatus] = useState<GameStatus>(() => statusOf(game))
 
   const clearSelection = useCallback((): void => {
     setSelectedSquare(null)
@@ -61,6 +95,7 @@ export function useChessGame(initialPosition?: string): UseChessGame {
 
       setPosition(game.fen())
       setCheckedSquare(kingSquareInCheck(game))
+      setStatus(statusOf(game))
       clearSelection()
       return true
     },
@@ -102,6 +137,7 @@ export function useChessGame(initialPosition?: string): UseChessGame {
     selectedSquare,
     possibleMoves,
     checkedSquare,
+    status,
     onPieceDrop,
     onSquareClick
   }

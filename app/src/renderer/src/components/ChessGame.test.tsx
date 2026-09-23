@@ -28,6 +28,18 @@ describe('ChessGame', () => {
     })
   })
 
+  it('shows whose turn it is in the status bar', () => {
+    const { container } = render(<ChessGame />)
+
+    expect(container.querySelector('.status-bar')).toHaveTextContent('Ход белых')
+  })
+
+  it('shows the check status in the status bar', () => {
+    const { container } = render(<ChessGame initialPosition="4k3/8/8/8/8/8/8/4R1K1 b - - 0 1" />)
+
+    expect(container.querySelector('.status-bar')).toHaveTextContent('Шах чёрным!')
+  })
+
   it('highlights the king square when it is in check', () => {
     const { container } = render(<ChessGame initialPosition="4k3/8/8/8/8/8/8/4R1K1 b - - 0 1" />)
 

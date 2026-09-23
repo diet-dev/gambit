@@ -169,6 +169,77 @@ describe('useChessGame', () => {
     expect(result.current.checkedSquare).toBeNull()
   })
 
+  it('reports whose turn it is when there is no check', () => {
+    const { result } = renderHook(() => useChessGame())
+
+    expect(result.current.status).toEqual({ kind: 'turn', turn: 'w' })
+  })
+
+  it('reports check with the side to move', () => {
+    const { result } = renderHook(() => useChessGame('4k3/8/8/8/8/8/8/R5K1 w - - 0 1'))
+
+    act(() => {
+      result.current.onSquareClick({ square: 'a1' })
+    })
+    act(() => {
+      result.current.onSquareClick({ square: 'a8' })
+    })
+
+    expect(result.current.status).toEqual({ kind: 'check', turn: 'b' })
+  })
+
+  it('reports checkmate with the winner', () => {
+    const { result } = renderHook(() =>
+      useChessGame('rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3')
+    )
+
+    expect(result.current.status).toEqual({ kind: 'checkmate', winner: 'b' })
+  })
+
+  it('reports stalemate', () => {
+    const { result } = renderHook(() => useChessGame('7k/5Q2/6K1/8/8/8/8/8 b - - 0 1'))
+
+    expect(result.current.status).toEqual({ kind: 'stalemate' })
+  })
+
+  it('reports a draw by insufficient material', () => {
+    const { result } = renderHook(() => useChessGame('8/8/8/8/8/8/8/K6k w - - 0 1'))
+
+    expect(result.current.status).toEqual({ kind: 'draw', reason: 'insufficient-material' })
+  })
+
+  it('reports a draw by the fifty-move rule', () => {
+    const { result } = renderHook(() => useChessGame('8/8/8/4k3/8/4K3/6R1/8 w - - 100 200'))
+
+    expect(result.current.status).toEqual({ kind: 'draw', reason: 'fifty-moves' })
+  })
+
+  it('reports a draw by threefold repetition', () => {
+    const { result } = renderHook(() => useChessGame())
+
+    const moves: [string, string][] = [
+      ['g1', 'f3'],
+      ['g8', 'f6'],
+      ['f3', 'g1'],
+      ['f6', 'g8'],
+      ['g1', 'f3'],
+      ['g8', 'f6'],
+      ['f3', 'g1'],
+      ['f6', 'g8']
+    ]
+
+    for (const [from, to] of moves) {
+      act(() => {
+        result.current.onSquareClick({ square: from })
+      })
+      act(() => {
+        result.current.onSquareClick({ square: to })
+      })
+    }
+
+    expect(result.current.status).toEqual({ kind: 'draw', reason: 'threefold-repetition' })
+  })
+
   it('promotes a pawn to a queen', () => {
     const { result } = renderHook(() => useChessGame('8/P7/8/8/8/8/8/k6K w - - 0 1'))
 
