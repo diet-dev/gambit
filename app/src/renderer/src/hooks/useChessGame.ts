@@ -30,6 +30,7 @@ type UseChessGame = {
   status: GameStatus
   onPieceDrop: (args: PieceDropArgs) => boolean
   onSquareClick: (args: SquareClickArgs) => void
+  playMove: (args: { from: string; to: string; promotion?: string }) => boolean
 }
 
 function legalMovesFrom(game: Chess, square: string): PossibleMove[] {
@@ -86,9 +87,9 @@ export function useChessGame(initialPosition?: string): UseChessGame {
   }, [])
 
   const applyMove = useCallback(
-    (sourceSquare: string, targetSquare: string): boolean => {
+    (sourceSquare: string, targetSquare: string, promotion = 'q'): boolean => {
       try {
-        game.move({ from: sourceSquare, to: targetSquare, promotion: 'q' })
+        game.move({ from: sourceSquare, to: targetSquare, promotion })
       } catch {
         return false
       }
@@ -132,6 +133,12 @@ export function useChessGame(initialPosition?: string): UseChessGame {
     [applyMove]
   )
 
+  const playMove = useCallback(
+    ({ from, to, promotion }: { from: string; to: string; promotion?: string }): boolean =>
+      applyMove(from, to, promotion),
+    [applyMove]
+  )
+
   return {
     position,
     selectedSquare,
@@ -139,6 +146,7 @@ export function useChessGame(initialPosition?: string): UseChessGame {
     checkedSquare,
     status,
     onPieceDrop,
-    onSquareClick
+    onSquareClick,
+    playMove
   }
 }

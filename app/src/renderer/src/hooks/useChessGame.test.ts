@@ -251,4 +251,39 @@ describe('useChessGame', () => {
     expect(accepted).toBe(true)
     expect(result.current.position).toBe('Q7/8/8/8/8/8/8/k6K b - - 0 1')
   })
+
+  it('plays a move programmatically', () => {
+    const { result } = renderHook(() => useChessGame())
+
+    let accepted = false
+    act(() => {
+      accepted = result.current.playMove({ from: 'e2', to: 'e4' })
+    })
+
+    expect(accepted).toBe(true)
+    expect(result.current.position).toBe(
+      'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+    )
+  })
+
+  it('plays a promotion move programmatically', () => {
+    const { result } = renderHook(() => useChessGame('8/P7/8/8/8/8/8/k6K w - - 0 1'))
+
+    act(() => {
+      result.current.playMove({ from: 'a7', to: 'a8', promotion: 'q' })
+    })
+
+    expect(result.current.position).toBe('Q7/8/8/8/8/8/8/k6K b - - 0 1')
+  })
+
+  it('rejects an illegal programmatic move', () => {
+    const { result } = renderHook(() => useChessGame())
+
+    let accepted = true
+    act(() => {
+      accepted = result.current.playMove({ from: 'e2', to: 'e5' })
+    })
+
+    expect(accepted).toBe(false)
+  })
 })
