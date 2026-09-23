@@ -48,4 +48,14 @@ describe('ChessGame', () => {
         'radial-gradient(circle, transparent 35%, rgba(255, 0, 0, 0.75) 65%, rgba(255, 0, 0, 0.75) 100%)'
     })
   })
+
+  it('shows a bot toggle that is off by default', () => {
+    const { container } = render(<ChessGame />)
+
+    const toggle = container.querySelector('input[type="checkbox"]')
+
+    expect(toggle).toBeInTheDocument()
+    expect(toggle).not.toBeChecked()
+    expect(container).toHaveTextContent('Играть с ботом')
+  })
 })

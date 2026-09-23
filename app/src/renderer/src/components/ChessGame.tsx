@@ -1,6 +1,7 @@
-import { type CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { Chessboard } from 'react-chessboard'
 import { useChessGame, type GameStatus } from '../hooks/useChessGame'
+import { useEngineOpponent } from '../hooks/useEngineOpponent'
 
 function statusText(status: GameStatus): string {
   switch (status.kind) {
@@ -53,8 +54,19 @@ function ChessGame({ initialPosition }: ChessGameProps): React.JSX.Element {
     checkedSquare,
     status,
     onPieceDrop,
-    onSquareClick
+    onSquareClick,
+    playMove
   } = useChessGame(initialPosition)
+  const [botEnabled, setBotEnabled] = useState(false)
+
+  const turn = status.kind === 'turn' || status.kind === 'check' ? status.turn : null
+  const { isThinking } = useEngineOpponent({
+    enabled: botEnabled,
+    fen: position,
+    turn,
+    isGameOver: turn === null,
+    playMove
+  })
 
   const squareStyles: Record<string, CSSProperties> = {}
   if (selectedSquare) {
@@ -72,7 +84,17 @@ function ChessGame({ initialPosition }: ChessGameProps): React.JSX.Element {
       <div className="board">
         <Chessboard options={{ position, onPieceDrop, onSquareClick, squareStyles }} />
       </div>
-      <div className="status-bar">{statusText(status)}</div>
+      <div className="controls">
+        <label className="bot-toggle">
+          <input
+            type="checkbox"
+            checked={botEnabled}
+            onChange={(event) => setBotEnabled(event.target.checked)}
+          />
+          Играть с ботом
+        </label>
+      </div>
+      <div className="status-bar">{isThinking ? 'Бот думает…' : statusText(status)}</div>
     </div>
   )
 }

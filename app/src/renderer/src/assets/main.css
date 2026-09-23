@@ -140,6 +140,21 @@ code {
   aspect-ratio: 1 / 1;
 }
 
+.controls {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 8px;
+}
+
+.bot-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ev-c-text-1);
+  font-size: 14px;
+  cursor: pointer;
+}
+
 .status-bar {
   padding: 8px 12px;
   border-radius: 8px;
