@@ -76,4 +76,30 @@ describe('createStockfishEngine', () => {
 
     expect(fake.terminate).toHaveBeenCalled()
   })
+
+  it('serializes overlapping searches so each receives its own move', async () => {
+    const fake = createFakeTransport()
+    const engine = createStockfishEngine(fake.transport)
+
+    fake.emit('uciok')
+    await Promise.resolve()
+
+    const first = engine.findBestMove('fen-a')
+    const second = engine.findBestMove('fen-b')
+
+    const goCount = (): number =>
+      fake.sent.filter((message) => message === 'go movetime 500').length
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(goCount()).toBe(1)
+
+    fake.emit('bestmove e2e4 ponder e7e5')
+    await expect(first).resolves.toBe('e2e4')
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(goCount()).toBe(2)
+
+    fake.emit('bestmove d2d4 ponder d7d5')
+    await expect(second).resolves.toBe('d2d4')
+  })
 })

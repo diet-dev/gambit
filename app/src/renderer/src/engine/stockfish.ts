@@ -33,26 +33,42 @@ export function createStockfishEngine(transport: UciTransport): Engine {
     await uciok
   })()
 
+  let active: Promise<unknown> | null = null
+
+  async function search(fen: string): Promise<string> {
+    const bestmove = waitFor((line) => line.startsWith('bestmove'))
+    await ready
+    transport.post(`position fen ${fen}`)
+    transport.post('go movetime 500')
+    const line = await bestmove
+    const move = line.split(' ')[1]
+
+    if (!move || move === '(none)') {
+      throw new Error('Stockfish did not return a move')
+    }
+
+    return move
+  }
+
+  function findBestMove(fen: string): Promise<string> {
+    if (active) {
+      const run = active.then(() => search(fen))
+      active = run.catch(() => undefined)
+      return run
+    }
+
+    const run = search(fen)
+    active = run.catch(() => undefined)
+    return run
+  }
+
   return {
     async setSkillLevel(level: number): Promise<void> {
       await ready
       transport.post(`setoption name Skill Level value ${level}`)
     },
 
-    async findBestMove(fen: string): Promise<string> {
-      const bestmove = waitFor((line) => line.startsWith('bestmove'))
-      await ready
-      transport.post(`position fen ${fen}`)
-      transport.post('go movetime 500')
-      const line = await bestmove
-      const move = line.split(' ')[1]
-
-      if (!move || move === '(none)') {
-        throw new Error('Stockfish did not return a move')
-      }
-
-      return move
-    },
+    findBestMove,
 
     dispose(): void {
       transport.terminate()

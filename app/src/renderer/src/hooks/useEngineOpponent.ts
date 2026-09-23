@@ -24,13 +24,9 @@ export function useEngineOpponent({
 }: UseEngineOpponentOptions): { isThinking: boolean } {
   const [isThinking, setIsThinking] = useState(false)
   const requestedFenRef = useRef<string | null>(null)
-  const latestFenRef = useRef(fen)
-  const enabledRef = useRef(enabled)
-
-  useEffect(() => {
-    latestFenRef.current = fen
-    enabledRef.current = enabled
-  }, [fen, enabled])
+  const latestRef = useRef({ fen, enabled })
+  // eslint-disable-next-line react-hooks/refs -- latest-value ref read from async callbacks
+  latestRef.current = { fen, enabled }
 
   useEffect(() => {
     if (!enabled || isGameOver || turn !== 'b' || requestedFenRef.current === fen) {
@@ -43,7 +39,7 @@ export function useEngineOpponent({
     getEngine()
       .findBestMove(fen)
       .then((uci) => {
-        if (!enabledRef.current || latestFenRef.current !== fen) {
+        if (!latestRef.current.enabled || latestRef.current.fen !== fen) {
           return
         }
 
