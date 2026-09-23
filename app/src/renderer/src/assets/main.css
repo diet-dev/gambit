@@ -31,7 +31,11 @@ code {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin-bottom: 80px;
+}
+
+.chess-game {
+  width: min(90vmin, 640px);
+  aspect-ratio: 1 / 1;
 }
 
 .logo {
