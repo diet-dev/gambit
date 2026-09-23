@@ -9,10 +9,12 @@ describe('SituationList', () => {
       <SituationList groups={SITUATION_GROUPS} selectedId="start" onSelect={() => {}} />
     )
 
-    expect(container.querySelectorAll('.situation-item')).toHaveLength(11)
+    const total = SITUATION_GROUPS.flatMap((group) => group.situations).length
+    expect(container.querySelectorAll('.situation-item')).toHaveLength(total)
     expect(container).toHaveTextContent('Начало')
     expect(container).toHaveTextContent('Мат Легаля')
     expect(container).toHaveTextContent('Вилка конём')
+    expect(container).toHaveTextContent('Спёртый мат')
   })
 
   it('calls onSelect with the situation id when an item is clicked', () => {

@@ -75,4 +75,78 @@ describe('situations data', () => {
     game.move('Bc4+')
     expect(game.isCheck()).toBe(true)
   })
+
+  it('includes a smothered mate', () => {
+    const game = new Chess(findSituation('smothered-mate')!.fen)
+
+    expect(game.moves()).toContain('Nf7#')
+  })
+
+  it('includes a ladder mate with two rooks', () => {
+    const game = new Chess(findSituation('ladder-mate')!.fen)
+
+    expect(game.moves()).toContain('Rb8#')
+  })
+
+  it('includes a draw by insufficient material', () => {
+    const game = new Chess(findSituation('insufficient-material')!.fen)
+
+    expect(game.isInsufficientMaterial()).toBe(true)
+    expect(game.isDraw()).toBe(true)
+  })
+
+  it('includes a double check given by two pieces at once', () => {
+    const game = new Chess(findSituation('double-check')!.fen)
+
+    game.move('Nf7+')
+    expect(game.isCheck()).toBe(true)
+    expect(game.attackers('h8', 'w')).toHaveLength(2)
+  })
+
+  it('includes a skewer that wins the piece behind the king', () => {
+    const game = new Chess(findSituation('skewer')!.fen)
+
+    game.move('Ra1+')
+    expect(game.isCheck()).toBe(true)
+    game.move('Kb6')
+    expect(game.moves()).toContain('Rxa8')
+  })
+
+  it('includes a discovered attack that is not a check', () => {
+    const game = new Chess(findSituation('discovered-attack')!.fen)
+
+    game.move('Nf5')
+    expect(game.isCheck()).toBe(false)
+    expect(game.isAttacked('h8', 'w')).toBe(true)
+  })
+
+  it('includes a pawn fork', () => {
+    const game = new Chess(findSituation('pawn-fork')!.fen)
+
+    game.move('c4')
+    expect(game.isAttacked('b5', 'w')).toBe(true)
+    expect(game.isAttacked('d5', 'w')).toBe(true)
+  })
+
+  it('includes a centre-control opening position', () => {
+    const game = new Chess(findSituation('center-control')!.fen)
+
+    expect(game.get('e4')?.type).toBe('p')
+    expect(game.get('e5')?.type).toBe('p')
+  })
+
+  it('includes a piece-development opening position', () => {
+    const game = new Chess(findSituation('piece-development')!.fen)
+
+    expect(game.get('f3')?.type).toBe('n')
+    expect(game.get('c4')?.type).toBe('b')
+    expect(game.get('c6')?.type).toBe('n')
+    expect(game.get('f6')?.type).toBe('n')
+  })
+
+  it('has no duplicate positions', () => {
+    const fens = allSituations.map((situation) => situation.fen)
+
+    expect(new Set(fens).size).toBe(fens.length)
+  })
 })
