@@ -77,6 +77,7 @@ describe('App', () => {
 
     fireEvent.click(getByRole('button', { name: 'Настройки' }))
     expect(container.querySelector('.left-panel .settings-panel')).toBeInTheDocument()
+    expect(getByRole('radiogroup', { name: 'Тема оформления' })).toBeInTheDocument()
 
     fireEvent.click(getByRole('button', { name: 'Справка' }))
     expect(container.querySelector('.left-panel .help-panel')).toBeInTheDocument()

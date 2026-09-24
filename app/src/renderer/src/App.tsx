@@ -8,6 +8,7 @@ import EventLogPanel from './components/EventLogPanel'
 import HelpArticleOverlay from './components/HelpArticleOverlay'
 import HelpPanel from './components/HelpPanel'
 import RemoteQrButton from './components/RemoteQrButton'
+import SettingsPanel from './components/SettingsPanel'
 import SituationCommentDialog from './components/SituationCommentDialog'
 import SituationList from './components/SituationList'
 import StudentsPanel from './components/StudentsPanel'
@@ -75,7 +76,7 @@ function App(): React.JSX.Element {
             {activity === 'classes' && <ClassesPanel />}
             {activity === 'students' && <StudentsPanel />}
             {activity === 'events' && <EventLogPanel events={events} />}
-            {activity === 'settings' && <div className="settings-panel" />}
+            {activity === 'settings' && <SettingsPanel />}
             {activity === 'help' && (
               <HelpPanel openArticleId={helpArticleId} onOpen={setHelpArticleId} />
             )}
