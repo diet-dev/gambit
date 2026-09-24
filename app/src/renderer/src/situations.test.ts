@@ -11,10 +11,11 @@ describe('situations data', () => {
     expect(new Set(ids).size).toBe(ids.length)
   })
 
-  it('gives every situation a title, a description and a valid FEN', () => {
+  it('gives every situation a title, a description, a comment and a valid FEN', () => {
     for (const situation of allSituations) {
       expect(situation.title.length).toBeGreaterThan(0)
       expect(situation.description.length).toBeGreaterThan(0)
+      expect(situation.comment.length).toBeGreaterThan(0)
       expect(() => new Chess(situation.fen)).not.toThrow()
     }
   })

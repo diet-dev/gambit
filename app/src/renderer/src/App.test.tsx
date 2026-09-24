@@ -19,4 +19,18 @@ describe('App', () => {
     expect(container.querySelector('[data-square="g8"] [data-piece="bK"]')).toBeInTheDocument()
     expect(container.querySelector('[data-square="e1"] [data-piece="wQ"]')).toBeInTheDocument()
   })
+
+  it('opens the comment dialog for the active situation and closes it on Escape', () => {
+    const { queryByRole, getByRole } = render(<App />)
+
+    fireEvent.click(getByRole('button', { name: /Подробнее: Начальная позиция/ }))
+
+    const dialog = getByRole('dialog')
+    expect(dialog).toHaveTextContent('Начальная позиция')
+    expect(dialog).toHaveTextContent('точка отсчёта любой партии')
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+
+    expect(queryByRole('dialog')).not.toBeInTheDocument()
+  })
 })
