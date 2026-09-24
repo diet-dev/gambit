@@ -2,6 +2,7 @@
   "name": "gambit",
   "version": "1.0.0",
   "description": "An Electron application with React and TypeScript",
+  "license": "GPL-3.0-only",
   "main": "./out/main/index.js",
   "author": "example.com",
   "homepage": "https://electron-vite.org",
@@ -30,6 +31,7 @@
     "lucide-react": "^1.48.0",
     "qrcode": "^1.5.4",
     "react-chessboard": "^5.12.1",
+    "react-markdown": "^10.1.0",
     "react-resizable-panels": "^4.13.2",
     "ws": "^8.21.3"
   },

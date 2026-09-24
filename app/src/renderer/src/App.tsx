@@ -5,11 +5,14 @@ import ChessGame from './components/ChessGame'
 import ClassesPanel from './components/ClassesPanel'
 import DevicesPanel from './components/DevicesPanel'
 import EventLogPanel from './components/EventLogPanel'
+import HelpArticleOverlay from './components/HelpArticleOverlay'
+import HelpPanel from './components/HelpPanel'
 import RemoteQrButton from './components/RemoteQrButton'
 import SituationCommentDialog from './components/SituationCommentDialog'
 import SituationList from './components/SituationList'
 import StudentsPanel from './components/StudentsPanel'
 import { useEventLog } from './hooks/useEventLog'
+import { findHelpArticle } from './help/articles'
 import { DEFAULT_SITUATION_ID, SITUATION_GROUPS, findSituation } from './situations'
 
 function App(): React.JSX.Element {
@@ -17,9 +20,11 @@ function App(): React.JSX.Element {
   const [commentId, setCommentId] = useState<string | null>(null)
   const [instance, setInstance] = useState(0)
   const [activity, setActivity] = useState<Activity>('situations')
+  const [helpArticleId, setHelpArticleId] = useState<string | null>(null)
   const { events, logMove } = useEventLog()
   const selected = findSituation(selectedId) ?? findSituation(DEFAULT_SITUATION_ID)!
   const commentSituation = commentId ? findSituation(commentId) : undefined
+  const helpArticle = findHelpArticle(helpArticleId)
 
   useEffect(() => {
     document.title = `Гамбит — ${selected.title}`
@@ -29,6 +34,13 @@ function App(): React.JSX.Element {
     id: 'gambit-layout',
     onlySaveAfterUserInteractions: true
   })
+
+  function selectActivity(next: Activity): void {
+    setActivity(next)
+    if (next !== 'help') {
+      setHelpArticleId(null)
+    }
+  }
 
   function selectSituation(id: string): void {
     setSelectedId(id)
@@ -41,7 +53,7 @@ function App(): React.JSX.Element {
 
   return (
     <>
-      <ActivityBar active={activity} onSelect={setActivity} />
+      <ActivityBar active={activity} onSelect={selectActivity} />
       <Group
         className="panels"
         orientation="horizontal"
@@ -64,7 +76,9 @@ function App(): React.JSX.Element {
             {activity === 'students' && <StudentsPanel />}
             {activity === 'events' && <EventLogPanel events={events} />}
             {activity === 'settings' && <div className="settings-panel" />}
-            {activity === 'help' && <div className="help-panel" />}
+            {activity === 'help' && (
+              <HelpPanel openArticleId={helpArticleId} onOpen={setHelpArticleId} />
+            )}
           </div>
         </Panel>
         <Separator className="separator" />
@@ -76,6 +90,9 @@ function App(): React.JSX.Element {
               onMove={logMove}
             />
             <RemoteQrButton />
+            {activity === 'help' && helpArticle && (
+              <HelpArticleOverlay article={helpArticle} onClose={() => setHelpArticleId(null)} />
+            )}
           </div>
         </Panel>
       </Group>

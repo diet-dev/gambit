@@ -82,6 +82,19 @@ describe('App', () => {
     expect(container.querySelector('.left-panel .help-panel')).toBeInTheDocument()
   })
 
+  it('opens a help article over the board and closes it when leaving the tab', () => {
+    const { container, getByRole } = render(<App />)
+
+    fireEvent.click(getByRole('button', { name: 'Справка' }))
+    fireEvent.click(getByRole('button', { name: 'Лицензия' }))
+
+    expect(container.querySelector('.right-panel .help-overlay')).toBeInTheDocument()
+
+    fireEvent.click(getByRole('button', { name: 'Ситуации' }))
+
+    expect(container.querySelector('.help-overlay')).not.toBeInTheDocument()
+  })
+
   it('reflects the selected situation in the window title', () => {
     const { getByRole } = render(<App />)
 
