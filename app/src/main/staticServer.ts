@@ -13,6 +13,7 @@ export type StaticServerOptions = {
   staticDir: string
   devServerUrl?: string
   preferredPort?: number
+  responseHeaders?: (request: IncomingMessage, urlPath: string) => Record<string, string>
 }
 
 const DEFAULT_PORT = 3210
@@ -51,7 +52,8 @@ function cacheControlFor(filePath: string): string {
 async function serveStaticFile(
   staticDir: string,
   request: IncomingMessage,
-  response: ServerResponse
+  response: ServerResponse,
+  extraHeaders: Record<string, string>
 ): Promise<void> {
   const urlPath = decodeURIComponent((request.url ?? '/').split('?')[0])
   const requestedPath = urlPath === '/' ? 'remote.html' : urlPath.replace(/^\/+/, '')
@@ -69,7 +71,8 @@ async function serveStaticFile(
     const content = await readFile(filePath)
     response.writeHead(200, {
       'content-type': CONTENT_TYPES[extname(filePath)] ?? 'application/octet-stream',
-      'cache-control': cacheControlFor(filePath)
+      'cache-control': cacheControlFor(filePath),
+      ...extraHeaders
     })
     response.end(content)
   } catch {
@@ -81,23 +84,26 @@ async function serveStaticFile(
 async function proxyToDevServer(
   devServerUrl: string,
   request: IncomingMessage,
-  response: ServerResponse
+  response: ServerResponse,
+  extraHeaders: Record<string, string>
 ): Promise<void> {
   const parsed = new URL(request.url ?? '/', 'http://localhost')
   const path = parsed.pathname === '/' ? '/remote.html' : parsed.pathname
   const target = `${devServerUrl}${path}${parsed.search}`
   const proxied = await fetch(target)
   response.writeHead(proxied.status, {
-    'content-type': proxied.headers.get('content-type') ?? 'application/octet-stream'
+    'content-type': proxied.headers.get('content-type') ?? 'application/octet-stream',
+    ...extraHeaders
   })
   response.end(Buffer.from(await proxied.arrayBuffer()))
 }
 
 export async function startStaticServer(options: StaticServerOptions): Promise<StaticServer> {
   const server = createServer((request, response) => {
+    const extraHeaders = options.responseHeaders?.(request, request.url ?? '/') ?? {}
     const handle = options.devServerUrl
-      ? proxyToDevServer(options.devServerUrl, request, response)
-      : serveStaticFile(options.staticDir, request, response)
+      ? proxyToDevServer(options.devServerUrl, request, response, extraHeaders)
+      : serveStaticFile(options.staticDir, request, response, extraHeaders)
     handle.catch(() => {
       response.writeHead(500)
       response.end()

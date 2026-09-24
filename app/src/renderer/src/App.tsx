@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Group, Panel, Separator, useDefaultLayout } from 'react-resizable-panels'
 import ActivityBar, { type Activity } from './components/ActivityBar'
 import ChessGame from './components/ChessGame'
+import DevicesPanel from './components/DevicesPanel'
 import RemoteQrButton from './components/RemoteQrButton'
 import SituationCommentDialog from './components/SituationCommentDialog'
 import SituationList from './components/SituationList'
@@ -53,7 +54,7 @@ function App(): React.JSX.Element {
                 onReset={resetSituation}
               />
             ) : (
-              <div className="devices-panel" />
+              <DevicesPanel />
             )}
           </div>
         </Panel>

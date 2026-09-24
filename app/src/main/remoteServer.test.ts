@@ -6,10 +6,21 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createRemoteServer, type RemoteServer } from './remoteServer'
 import type { RemoteMove } from '../shared/remote'
 
-function nextMessage(socket: WebSocket): Promise<{ type: string; fen?: string }> {
+function nextMessage(socket: WebSocket): Promise<{ type: string; fen?: string; id?: string }> {
   return new Promise((resolve) => {
     socket.once('message', (data) => resolve(JSON.parse(data.toString())))
   })
+}
+
+async function waitUntil(check: () => boolean, timeoutMs = 1000): Promise<void> {
+  const deadline = Date.now() + timeoutMs
+  while (Date.now() < deadline) {
+    if (check()) {
+      return
+    }
+    await new Promise((resolve) => setTimeout(resolve, 10))
+  }
+  throw new Error('condition not met in time')
 }
 
 describe('createRemoteServer', () => {
@@ -90,5 +101,60 @@ describe('createRemoteServer', () => {
 
     expect(onMove).toHaveBeenCalledWith({ from: 'e2', to: 'e4', promotion: 'q' })
     socket.close()
+  })
+
+  it('sets a device cookie when serving the remote page', async () => {
+    const server = await start()
+
+    const response = await fetch(`http://127.0.0.1:${server.port}/`)
+
+    expect(response.headers.get('set-cookie')).toMatch(/gambit_device=/)
+  })
+
+  it('registers a device on hello and replies with a welcome id', async () => {
+    const server = await start()
+    const socket = new WebSocket(`ws://127.0.0.1:${server.port}/ws`)
+    await nextMessage(socket)
+
+    socket.send(JSON.stringify({ type: 'hello', id: null }))
+    const welcome = await nextMessage(socket)
+
+    expect(welcome.type).toBe('welcome')
+    expect(typeof welcome.id).toBe('string')
+
+    await waitUntil(() => server.getClients().length === 1)
+    const [client] = server.getClients()
+    expect(client.id).toBe(welcome.id)
+    expect(client.online).toBe(true)
+    socket.close()
+  })
+
+  it('reuses the id a reconnecting device sends in hello', async () => {
+    const server = await start()
+    const id = '11111111-1111-4111-8111-111111111111'
+    const socket = new WebSocket(`ws://127.0.0.1:${server.port}/ws`)
+    await nextMessage(socket)
+
+    socket.send(JSON.stringify({ type: 'hello', id }))
+    const welcome = await nextMessage(socket)
+
+    expect(welcome.id).toBe(id)
+    await waitUntil(() => server.getClients().length === 1)
+    expect(server.getClients()[0].id).toBe(id)
+    socket.close()
+  })
+
+  it('marks a device offline when it disconnects', async () => {
+    const server = await start()
+    const socket = new WebSocket(`ws://127.0.0.1:${server.port}/ws`)
+    await nextMessage(socket)
+    socket.send(JSON.stringify({ type: 'hello', id: null }))
+    await nextMessage(socket)
+    await waitUntil(() => server.getClients().length === 1)
+
+    socket.close()
+
+    await waitUntil(() => server.getClients()[0]?.online === false)
+    expect(server.getClients()[0].online).toBe(false)
   })
 })

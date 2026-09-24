@@ -25,7 +25,7 @@ describe('registerRemoteIpc', () => {
   it('publishes positions to the server', () => {
     const { ipcMain, emit } = createIpcMain()
     const setPosition = vi.fn()
-    registerRemoteIpc({ ipcMain, server: { setPosition }, info })
+    registerRemoteIpc({ ipcMain, server: { setPosition, getClients: () => [] }, info })
 
     emit('remote:position', '8/8/8/8/8/8/8/K6k w - - 0 1')
 
@@ -35,7 +35,7 @@ describe('registerRemoteIpc', () => {
   it('ignores non-string positions', () => {
     const { ipcMain, emit } = createIpcMain()
     const setPosition = vi.fn()
-    registerRemoteIpc({ ipcMain, server: { setPosition }, info })
+    registerRemoteIpc({ ipcMain, server: { setPosition, getClients: () => [] }, info })
 
     emit('remote:position', 42)
 
@@ -44,8 +44,27 @@ describe('registerRemoteIpc', () => {
 
   it('returns server info on request', () => {
     const { ipcMain, invoke } = createIpcMain()
-    registerRemoteIpc({ ipcMain, server: { setPosition: vi.fn() }, info })
+    registerRemoteIpc({ ipcMain, server: { setPosition: vi.fn(), getClients: () => [] }, info })
 
     expect(invoke('remote:server-info')).toEqual(info)
+  })
+
+  it('returns the connected clients', () => {
+    const { ipcMain, invoke } = createIpcMain()
+    const client = {
+      id: 'device-1',
+      address: '192.168.1.5',
+      userAgent: 'iPhone',
+      online: true,
+      connectedAt: 1,
+      lastSeenAt: 2
+    }
+    registerRemoteIpc({
+      ipcMain,
+      server: { setPosition: vi.fn(), getClients: () => [client] },
+      info
+    })
+
+    expect(invoke('remote:clients')).toEqual([client])
   })
 })

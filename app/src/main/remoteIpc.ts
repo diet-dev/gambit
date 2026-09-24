@@ -1,4 +1,4 @@
-import type { ServerInfo } from '../shared/remote'
+import type { RemoteClient, ServerInfo } from '../shared/remote'
 
 export type IpcMainLike = {
   on(channel: string, listener: (event: unknown, ...args: unknown[]) => void): unknown
@@ -7,7 +7,7 @@ export type IpcMainLike = {
 
 export type RegisterRemoteIpcOptions = {
   ipcMain: IpcMainLike
-  server: { setPosition: (fen: string) => void }
+  server: { setPosition: (fen: string) => void; getClients: () => RemoteClient[] }
   info: ServerInfo
 }
 
@@ -18,4 +18,5 @@ export function registerRemoteIpc({ ipcMain, server, info }: RegisterRemoteIpcOp
     }
   })
   ipcMain.handle('remote:server-info', () => info)
+  ipcMain.handle('remote:clients', () => server.getClients())
 }

@@ -16,6 +16,9 @@ async function startRemoteServer(): Promise<void> {
     devServerUrl: is.dev ? process.env['ELECTRON_RENDERER_URL'] : undefined,
     onMove: (move) => {
       BrowserWindow.getAllWindows()[0]?.webContents.send('remote:move', move)
+    },
+    onClientsChanged: (clients) => {
+      BrowserWindow.getAllWindows()[0]?.webContents.send('remote:clients-changed', clients)
     }
   })
 

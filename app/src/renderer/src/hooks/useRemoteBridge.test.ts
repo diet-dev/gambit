@@ -8,6 +8,8 @@ function installApi(overrides: Partial<RemoteApi> = {}): RemoteApi {
     publishPosition: vi.fn(),
     onRemoteMove: vi.fn(() => () => {}),
     getServerInfo: vi.fn(async () => null),
+    getClients: vi.fn(async () => []),
+    onClientsChanged: vi.fn(() => () => {}),
     ...overrides
   }
   window.api = { remote }

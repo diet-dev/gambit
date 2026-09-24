@@ -33,6 +33,29 @@ describe('useRemoteSocket', () => {
   afterEach(() => {
     FakeWebSocket.instances = []
     vi.unstubAllGlobals()
+    window.localStorage.clear()
+    document.cookie = 'gambit_device=; Path=/; Max-Age=0'
+  })
+
+  it('sends hello on open and stores the id from welcome', () => {
+    vi.stubGlobal('WebSocket', FakeWebSocket)
+    renderHook(() => useRemoteSocket())
+
+    act(() => {
+      lastSocket().onopen?.()
+    })
+
+    expect(JSON.parse(lastSocket().sent[0])).toEqual({ type: 'hello', id: null })
+
+    act(() => {
+      lastSocket().onmessage?.({
+        data: JSON.stringify({ type: 'welcome', id: '11111111-1111-4111-8111-111111111111' })
+      })
+    })
+
+    expect(window.localStorage.getItem('gambit_device_id')).toBe(
+      '11111111-1111-4111-8111-111111111111'
+    )
   })
 
   it('starts from the initial position and follows server updates', () => {

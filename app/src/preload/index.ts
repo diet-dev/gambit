@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import type { RemoteApi, RemoteMove, ServerInfo } from '../shared/remote'
+import type { RemoteApi, RemoteClient, RemoteMove, ServerInfo } from '../shared/remote'
 
 const remote: RemoteApi = {
   publishPosition: (fen) => ipcRenderer.send('remote:position', fen),
@@ -9,7 +9,13 @@ const remote: RemoteApi = {
     ipcRenderer.on('remote:move', listener)
     return () => ipcRenderer.removeListener('remote:move', listener)
   },
-  getServerInfo: () => ipcRenderer.invoke('remote:server-info') as Promise<ServerInfo | null>
+  getServerInfo: () => ipcRenderer.invoke('remote:server-info') as Promise<ServerInfo | null>,
+  getClients: () => ipcRenderer.invoke('remote:clients') as Promise<RemoteClient[]>,
+  onClientsChanged: (callback) => {
+    const listener = (_event: IpcRendererEvent, clients: RemoteClient[]): void => callback(clients)
+    ipcRenderer.on('remote:clients-changed', listener)
+    return () => ipcRenderer.removeListener('remote:clients-changed', listener)
+  }
 }
 
 const api = { remote }

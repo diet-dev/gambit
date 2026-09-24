@@ -13,7 +13,9 @@ function installApi(serverInfo: ServerInfo | null): RemoteApi {
   const remote: RemoteApi = {
     publishPosition: vi.fn(),
     onRemoteMove: vi.fn(() => () => {}),
-    getServerInfo: vi.fn(async () => serverInfo)
+    getServerInfo: vi.fn(async () => serverInfo),
+    getClients: vi.fn(async () => []),
+    onClientsChanged: vi.fn(() => () => {})
   }
   window.api = { remote }
   return remote

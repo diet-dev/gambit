@@ -33,6 +33,31 @@ function remoteSocketUrl(): string {
   return `ws://${window.location.hostname}:${port}/ws`
 }
 
+const DEVICE_ID_KEY = 'gambit_device_id'
+const DEVICE_COOKIE = 'gambit_device'
+
+function readCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+function storedDeviceId(): string | null {
+  try {
+    return window.localStorage.getItem(DEVICE_ID_KEY) ?? readCookie(DEVICE_COOKIE)
+  } catch {
+    return readCookie(DEVICE_COOKIE)
+  }
+}
+
+function persistDeviceId(id: string): void {
+  try {
+    window.localStorage.setItem(DEVICE_ID_KEY, id)
+  } catch {
+    // storage unavailable — cookie still holds the id
+  }
+  document.cookie = `${DEVICE_COOKIE}=${id}; Path=/; SameSite=Lax; Max-Age=31536000`
+}
+
 export function useRemoteSocket(): UseRemoteSocket {
   const gameRef = useRef(new Chess())
   const socketRef = useRef<WebSocket | null>(null)
@@ -53,9 +78,18 @@ export function useRemoteSocket(): UseRemoteSocket {
       socketRef.current = socket
       socket.onopen = () => {
         attempt = 0
+        socket?.send(JSON.stringify({ type: 'hello', id: storedDeviceId() }))
       }
       socket.onmessage = (event) => {
-        const message = JSON.parse(event.data as string) as { type: string; fen?: string }
+        const message = JSON.parse(event.data as string) as {
+          type: string
+          fen?: string
+          id?: string
+        }
+        if (message.type === 'welcome' && message.id) {
+          persistDeviceId(message.id)
+          return
+        }
         if (message.type === 'position' && message.fen) {
           gameRef.current = new Chess(message.fen)
           setPosition(message.fen)
