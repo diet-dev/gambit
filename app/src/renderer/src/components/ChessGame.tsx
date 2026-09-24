@@ -2,6 +2,7 @@ import { useState, type CSSProperties } from 'react'
 import { Chessboard } from 'react-chessboard'
 import { useChessGame, type GameStatus } from '../hooks/useChessGame'
 import { useEngineOpponent } from '../hooks/useEngineOpponent'
+import { useRemoteBridge } from '../hooks/useRemoteBridge'
 
 function statusText(status: GameStatus): string {
   switch (status.kind) {
@@ -67,6 +68,8 @@ function ChessGame({ initialPosition }: ChessGameProps): React.JSX.Element {
     isGameOver: turn === null,
     playMove
   })
+
+  useRemoteBridge({ position, playMove })
 
   const squareStyles: Record<string, CSSProperties> = {}
   if (selectedSquare) {
