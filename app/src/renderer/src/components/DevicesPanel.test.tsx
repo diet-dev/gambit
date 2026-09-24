@@ -11,7 +11,15 @@ function installApi(clients: RemoteClient[]): RemoteApi {
     getClients: vi.fn(async () => clients),
     onClientsChanged: vi.fn(() => () => {})
   }
-  window.api = { remote }
+  window.api = {
+    remote,
+    students: {
+      list: async () => [],
+      create: async (input) => ({ id: 1, ...input }),
+      update: async (student) => student,
+      remove: async () => {}
+    }
+  }
   return remote
 }
 

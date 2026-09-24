@@ -15,7 +15,15 @@ function installApi(initial: RemoteClient[]): { emit: (clients: RemoteClient[]) 
       return () => {}
     })
   }
-  window.api = { remote }
+  window.api = {
+    remote,
+    students: {
+      list: async () => [],
+      create: async (input) => ({ id: 1, ...input }),
+      update: async (student) => student,
+      remove: async () => {}
+    }
+  }
   return {
     emit: (clients) => handler?.(clients)
   }

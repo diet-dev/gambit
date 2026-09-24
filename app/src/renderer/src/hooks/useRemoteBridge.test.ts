@@ -12,7 +12,15 @@ function installApi(overrides: Partial<RemoteApi> = {}): RemoteApi {
     onClientsChanged: vi.fn(() => () => {}),
     ...overrides
   }
-  window.api = { remote }
+  window.api = {
+    remote,
+    students: {
+      list: async () => [],
+      create: async (input) => ({ id: 1, ...input }),
+      update: async (student) => student,
+      remove: async () => {}
+    }
+  }
   return remote
 }
 

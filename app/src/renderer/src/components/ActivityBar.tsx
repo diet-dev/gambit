@@ -1,6 +1,12 @@
-import { ListChecks, MonitorSmartphone, ScrollText, type LucideIcon } from 'lucide-react'
+import {
+  GraduationCap,
+  ListChecks,
+  MonitorSmartphone,
+  ScrollText,
+  type LucideIcon
+} from 'lucide-react'
 
-export type Activity = 'situations' | 'devices' | 'events'
+export type Activity = 'situations' | 'students' | 'devices' | 'events'
 
 type ActivityBarProps = {
   active: Activity
@@ -9,6 +15,7 @@ type ActivityBarProps = {
 
 const ITEMS: Array<{ id: Activity; icon: LucideIcon; title: string }> = [
   { id: 'situations', icon: ListChecks, title: 'Ситуации' },
+  { id: 'students', icon: GraduationCap, title: 'Ученики' },
   { id: 'devices', icon: MonitorSmartphone, title: 'Устройства' },
   { id: 'events', icon: ScrollText, title: 'События' }
 ]

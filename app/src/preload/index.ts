@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import type { RemoteApi, RemoteClient, RemoteMove, ServerInfo } from '../shared/remote'
+import type { Student, StudentInput, StudentsApi } from '../shared/students'
 
 const remote: RemoteApi = {
   publishPosition: (fen) => ipcRenderer.send('remote:position', fen),
@@ -18,7 +19,15 @@ const remote: RemoteApi = {
   }
 }
 
-const api = { remote }
+const students: StudentsApi = {
+  list: () => ipcRenderer.invoke('students:list') as Promise<Student[]>,
+  create: (student: StudentInput) =>
+    ipcRenderer.invoke('students:create', student) as Promise<Student>,
+  update: (student: Student) => ipcRenderer.invoke('students:update', student) as Promise<Student>,
+  remove: (id: number) => ipcRenderer.invoke('students:remove', id) as Promise<void>
+}
+
+const api = { remote, students }
 
 if (process.contextIsolated) {
   try {

@@ -7,6 +7,7 @@ import EventLogPanel from './components/EventLogPanel'
 import RemoteQrButton from './components/RemoteQrButton'
 import SituationCommentDialog from './components/SituationCommentDialog'
 import SituationList from './components/SituationList'
+import StudentsPanel from './components/StudentsPanel'
 import { useEventLog } from './hooks/useEventLog'
 import { DEFAULT_SITUATION_ID, SITUATION_GROUPS, findSituation } from './situations'
 
@@ -58,6 +59,7 @@ function App(): React.JSX.Element {
               />
             )}
             {activity === 'devices' && <DevicesPanel />}
+            {activity === 'students' && <StudentsPanel />}
             {activity === 'events' && <EventLogPanel events={events} />}
           </div>
         </Panel>

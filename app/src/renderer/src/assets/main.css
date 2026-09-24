@@ -295,6 +295,144 @@ code {
   color: var(--ev-c-text-2);
 }
 
+.students-panel {
+  padding: 12px;
+}
+
+.students-header {
+  margin-bottom: 12px;
+}
+
+.students-add {
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--ev-c-gray-3);
+  color: var(--ev-c-text-1);
+  font: inherit;
+  cursor: pointer;
+}
+
+.students-add:hover {
+  background: var(--ev-c-gray-2);
+}
+
+.students-empty {
+  font-size: 14px;
+  color: var(--ev-c-text-2);
+}
+
+.students-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+}
+
+.student-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--ev-c-gray-3);
+}
+
+.student-name {
+  flex: 1 1 auto;
+  font-size: 14px;
+  color: var(--ev-c-text-1);
+}
+
+.student-class {
+  font-size: 12px;
+  color: var(--ev-c-text-2);
+}
+
+.student-rating {
+  min-width: 32px;
+  text-align: right;
+  font-size: 13px;
+  color: var(--ev-c-text-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.student-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ev-c-text-2);
+  cursor: pointer;
+}
+
+.student-action:hover {
+  color: var(--ev-c-text-1);
+  background: var(--ev-c-gray-2);
+}
+
+.student-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.student-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--ev-c-text-2);
+}
+
+.student-field input {
+  padding: 8px 10px;
+  border: 1px solid var(--ev-c-gray-1);
+  border-radius: 6px;
+  background: var(--ev-c-black-mute);
+  color: var(--ev-c-text-1);
+  font: inherit;
+}
+
+.student-required {
+  color: #ef4444;
+}
+
+.student-field-error {
+  font-size: 12px;
+  color: #ef4444;
+}
+
+.student-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.student-form-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: var(--ev-c-gray-3);
+  color: var(--ev-c-text-1);
+  font: inherit;
+  cursor: pointer;
+}
+
+.student-form-actions button:last-child {
+  background: #a78bfa;
+  color: #1b1b1f;
+}
+
+.student-form-actions button:hover {
+  opacity: 0.9;
+}
+
 .situation-group-title {
   margin-bottom: 6px;
   font-size: 12px;
@@ -558,6 +696,18 @@ code {
 
 .comment-dialog.remote-qr-dialog {
   width: min(100%, 540px);
+}
+
+.comment-dialog.student-delete-dialog {
+  width: min(100%, 450px);
+}
+
+.comment-dialog.student-form-dialog {
+  width: min(100%, 480px);
+}
+
+.student-delete-dialog .student-form-actions {
+  margin-top: 24px;
 }
 
 .remote-qr-dialog .comment-dialog-title {

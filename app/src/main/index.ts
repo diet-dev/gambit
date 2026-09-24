@@ -7,8 +7,13 @@ import icon from '../../resources/icon.png?asset'
 import { createRemoteServer, type RemoteServer } from './remoteServer'
 import { getLanAddress } from './lan'
 import { registerRemoteIpc } from './remoteIpc'
+import { openDatabase } from './database'
+import { createStudentStore } from './studentStore'
+import { registerStudentsIpc } from './studentsIpc'
+import type { DatabaseSync } from 'node:sqlite'
 
 let remoteServer: RemoteServer | null = null
+let database: DatabaseSync | null = null
 
 async function startRemoteServer(): Promise<void> {
   remoteServer = await createRemoteServer({
@@ -74,6 +79,9 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  database = openDatabase(join(app.getPath('userData'), 'gambit', 'gambit.db'))
+  registerStudentsIpc({ ipcMain, store: createStudentStore(database) })
+
   try {
     await startRemoteServer()
   } catch (error) {
@@ -95,4 +103,5 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   remoteServer?.close()
+  database?.close()
 })
