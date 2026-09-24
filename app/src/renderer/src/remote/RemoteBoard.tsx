@@ -17,12 +17,12 @@ function RemoteBoard(): React.JSX.Element {
 
   return (
     <div className="remote-game">
+      <div className={statusBarClassName(status)}>{statusText(status)}</div>
       <div className="remote-board-area">
         <div className="remote-board">
           <Chessboard options={{ position, onPieceDrop, onSquareClick, squareStyles }} />
         </div>
       </div>
-      <div className={statusBarClassName(status)}>{statusText(status)}</div>
     </div>
   )
 }
