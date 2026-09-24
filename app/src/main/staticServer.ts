@@ -1,6 +1,6 @@
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from 'http'
 import { readFile } from 'fs/promises'
-import { extname, join, normalize } from 'path'
+import { extname, isAbsolute, join, normalize, relative } from 'path'
 import type { AddressInfo } from 'net'
 
 export type StaticServer = {
@@ -50,10 +50,12 @@ async function serveStaticFile(
   response: ServerResponse
 ): Promise<void> {
   const urlPath = decodeURIComponent((request.url ?? '/').split('?')[0])
-  const relative = urlPath === '/' ? 'remote.html' : urlPath.replace(/^\/+/, '')
-  const filePath = normalize(join(staticDir, relative))
+  const requestedPath = urlPath === '/' ? 'remote.html' : urlPath.replace(/^\/+/, '')
+  const resolvedDir = normalize(staticDir)
+  const filePath = normalize(join(resolvedDir, requestedPath))
+  const rel = relative(resolvedDir, filePath)
 
-  if (filePath !== staticDir && !filePath.startsWith(staticDir + '/')) {
+  if (rel === '' || rel.startsWith('..') || isAbsolute(rel)) {
     response.writeHead(404)
     response.end()
     return

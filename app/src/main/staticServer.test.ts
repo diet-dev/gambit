@@ -2,6 +2,7 @@ import { mkdtemp, writeFile } from 'fs/promises'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { createServer } from 'http'
+import type { AddressInfo } from 'net'
 import { afterEach, describe, expect, it } from 'vitest'
 import { startStaticServer, type StaticServer } from './staticServer'
 
@@ -62,5 +63,22 @@ describe('startStaticServer', () => {
     expect(body).toContain('dev-remote')
 
     await new Promise<void>((resolve) => devServer.close(() => resolve()))
+  })
+
+  it('falls back to the next port when the preferred port is busy', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'gambit-static-'))
+    await writeFile(join(dir, 'remote.html'), '<!doctype html><title>remote</title>')
+
+    const blocker = createServer()
+    await new Promise<void>((resolve) => blocker.listen(0, '127.0.0.1', resolve))
+    const busyPort = (blocker.address() as AddressInfo).port
+
+    try {
+      running = await startStaticServer({ staticDir: dir, preferredPort: busyPort })
+      expect(running.port).not.toBe(busyPort)
+      expect(running.port).toBeGreaterThan(busyPort)
+    } finally {
+      await new Promise<void>((resolve) => blocker.close(() => resolve()))
+    }
   })
 })
