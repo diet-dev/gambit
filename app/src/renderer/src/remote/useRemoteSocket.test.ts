@@ -84,4 +84,90 @@ describe('useRemoteSocket', () => {
     expect(accepted).toBe(false)
     expect(lastSocket().sent).toHaveLength(0)
   })
+
+  it('selects a piece and shows its possible moves on click', () => {
+    vi.stubGlobal('WebSocket', FakeWebSocket)
+    const { result } = renderHook(() => useRemoteSocket())
+
+    act(() => {
+      lastSocket().onmessage?.({
+        data: JSON.stringify({
+          type: 'position',
+          fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+        })
+      })
+    })
+
+    act(() => {
+      result.current.onSquareClick({ square: 'e2' })
+    })
+
+    expect(result.current.selectedSquare).toBe('e2')
+    expect(result.current.possibleMoves.map((move) => move.square)).toContain('e4')
+  })
+
+  it('moves when a possible target is clicked and sends the move', () => {
+    vi.stubGlobal('WebSocket', FakeWebSocket)
+    const { result } = renderHook(() => useRemoteSocket())
+
+    act(() => {
+      result.current.onSquareClick({ square: 'e2' })
+    })
+    act(() => {
+      result.current.onSquareClick({ square: 'e4' })
+    })
+
+    expect(result.current.position).toContain('4P3')
+    expect(result.current.selectedSquare).toBeNull()
+    expect(lastSocket().sent[0]).toBe(
+      JSON.stringify({ type: 'move', from: 'e2', to: 'e4', promotion: 'q' })
+    )
+  })
+
+  it('highlights the king and reports check status', () => {
+    vi.stubGlobal('WebSocket', FakeWebSocket)
+    const { result } = renderHook(() => useRemoteSocket())
+
+    act(() => {
+      lastSocket().onmessage?.({
+        data: JSON.stringify({ type: 'position', fen: '4k3/8/8/8/8/8/8/4R1K1 b - - 0 1' })
+      })
+    })
+
+    expect(result.current.checkedSquare).toBe('e8')
+    expect(result.current.status).toEqual({ kind: 'check', turn: 'b' })
+  })
+
+  it('reports checkmate status', () => {
+    vi.stubGlobal('WebSocket', FakeWebSocket)
+    const { result } = renderHook(() => useRemoteSocket())
+
+    act(() => {
+      lastSocket().onmessage?.({
+        data: JSON.stringify({
+          type: 'position',
+          fen: 'rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3'
+        })
+      })
+    })
+
+    expect(result.current.status).toEqual({ kind: 'checkmate', winner: 'b' })
+  })
+
+  it('clears the selection when the server sends a new position', () => {
+    vi.stubGlobal('WebSocket', FakeWebSocket)
+    const { result } = renderHook(() => useRemoteSocket())
+
+    act(() => {
+      result.current.onSquareClick({ square: 'e2' })
+    })
+    act(() => {
+      lastSocket().onmessage?.({
+        data: JSON.stringify({ type: 'position', fen: '8/8/8/8/8/8/8/K6k w - - 0 1' })
+      })
+    })
+
+    expect(result.current.selectedSquare).toBeNull()
+    expect(result.current.possibleMoves).toHaveLength(0)
+  })
 })

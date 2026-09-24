@@ -1,14 +1,30 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Chess } from 'chess.js'
+import {
+  kingSquareInCheck,
+  legalMovesFrom,
+  statusOf,
+  type GameStatus,
+  type PossibleMove
+} from '../chess/rules'
 
 type PieceDropArgs = {
   sourceSquare: string
   targetSquare: string | null
 }
 
+type SquareClickArgs = {
+  square: string
+}
+
 type UseRemoteSocket = {
   position: string
+  selectedSquare: string | null
+  possibleMoves: PossibleMove[]
+  checkedSquare: string | null
+  status: GameStatus
   onPieceDrop: (args: PieceDropArgs) => boolean
+  onSquareClick: (args: SquareClickArgs) => void
 }
 
 function remoteSocketUrl(): string {
@@ -21,6 +37,10 @@ export function useRemoteSocket(): UseRemoteSocket {
   const gameRef = useRef(new Chess())
   const socketRef = useRef<WebSocket | null>(null)
   const [position, setPosition] = useState(() => new Chess().fen())
+  const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
+  const [possibleMoves, setPossibleMoves] = useState<PossibleMove[]>([])
+  const [checkedSquare, setCheckedSquare] = useState<string | null>(null)
+  const [status, setStatus] = useState<GameStatus>(() => statusOf(new Chess()))
 
   useEffect(() => {
     let socket: WebSocket | null = null
@@ -39,6 +59,10 @@ export function useRemoteSocket(): UseRemoteSocket {
         if (message.type === 'position' && message.fen) {
           gameRef.current = new Chess(message.fen)
           setPosition(message.fen)
+          setCheckedSquare(kingSquareInCheck(gameRef.current))
+          setStatus(statusOf(gameRef.current))
+          setSelectedSquare(null)
+          setPossibleMoves([])
         }
       }
       socket.onclose = () => {
@@ -61,24 +85,62 @@ export function useRemoteSocket(): UseRemoteSocket {
     }
   }, [])
 
-  const onPieceDrop = useCallback(({ sourceSquare, targetSquare }: PieceDropArgs): boolean => {
-    if (!targetSquare) {
-      return false
-    }
+  const applyMove = useCallback((from: string, to: string): boolean => {
     try {
-      gameRef.current.move({ from: sourceSquare, to: targetSquare, promotion: 'q' })
+      gameRef.current.move({ from, to, promotion: 'q' })
     } catch {
       return false
     }
     setPosition(gameRef.current.fen())
+    setCheckedSquare(kingSquareInCheck(gameRef.current))
+    setStatus(statusOf(gameRef.current))
+    setSelectedSquare(null)
+    setPossibleMoves([])
+
     const socket = socketRef.current
     if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(
-        JSON.stringify({ type: 'move', from: sourceSquare, to: targetSquare, promotion: 'q' })
-      )
+      socket.send(JSON.stringify({ type: 'move', from, to, promotion: 'q' }))
     }
     return true
   }, [])
 
-  return { position, onPieceDrop }
+  const onPieceDrop = useCallback(
+    ({ sourceSquare, targetSquare }: PieceDropArgs): boolean => {
+      if (!targetSquare) {
+        return false
+      }
+      return applyMove(sourceSquare, targetSquare)
+    },
+    [applyMove]
+  )
+
+  const onSquareClick = useCallback(
+    ({ square }: SquareClickArgs): void => {
+      if (selectedSquare && possibleMoves.some((move) => move.square === square)) {
+        applyMove(selectedSquare, square)
+        return
+      }
+
+      const moves = legalMovesFrom(gameRef.current, square)
+      if (moves.length === 0) {
+        setSelectedSquare(null)
+        setPossibleMoves([])
+        return
+      }
+
+      setSelectedSquare(square)
+      setPossibleMoves(moves)
+    },
+    [selectedSquare, possibleMoves, applyMove]
+  )
+
+  return {
+    position,
+    selectedSquare,
+    possibleMoves,
+    checkedSquare,
+    status,
+    onPieceDrop,
+    onSquareClick
+  }
 }
