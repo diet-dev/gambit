@@ -42,6 +42,16 @@ describe('App', () => {
     expect(container.querySelector('.left-panel .events-panel')).toBeInTheDocument()
   })
 
+  it('switches the left panel to the classes tab', () => {
+    const { container, getByRole, queryByRole } = render(<App />)
+
+    fireEvent.click(getByRole('button', { name: 'Классы' }))
+
+    expect(getByRole('button', { name: 'Классы' })).toHaveClass('activity-button-active')
+    expect(queryByRole('button', { name: /Мат в один ход/ })).not.toBeInTheDocument()
+    expect(container.querySelector('.left-panel .classes-panel')).toBeInTheDocument()
+  })
+
   it('switches the left panel to the students tab', () => {
     const { container, getByRole, queryByRole } = render(<App />)
 

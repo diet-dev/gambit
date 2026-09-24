@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
 import type { Student, StudentInput } from '../../../shared/students'
+import { useClasses } from '../hooks/useClasses'
 import { useStudents } from '../hooks/useStudents'
 import Dialog from './Dialog'
 import StudentFormDialog from './StudentFormDialog'
@@ -11,9 +12,12 @@ function studentName(student: Student): string {
 
 function StudentsPanel(): React.JSX.Element {
   const { students, create, update, remove } = useStudents()
+  const { classes } = useClasses()
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Student | null>(null)
   const [deleting, setDeleting] = useState<Student | null>(null)
+
+  const classNames = new Map(classes.map((schoolClass) => [schoolClass.id, schoolClass.name]))
 
   function openCreate(): void {
     setEditing(null)
@@ -42,24 +46,26 @@ function StudentsPanel(): React.JSX.Element {
   }
 
   return (
-    <div className="students-panel">
-      <div className="students-header">
-        <button type="button" className="students-add" onClick={openCreate}>
+    <div className="entity-panel students-panel">
+      <div className="entity-header">
+        <button type="button" className="entity-add" onClick={openCreate}>
           Добавить ученика
         </button>
       </div>
       {students.length === 0 ? (
-        <p className="students-empty">Учеников пока нет</p>
+        <p className="entity-empty">Учеников пока нет</p>
       ) : (
-        <ul className="students-list">
+        <ul className="entity-list">
           {students.map((student) => (
-            <li key={student.id} className="student-item">
-              <span className="student-name">{studentName(student)}</span>
-              <span className="student-class">{student.className}</span>
-              <span className="student-rating">{student.rating}</span>
+            <li key={student.id} className="entity-item">
+              <span className="entity-name">{studentName(student)}</span>
+              <span className="entity-sub">
+                {student.classId !== null ? (classNames.get(student.classId) ?? '—') : '—'}
+              </span>
+              <span className="entity-value">{student.rating}</span>
               <button
                 type="button"
-                className="student-action"
+                className="entity-action"
                 aria-label={`Изменить: ${student.lastName}`}
                 onClick={() => openEdit(student)}
               >
@@ -67,7 +73,7 @@ function StudentsPanel(): React.JSX.Element {
               </button>
               <button
                 type="button"
-                className="student-action"
+                className="entity-action"
                 aria-label={`Удалить: ${student.lastName}`}
                 onClick={() => setDeleting(student)}
               >
@@ -78,19 +84,24 @@ function StudentsPanel(): React.JSX.Element {
         </ul>
       )}
       {formOpen && (
-        <StudentFormDialog student={editing} onSubmit={submit} onClose={() => setFormOpen(false)} />
+        <StudentFormDialog
+          student={editing}
+          classes={classes}
+          onSubmit={submit}
+          onClose={() => setFormOpen(false)}
+        />
       )}
       {deleting && (
         <Dialog
           titleId="student-delete-title"
-          className="student-delete-dialog"
+          className="entity-delete-dialog"
           onClose={() => setDeleting(null)}
         >
           <h2 id="student-delete-title" className="comment-dialog-title">
             Удалить ученика?
           </h2>
           <p className="comment-dialog-text">{studentName(deleting)}</p>
-          <div className="student-form-actions">
+          <div className="entity-actions">
             <button type="button" onClick={() => setDeleting(null)}>
               Отмена
             </button>

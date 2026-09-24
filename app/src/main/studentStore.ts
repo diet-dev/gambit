@@ -9,7 +9,7 @@ export type StudentStore = {
 }
 
 const COLUMNS =
-  'id, last_name AS lastName, first_name AS firstName, middle_name AS middleName, class_name AS className, rating'
+  'id, last_name AS lastName, first_name AS firstName, middle_name AS middleName, class_id AS classId, rating'
 
 export function createStudentStore(database: DatabaseSync): StudentStore {
   function get(id: number): Student {
@@ -28,21 +28,21 @@ export function createStudentStore(database: DatabaseSync): StudentStore {
     create: (input) => {
       const info = database
         .prepare(
-          'INSERT INTO students (last_name, first_name, middle_name, class_name, rating) VALUES (?, ?, ?, ?, ?)'
+          'INSERT INTO students (last_name, first_name, middle_name, class_id, rating) VALUES (?, ?, ?, ?, ?)'
         )
-        .run(input.lastName, input.firstName, input.middleName, input.className, input.rating)
+        .run(input.lastName, input.firstName, input.middleName, input.classId, input.rating)
       return get(Number(info.lastInsertRowid))
     },
     update: (student) => {
       database
         .prepare(
-          'UPDATE students SET last_name = ?, first_name = ?, middle_name = ?, class_name = ?, rating = ? WHERE id = ?'
+          'UPDATE students SET last_name = ?, first_name = ?, middle_name = ?, class_id = ?, rating = ? WHERE id = ?'
         )
         .run(
           student.lastName,
           student.firstName,
           student.middleName,
-          student.className,
+          student.classId,
           student.rating,
           student.id
         )

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
-import { registerStudentsIpc } from './studentsIpc'
+import { registerClassesIpc } from './classesIpc'
 import type { IpcMainLike } from './remoteIpc'
-import type { StudentStore } from './studentStore'
+import type { ClassStore } from './classStore'
 
 function createIpcMain(): {
   ipcMain: IpcMainLike
@@ -17,38 +17,32 @@ function createIpcMain(): {
   }
 }
 
-function createStore(): StudentStore {
+function createStore(): ClassStore {
   return {
     list: vi.fn(() => []),
     create: vi.fn((input) => ({ id: 1, ...input })),
-    update: vi.fn((student) => student),
+    update: vi.fn((schoolClass) => schoolClass),
     remove: vi.fn()
   }
 }
 
-describe('registerStudentsIpc', () => {
+describe('registerClassesIpc', () => {
   it('routes list/create/update/remove to the store', () => {
     const { ipcMain, invoke } = createIpcMain()
     const store = createStore()
-    registerStudentsIpc({ ipcMain, store })
+    registerClassesIpc({ ipcMain, store })
 
-    expect(invoke('students:list')).toEqual([])
+    expect(invoke('classes:list')).toEqual([])
 
-    const input = {
-      lastName: 'Иванов',
-      firstName: 'Иван',
-      middleName: '',
-      classId: 1,
-      rating: 0
-    }
-    expect(invoke('students:create', input)).toEqual({ id: 1, ...input })
+    const input = { name: '7А', comment: '' }
+    expect(invoke('classes:create', input)).toEqual({ id: 1, ...input })
     expect(store.create).toHaveBeenCalledWith(input)
 
-    const student = { id: 1, ...input }
-    expect(invoke('students:update', student)).toEqual(student)
-    expect(store.update).toHaveBeenCalledWith(student)
+    const schoolClass = { id: 1, ...input }
+    expect(invoke('classes:update', schoolClass)).toEqual(schoolClass)
+    expect(store.update).toHaveBeenCalledWith(schoolClass)
 
-    invoke('students:remove', 1)
+    invoke('classes:remove', 1)
     expect(store.remove).toHaveBeenCalledWith(1)
   })
 })

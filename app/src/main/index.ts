@@ -10,6 +10,8 @@ import { registerRemoteIpc } from './remoteIpc'
 import { openDatabase } from './database'
 import { createStudentStore } from './studentStore'
 import { registerStudentsIpc } from './studentsIpc'
+import { createClassStore } from './classStore'
+import { registerClassesIpc } from './classesIpc'
 import type { DatabaseSync } from 'node:sqlite'
 
 let remoteServer: RemoteServer | null = null
@@ -81,6 +83,7 @@ app.whenReady().then(async () => {
 
   database = openDatabase(join(app.getPath('userData'), 'gambit', 'gambit.db'))
   registerStudentsIpc({ ipcMain, store: createStudentStore(database) })
+  registerClassesIpc({ ipcMain, store: createClassStore(database) })
 
   try {
     await startRemoteServer()

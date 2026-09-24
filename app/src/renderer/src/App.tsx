@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Group, Panel, Separator, useDefaultLayout } from 'react-resizable-panels'
 import ActivityBar, { type Activity } from './components/ActivityBar'
 import ChessGame from './components/ChessGame'
+import ClassesPanel from './components/ClassesPanel'
 import DevicesPanel from './components/DevicesPanel'
 import EventLogPanel from './components/EventLogPanel'
 import RemoteQrButton from './components/RemoteQrButton'
@@ -59,6 +60,7 @@ function App(): React.JSX.Element {
               />
             )}
             {activity === 'devices' && <DevicesPanel />}
+            {activity === 'classes' && <ClassesPanel />}
             {activity === 'students' && <StudentsPanel />}
             {activity === 'events' && <EventLogPanel events={events} />}
           </div>

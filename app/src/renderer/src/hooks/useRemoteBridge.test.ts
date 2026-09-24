@@ -19,6 +19,12 @@ function installApi(overrides: Partial<RemoteApi> = {}): RemoteApi {
       create: async (input) => ({ id: 1, ...input }),
       update: async (student) => student,
       remove: async () => {}
+    },
+    classes: {
+      list: async () => [],
+      create: async (input) => ({ id: 1, ...input }),
+      update: async (schoolClass) => schoolClass,
+      remove: async () => {}
     }
   }
   return remote

@@ -295,15 +295,15 @@ code {
   color: var(--ev-c-text-2);
 }
 
-.students-panel {
+.entity-panel {
   padding: 12px;
 }
 
-.students-header {
+.entity-header {
   margin-bottom: 12px;
 }
 
-.students-add {
+.entity-add {
   width: 100%;
   padding: 8px 10px;
   border: none;
@@ -314,23 +314,23 @@ code {
   cursor: pointer;
 }
 
-.students-add:hover {
+.entity-add:hover {
   background: var(--ev-c-gray-2);
 }
 
-.students-empty {
+.entity-empty {
   font-size: 14px;
   color: var(--ev-c-text-2);
 }
 
-.students-list {
+.entity-list {
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: 0;
 }
 
-.student-item {
+.entity-item {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -339,18 +339,18 @@ code {
   background: var(--ev-c-gray-3);
 }
 
-.student-name {
+.entity-name {
   flex: 1 1 auto;
   font-size: 14px;
   color: var(--ev-c-text-1);
 }
 
-.student-class {
+.entity-sub {
   font-size: 12px;
   color: var(--ev-c-text-2);
 }
 
-.student-rating {
+.entity-value {
   min-width: 32px;
   text-align: right;
   font-size: 13px;
@@ -358,7 +358,7 @@ code {
   font-variant-numeric: tabular-nums;
 }
 
-.student-action {
+.entity-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -370,18 +370,18 @@ code {
   cursor: pointer;
 }
 
-.student-action:hover {
+.entity-action:hover {
   color: var(--ev-c-text-1);
   background: var(--ev-c-gray-2);
 }
 
-.student-form {
+.entity-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.student-field {
+.entity-field {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -389,7 +389,8 @@ code {
   color: var(--ev-c-text-2);
 }
 
-.student-field input {
+.entity-field input,
+.entity-field select {
   padding: 8px 10px;
   border: 1px solid var(--ev-c-gray-1);
   border-radius: 6px;
@@ -398,23 +399,23 @@ code {
   font: inherit;
 }
 
-.student-required {
+.entity-required {
   color: #ef4444;
 }
 
-.student-field-error {
+.entity-error {
   font-size: 12px;
   color: #ef4444;
 }
 
-.student-form-actions {
+.entity-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   margin-top: 8px;
 }
 
-.student-form-actions button {
+.entity-actions button {
   padding: 8px 16px;
   border: none;
   border-radius: 6px;
@@ -424,12 +425,12 @@ code {
   cursor: pointer;
 }
 
-.student-form-actions button:last-child {
+.entity-actions button:last-child {
   background: #a78bfa;
   color: #1b1b1f;
 }
 
-.student-form-actions button:hover {
+.entity-actions button:hover {
   opacity: 0.9;
 }
 
@@ -698,15 +699,15 @@ code {
   width: min(100%, 540px);
 }
 
-.comment-dialog.student-delete-dialog {
+.comment-dialog.entity-delete-dialog {
   width: min(100%, 450px);
 }
 
-.comment-dialog.student-form-dialog {
+.comment-dialog.entity-form-dialog {
   width: min(100%, 480px);
 }
 
-.student-delete-dialog .student-form-actions {
+.entity-delete-dialog .entity-actions {
   margin-top: 24px;
 }
 

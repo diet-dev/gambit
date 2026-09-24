@@ -3,7 +3,7 @@ export type Student = {
   lastName: string
   firstName: string
   middleName: string
-  className: string
+  classId: number | null
   rating: number
 }
 

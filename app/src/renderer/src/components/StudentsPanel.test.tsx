@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import StudentsPanel from './StudentsPanel'
 import type { RemoteApi } from '../../../shared/remote'
+import type { ClassInput, ClassesApi, SchoolClass } from '../../../shared/classes'
 import type { Student, StudentInput, StudentsApi } from '../../../shared/students'
 
 const remoteStub: RemoteApi = {
@@ -12,9 +14,13 @@ const remoteStub: RemoteApi = {
   onClientsChanged: vi.fn(() => () => {})
 }
 
-function installApi(initial: Student[]): StudentsApi {
-  let students = [...initial]
-  const api = {
+function installApi(
+  studentsInit: Student[],
+  classesInit: SchoolClass[]
+): { studentsApi: StudentsApi; classesApi: ClassesApi } {
+  let students = [...studentsInit]
+  let classes = [...classesInit]
+  const studentsApi = {
     list: vi.fn(async () => students),
     create: vi.fn(async (input: StudentInput) => {
       const created = { id: students.length + 1, ...input }
@@ -29,8 +35,23 @@ function installApi(initial: Student[]): StudentsApi {
       students = students.filter((item) => item.id !== id)
     })
   }
-  window.api = { remote: remoteStub, students: api }
-  return api
+  const classesApi = {
+    list: vi.fn(async () => classes),
+    create: vi.fn(async (input: ClassInput) => {
+      const created = { id: classes.length + 1, ...input }
+      classes = [...classes, created]
+      return created
+    }),
+    update: vi.fn(async (schoolClass: SchoolClass) => {
+      classes = classes.map((item) => (item.id === schoolClass.id ? schoolClass : item))
+      return schoolClass
+    }),
+    remove: vi.fn(async (id: number) => {
+      classes = classes.filter((item) => item.id !== id)
+    })
+  }
+  window.api = { remote: remoteStub, students: studentsApi, classes: classesApi }
+  return { studentsApi, classesApi }
 }
 
 const ivanov: Student = {
@@ -38,20 +59,25 @@ const ivanov: Student = {
   lastName: 'Иванов',
   firstName: 'Иван',
   middleName: 'Иванович',
-  className: '7А',
+  classId: 1,
   rating: 100
 }
 
+const classes: SchoolClass[] = [
+  { id: 1, name: '7А', comment: '' },
+  { id: 2, name: '8Б', comment: '' }
+]
+
 describe('StudentsPanel', () => {
   it('shows an empty state', async () => {
-    installApi([])
+    installApi([], classes)
     const { findByText } = render(<StudentsPanel />)
 
     expect(await findByText('Учеников пока нет')).toBeInTheDocument()
   })
 
-  it('lists students', async () => {
-    installApi([ivanov])
+  it('lists students with their class name', async () => {
+    installApi([ivanov], classes)
     const { findByText, container } = render(<StudentsPanel />)
 
     expect(await findByText('Иванов Иван Иванович')).toBeInTheDocument()
@@ -59,58 +85,51 @@ describe('StudentsPanel', () => {
     expect(container).toHaveTextContent('100')
   })
 
-  it('creates a student through the form', async () => {
-    const api = installApi([])
+  it('creates a student with the chosen class', async () => {
+    const { studentsApi } = installApi([], classes)
+    const user = userEvent.setup()
     const { getByRole, getByLabelText, findByText } = render(<StudentsPanel />)
 
-    fireEvent.click(getByRole('button', { name: 'Добавить ученика' }))
-    fireEvent.change(getByLabelText(/Фамилия/), { target: { value: 'Петров' } })
-    fireEvent.change(getByLabelText(/Имя/), { target: { value: 'Пётр' } })
-    fireEvent.change(getByLabelText(/Класс/), { target: { value: '8Б' } })
-    fireEvent.click(getByRole('button', { name: 'Сохранить' }))
+    await user.click(getByRole('button', { name: 'Добавить ученика' }))
+    await user.type(getByLabelText(/Фамилия/), 'Петров')
+    await user.type(getByLabelText(/Имя/), 'Пётр')
+    await user.selectOptions(getByRole('combobox'), '2')
+    await user.click(getByRole('button', { name: 'Сохранить' }))
 
     await waitFor(() =>
-      expect(api.create).toHaveBeenCalledWith({
+      expect(studentsApi.create).toHaveBeenCalledWith({
         lastName: 'Петров',
         firstName: 'Пётр',
         middleName: '',
-        className: '8Б',
+        classId: 2,
         rating: 0
       })
     )
     expect(await findByText('Петров Пётр')).toBeInTheDocument()
   })
 
-  it('rejects a class with spaces and trims surrounding spaces', async () => {
-    const api = installApi([])
+  it('requires selecting a class', async () => {
+    const { studentsApi } = installApi([], classes)
     const { getByRole, getByLabelText, findByText } = render(<StudentsPanel />)
 
     fireEvent.click(getByRole('button', { name: 'Добавить ученика' }))
     fireEvent.change(getByLabelText(/Фамилия/), { target: { value: 'Петров' } })
     fireEvent.change(getByLabelText(/Имя/), { target: { value: 'Пётр' } })
-    fireEvent.change(getByLabelText(/Класс/), { target: { value: '7 А' } })
     fireEvent.click(getByRole('button', { name: 'Сохранить' }))
 
-    expect(await findByText(/Класс обязателен/)).toBeInTheDocument()
-    expect(api.create).not.toHaveBeenCalled()
-
-    fireEvent.change(getByLabelText(/Класс/), { target: { value: ' 7А ' } })
-    fireEvent.click(getByRole('button', { name: 'Сохранить' }))
-
-    await waitFor(() =>
-      expect(api.create).toHaveBeenCalledWith(expect.objectContaining({ className: '7А' }))
-    )
+    expect(await findByText('Выберите класс')).toBeInTheDocument()
+    expect(studentsApi.create).not.toHaveBeenCalled()
   })
 
   it('deletes a student after confirmation', async () => {
-    const api = installApi([ivanov])
+    const { studentsApi } = installApi([ivanov], classes)
     const { getByRole, findByText, queryByText, findByRole } = render(<StudentsPanel />)
 
     await findByText('Иванов Иван Иванович')
     fireEvent.click(getByRole('button', { name: 'Удалить: Иванов' }))
     fireEvent.click(await findByRole('button', { name: 'Удалить' }))
 
-    await waitFor(() => expect(api.remove).toHaveBeenCalledWith(1))
+    await waitFor(() => expect(studentsApi.remove).toHaveBeenCalledWith(1))
     await waitFor(() => expect(queryByText('Иванов Иван Иванович')).not.toBeInTheDocument())
   })
 })
