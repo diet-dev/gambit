@@ -1,4 +1,4 @@
-import { CircleHelp } from 'lucide-react'
+import { CircleHelp, RotateCcw } from 'lucide-react'
 import { type SituationGroup } from '../situations'
 
 type SituationListProps = {
@@ -6,13 +6,15 @@ type SituationListProps = {
   selectedId: string
   onSelect: (id: string) => void
   onShowComment: (id: string) => void
+  onReset: (id: string) => void
 }
 
 function SituationList({
   groups,
   selectedId,
   onSelect,
-  onShowComment
+  onShowComment,
+  onReset
 }: SituationListProps): React.JSX.Element {
   return (
     <nav className="situation-list">
@@ -38,14 +40,24 @@ function SituationList({
                     <span className="situation-description">{situation.description}</span>
                   </button>
                   {active && (
-                    <button
-                      type="button"
-                      className="situation-help"
-                      aria-label={`Подробнее: ${situation.title}`}
-                      onClick={() => onShowComment(situation.id)}
-                    >
-                      <CircleHelp size={20} aria-hidden="true" />
-                    </button>
+                    <div className="situation-actions">
+                      <button
+                        type="button"
+                        className="situation-reset"
+                        aria-label={`Сбросить: ${situation.title}`}
+                        onClick={() => onReset(situation.id)}
+                      >
+                        <RotateCcw size={20} aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        className="situation-help"
+                        aria-label={`Подробнее: ${situation.title}`}
+                        onClick={() => onShowComment(situation.id)}
+                      >
+                        <CircleHelp size={20} aria-hidden="true" />
+                      </button>
+                    </div>
                   )}
                 </li>
               )

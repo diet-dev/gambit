@@ -8,6 +8,7 @@ import { DEFAULT_SITUATION_ID, SITUATION_GROUPS, findSituation } from './situati
 function App(): React.JSX.Element {
   const [selectedId, setSelectedId] = useState(DEFAULT_SITUATION_ID)
   const [commentId, setCommentId] = useState<string | null>(null)
+  const [instance, setInstance] = useState(0)
   const selected = findSituation(selectedId) ?? findSituation(DEFAULT_SITUATION_ID)!
   const commentSituation = commentId ? findSituation(commentId) : undefined
 
@@ -25,6 +26,10 @@ function App(): React.JSX.Element {
     setCommentId(null)
   }
 
+  function resetSituation(): void {
+    setInstance((value) => value + 1)
+  }
+
   return (
     <Group
       className="panels"
@@ -39,13 +44,14 @@ function App(): React.JSX.Element {
             selectedId={selectedId}
             onSelect={selectSituation}
             onShowComment={setCommentId}
+            onReset={resetSituation}
           />
         </div>
       </Panel>
       <Separator className="separator" />
       <Panel id="right" className="panel" minSize="30%">
         <div className="right-panel">
-          <ChessGame key={selected.id} initialPosition={selected.fen} />
+          <ChessGame key={`${selected.id}:${instance}`} initialPosition={selected.fen} />
         </div>
       </Panel>
       {commentSituation && (

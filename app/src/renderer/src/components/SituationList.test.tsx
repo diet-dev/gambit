@@ -11,6 +11,7 @@ describe('SituationList', () => {
         selectedId="start"
         onSelect={() => {}}
         onShowComment={() => {}}
+        onReset={() => {}}
       />
     )
 
@@ -30,6 +31,7 @@ describe('SituationList', () => {
         selectedId="start"
         onSelect={onSelect}
         onShowComment={() => {}}
+        onReset={() => {}}
       />
     )
 
@@ -45,6 +47,7 @@ describe('SituationList', () => {
         selectedId="start"
         onSelect={() => {}}
         onShowComment={() => {}}
+        onReset={() => {}}
       />
     )
 
@@ -60,6 +63,7 @@ describe('SituationList', () => {
         selectedId="start"
         onSelect={() => {}}
         onShowComment={() => {}}
+        onReset={() => {}}
       />
     )
 
@@ -84,11 +88,45 @@ describe('SituationList', () => {
         selectedId="legal-mate"
         onSelect={() => {}}
         onShowComment={onShowComment}
+        onReset={() => {}}
       />
     )
 
     fireEvent.click(getByRole('button', { name: /Подробнее: Мат Легаля/ }))
 
     expect(onShowComment).toHaveBeenCalledWith('legal-mate')
+  })
+
+  it('shows the reset button only on the active situation', () => {
+    const { container, queryByRole } = render(
+      <SituationList
+        groups={SITUATION_GROUPS}
+        selectedId="start"
+        onSelect={() => {}}
+        onShowComment={() => {}}
+        onReset={() => {}}
+      />
+    )
+
+    expect(container.querySelectorAll('.situation-reset')).toHaveLength(1)
+    expect(queryByRole('button', { name: /Сбросить: Начальная позиция/ })).toBeInTheDocument()
+    expect(queryByRole('button', { name: /Сбросить: Мат Легаля/ })).not.toBeInTheDocument()
+  })
+
+  it('calls onReset with the active situation id', () => {
+    const onReset = vi.fn()
+    const { getByRole } = render(
+      <SituationList
+        groups={SITUATION_GROUPS}
+        selectedId="legal-mate"
+        onSelect={() => {}}
+        onShowComment={() => {}}
+        onReset={onReset}
+      />
+    )
+
+    fireEvent.click(getByRole('button', { name: /Сбросить: Мат Легаля/ }))
+
+    expect(onReset).toHaveBeenCalledWith('legal-mate')
   })
 })

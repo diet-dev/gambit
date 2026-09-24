@@ -20,6 +20,16 @@ describe('App', () => {
     expect(container.querySelector('[data-square="e1"] [data-piece="wQ"]')).toBeInTheDocument()
   })
 
+  it('restarts the active situation by remounting the board', () => {
+    const { container, getByRole } = render(<App />)
+    const boardBefore = container.querySelector('.board')
+
+    fireEvent.click(getByRole('button', { name: /Сбросить: Начальная позиция/ }))
+
+    expect(container.querySelector('.board')).not.toBe(boardBefore)
+    expect(container.querySelector('[data-square="e2"] [data-piece="wP"]')).toBeInTheDocument()
+  })
+
   it('reflects the selected situation in the window title', () => {
     const { getByRole } = render(<App />)
 

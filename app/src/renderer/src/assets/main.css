@@ -135,7 +135,7 @@ code {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 8px 40px 8px 10px;
+  padding: 8px 72px 8px 10px;
   border: 1px solid transparent;
   border-radius: 6px;
   background: transparent;
@@ -154,11 +154,18 @@ code {
   border-color: var(--ev-c-gray-1);
 }
 
-.situation-help {
+.situation-actions {
   position: absolute;
   top: 50%;
   right: 8px;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.situation-reset,
+.situation-help {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -170,6 +177,7 @@ code {
   cursor: pointer;
 }
 
+.situation-reset:hover,
 .situation-help:hover {
   color: var(--ev-c-text-1);
   background: var(--ev-c-gray-3);
