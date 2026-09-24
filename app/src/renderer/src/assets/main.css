@@ -194,6 +194,7 @@ code {
 }
 
 .right-panel {
+  position: relative;
   height: 100%;
   width: 100%;
   display: flex;
@@ -256,6 +257,45 @@ code {
 
 .status-bar-checkmate {
   background-color: rgba(255, 0, 0, 0.75);
+}
+
+.remote-qr-button {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: none;
+  border-radius: 50%;
+  background: var(--ev-c-gray-3);
+  color: var(--ev-c-text-1);
+  cursor: pointer;
+}
+
+.remote-qr-button:hover:not(:disabled) {
+  background: var(--ev-c-gray-2);
+}
+
+.remote-qr-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.remote-qr-image {
+  display: block;
+  width: 280px;
+  height: 280px;
+  margin: 0 auto 16px;
+  background: #ffffff;
+  border-radius: 8px;
+}
+
+.remote-qr-url {
+  font-size: 22px;
+  text-align: center;
+  word-break: break-all;
 }
 
 .dialog-overlay {

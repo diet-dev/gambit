@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Group, Panel, Separator, useDefaultLayout } from 'react-resizable-panels'
 import ChessGame from './components/ChessGame'
+import RemoteQrButton from './components/RemoteQrButton'
 import SituationCommentDialog from './components/SituationCommentDialog'
 import SituationList from './components/SituationList'
 import { DEFAULT_SITUATION_ID, SITUATION_GROUPS, findSituation } from './situations'
@@ -52,6 +53,7 @@ function App(): React.JSX.Element {
       <Panel id="right" className="panel" minSize="30%">
         <div className="right-panel">
           <ChessGame key={`${selected.id}:${instance}`} initialPosition={selected.fen} />
+          <RemoteQrButton />
         </div>
       </Panel>
       {commentSituation && (
