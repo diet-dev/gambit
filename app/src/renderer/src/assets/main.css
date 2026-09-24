@@ -503,6 +503,13 @@ code {
   gap: 8px;
 }
 
+.remote-qr-note {
+  margin-bottom: 16px;
+  font-size: 14px;
+  text-align: center;
+  color: var(--ev-c-text-2);
+}
+
 .remote-qr-url {
   font-size: 22px;
   text-align: center;

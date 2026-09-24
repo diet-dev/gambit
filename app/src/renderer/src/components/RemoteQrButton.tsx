@@ -65,8 +65,11 @@ function RemoteQrButton(): React.JSX.Element {
       {open && info && (
         <Dialog titleId="remote-qr-title" className="remote-qr-dialog" onClose={close}>
           <h2 id="remote-qr-title" className="comment-dialog-title">
-            Управление с телефона
+            Управление со смартфона
           </h2>
+          <p className="remote-qr-note">
+            Важно: смартфон должен быть в одной Wi-Fi-сети с компьютером.
+          </p>
           <img
             className="remote-qr-image"
             src={info.qrDataUrl}
