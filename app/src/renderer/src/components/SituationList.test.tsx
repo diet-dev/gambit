@@ -35,7 +35,7 @@ describe('SituationList', () => {
       />
     )
 
-    fireEvent.click(getByRole('button', { name: /Вилка конём/ }))
+    fireEvent.click(getByRole('button', { name: /Конь нападает сразу на короля/ }))
 
     expect(onSelect).toHaveBeenCalledWith('knight-fork')
   })
