@@ -1,7 +1,7 @@
 import { type UciTransport } from './uciTransport'
 
 export type Engine = {
-  setSkillLevel(level: number): Promise<void>
+  configureStrength(elo: number): Promise<void>
   findBestMove(fen: string): Promise<string>
   dispose(): void
 }
@@ -102,9 +102,10 @@ export function createStockfishEngine(transport: UciTransport): Engine {
   }
 
   return {
-    async setSkillLevel(level: number): Promise<void> {
+    async configureStrength(elo: number): Promise<void> {
       await ready
-      transport.post(`setoption name Skill Level value ${level}`)
+      transport.post('setoption name UCI_LimitStrength value true')
+      transport.post(`setoption name UCI_Elo value ${elo}`)
     },
 
     findBestMove,

@@ -11,7 +11,7 @@ function createFakeEngine(): {
 } {
   const resolvers: ((uci: string) => void)[] = []
   const engine: Engine = {
-    setSkillLevel: vi.fn().mockResolvedValue(undefined),
+    configureStrength: vi.fn().mockResolvedValue(undefined),
     findBestMove: vi.fn(
       () =>
         new Promise<string>((resolve) => {
@@ -124,7 +124,7 @@ describe('useEngineOpponent', () => {
 
   it('clears thinking when the search rejects', async () => {
     const engine: Engine = {
-      setSkillLevel: vi.fn().mockResolvedValue(undefined),
+      configureStrength: vi.fn().mockResolvedValue(undefined),
       findBestMove: vi.fn(async () => {
         throw new Error('engine failed')
       }),

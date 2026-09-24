@@ -35,14 +35,15 @@ describe('createStockfishEngine', () => {
     expect(fake.sent).toContain('uci')
   })
 
-  it('sets the skill level after the handshake', async () => {
+  it('configures the Elo strength limit after the handshake', async () => {
     const fake = createFakeTransport()
     const engine = createStockfishEngine(fake.transport)
 
     fake.emit('uciok')
-    await engine.setSkillLevel(1)
+    await engine.configureStrength(2200)
 
-    expect(fake.sent).toContain('setoption name Skill Level value 1')
+    expect(fake.sent).toContain('setoption name UCI_LimitStrength value true')
+    expect(fake.sent).toContain('setoption name UCI_Elo value 2200')
   })
 
   it('returns the move from the bestmove line', async () => {

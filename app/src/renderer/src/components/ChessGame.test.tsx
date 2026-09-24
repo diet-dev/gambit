@@ -1,6 +1,11 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render } from '@testing-library/react'
 import ChessGame from './ChessGame'
+import type { Engine } from '../engine/stockfish'
+
+afterEach(() => {
+  localStorage.clear()
+})
 
 describe('ChessGame', () => {
   it('renders all 64 squares of the board', () => {
@@ -95,13 +100,39 @@ describe('ChessGame', () => {
     expect(statusBar).toHaveClass('status-bar-draw')
   })
 
-  it('shows a bot toggle that is off by default', () => {
-    const { container } = render(<ChessGame />)
+  it('shows the bot switch off and the weakest level by default', () => {
+    const { getByRole } = render(<ChessGame />)
 
-    const toggle = container.querySelector('input[type="checkbox"]')
+    expect(getByRole('switch', { name: 'Играть с ботом' })).toHaveAttribute('aria-checked', 'false')
+    expect(getByRole('button', { name: /Сила соперника: 3 разряд/ })).toBeInTheDocument()
+  })
 
-    expect(toggle).toBeInTheDocument()
-    expect(toggle).not.toBeChecked()
-    expect(container).toHaveTextContent('Играть с ботом')
+  it('configures the engine strength when the bot is turned on', () => {
+    const engine: Engine = {
+      configureStrength: vi.fn(async () => {}),
+      findBestMove: vi.fn(async () => 'e7e5'),
+      dispose: vi.fn()
+    }
+    const { getByRole } = render(<ChessGame getEngine={() => engine} />)
+
+    fireEvent.click(getByRole('switch'))
+
+    expect(engine.configureStrength).toHaveBeenCalledWith(1350)
+  })
+
+  it('reconfigures the engine and stores the level when it changes while on', () => {
+    const engine: Engine = {
+      configureStrength: vi.fn(async () => {}),
+      findBestMove: vi.fn(async () => 'e7e5'),
+      dispose: vi.fn()
+    }
+    const { getByRole } = render(<ChessGame getEngine={() => engine} />)
+
+    fireEvent.click(getByRole('switch'))
+    fireEvent.click(getByRole('button', { name: /Сила соперника/ }))
+    fireEvent.click(getByRole('option', { name: /Мастер/ }))
+
+    expect(engine.configureStrength).toHaveBeenLastCalledWith(2200)
+    expect(localStorage.getItem('gambit-engine-level')).toBe('4')
   })
 })

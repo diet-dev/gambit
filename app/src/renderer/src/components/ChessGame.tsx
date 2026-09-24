@@ -3,15 +3,24 @@ import { Chessboard } from 'react-chessboard'
 import { useChessGame, type MoveInfo } from '../hooks/useChessGame'
 import { useEngineOpponent } from '../hooks/useEngineOpponent'
 import { useRemoteBridge } from '../hooks/useRemoteBridge'
+import { getDefaultEngine } from '../engine/defaultEngine'
+import { levelByIndex, loadLevelIndex, saveLevelIndex } from '../engine/levels'
+import { type Engine } from '../engine/stockfish'
 import type { EventOrigin } from '../events'
 import { squareStylesFor, statusBarClassName, statusText } from '../chess/presentation'
+import EngineControls from './EngineControls'
 
 type ChessGameProps = {
   initialPosition?: string
   onMove?: (move: MoveInfo, origin: EventOrigin) => void
+  getEngine?: () => Engine
 }
 
-function ChessGame({ initialPosition, onMove }: ChessGameProps): React.JSX.Element {
+function ChessGame({
+  initialPosition,
+  onMove,
+  getEngine = getDefaultEngine
+}: ChessGameProps): React.JSX.Element {
   const {
     position,
     selectedSquare,
@@ -23,6 +32,7 @@ function ChessGame({ initialPosition, onMove }: ChessGameProps): React.JSX.Eleme
     playMove
   } = useChessGame(initialPosition, onMove)
   const [botEnabled, setBotEnabled] = useState(false)
+  const [level, setLevel] = useState(loadLevelIndex)
 
   const turn = status.kind === 'turn' || status.kind === 'check' ? status.turn : null
   const { isThinking } = useEngineOpponent({
@@ -30,8 +40,30 @@ function ChessGame({ initialPosition, onMove }: ChessGameProps): React.JSX.Eleme
     fen: position,
     turn,
     isGameOver: turn === null,
-    playMove
+    playMove,
+    getEngine
   })
+
+  function configureStrength(index: number): void {
+    void getEngine()
+      .configureStrength(levelByIndex(index).elo)
+      .catch(() => undefined)
+  }
+
+  function toggleBot(next: boolean): void {
+    setBotEnabled(next)
+    if (next) {
+      configureStrength(level)
+    }
+  }
+
+  function changeLevel(next: number): void {
+    setLevel(next)
+    saveLevelIndex(next)
+    if (botEnabled) {
+      configureStrength(next)
+    }
+  }
 
   const playRemoteMove = useCallback((move: MoveInfo) => playMove(move, 'remote'), [playMove])
 
@@ -41,23 +73,21 @@ function ChessGame({ initialPosition, onMove }: ChessGameProps): React.JSX.Eleme
 
   return (
     <div className="chess-game">
+      <div className={statusBarClassName(status)}>
+        {isThinking ? 'Бот думает…' : statusText(status)}
+      </div>
       <div className="board">
         <div className="board-square">
           <Chessboard options={{ position, onPieceDrop, onSquareClick, squareStyles }} />
         </div>
       </div>
       <div className="controls">
-        <label className="bot-toggle">
-          <input
-            type="checkbox"
-            checked={botEnabled}
-            onChange={(event) => setBotEnabled(event.target.checked)}
-          />
-          Играть с ботом
-        </label>
-      </div>
-      <div className={statusBarClassName(status)}>
-        {isThinking ? 'Бот думает…' : statusText(status)}
+        <EngineControls
+          enabled={botEnabled}
+          level={level}
+          onToggle={toggleBot}
+          onLevelChange={changeLevel}
+        />
       </div>
     </div>
   )
