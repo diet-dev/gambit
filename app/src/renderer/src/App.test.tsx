@@ -20,6 +20,18 @@ describe('App', () => {
     expect(container.querySelector('[data-square="e1"] [data-piece="wQ"]')).toBeInTheDocument()
   })
 
+  it('switches the left panel to the devices tab', () => {
+    const { container, getByRole, queryByRole } = render(<App />)
+
+    expect(container.querySelector('.left-panel .situation-list')).toBeInTheDocument()
+
+    fireEvent.click(getByRole('button', { name: 'Устройства' }))
+
+    expect(getByRole('button', { name: 'Устройства' })).toHaveClass('activity-button-active')
+    expect(queryByRole('button', { name: /Мат в один ход/ })).not.toBeInTheDocument()
+    expect(container.querySelector('.left-panel .devices-panel')).toBeInTheDocument()
+  })
+
   it('restarts the active situation by remounting the board', () => {
     const { container, getByRole } = render(<App />)
     const boardBefore = container.querySelector('.board')

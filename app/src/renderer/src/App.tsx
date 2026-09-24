@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Group, Panel, Separator, useDefaultLayout } from 'react-resizable-panels'
+import ActivityBar, { type Activity } from './components/ActivityBar'
 import ChessGame from './components/ChessGame'
 import RemoteQrButton from './components/RemoteQrButton'
 import SituationCommentDialog from './components/SituationCommentDialog'
@@ -10,6 +11,7 @@ function App(): React.JSX.Element {
   const [selectedId, setSelectedId] = useState(DEFAULT_SITUATION_ID)
   const [commentId, setCommentId] = useState<string | null>(null)
   const [instance, setInstance] = useState(0)
+  const [activity, setActivity] = useState<Activity>('situations')
   const selected = findSituation(selectedId) ?? findSituation(DEFAULT_SITUATION_ID)!
   const commentSituation = commentId ? findSituation(commentId) : undefined
 
@@ -32,34 +34,41 @@ function App(): React.JSX.Element {
   }
 
   return (
-    <Group
-      className="panels"
-      orientation="horizontal"
-      defaultLayout={defaultLayout}
-      onLayoutChanged={onLayoutChanged}
-    >
-      <Panel id="left" className="panel" defaultSize="30%" minSize={300} maxSize="50%">
-        <div className="left-panel">
-          <SituationList
-            groups={SITUATION_GROUPS}
-            selectedId={selectedId}
-            onSelect={selectSituation}
-            onShowComment={setCommentId}
-            onReset={resetSituation}
-          />
-        </div>
-      </Panel>
-      <Separator className="separator" />
-      <Panel id="right" className="panel" minSize="30%">
-        <div className="right-panel">
-          <ChessGame key={`${selected.id}:${instance}`} initialPosition={selected.fen} />
-          <RemoteQrButton />
-        </div>
-      </Panel>
+    <>
+      <ActivityBar active={activity} onSelect={setActivity} />
+      <Group
+        className="panels"
+        orientation="horizontal"
+        defaultLayout={defaultLayout}
+        onLayoutChanged={onLayoutChanged}
+      >
+        <Panel id="left" className="panel" defaultSize="30%" minSize={300} maxSize="50%">
+          <div className="left-panel">
+            {activity === 'situations' ? (
+              <SituationList
+                groups={SITUATION_GROUPS}
+                selectedId={selectedId}
+                onSelect={selectSituation}
+                onShowComment={setCommentId}
+                onReset={resetSituation}
+              />
+            ) : (
+              <div className="devices-panel" />
+            )}
+          </div>
+        </Panel>
+        <Separator className="separator" />
+        <Panel id="right" className="panel" minSize="30%">
+          <div className="right-panel">
+            <ChessGame key={`${selected.id}:${instance}`} initialPosition={selected.fen} />
+            <RemoteQrButton />
+          </div>
+        </Panel>
+      </Group>
       {commentSituation && (
         <SituationCommentDialog situation={commentSituation} onClose={() => setCommentId(null)} />
       )}
-    </Group>
+    </>
   )
 }
 
