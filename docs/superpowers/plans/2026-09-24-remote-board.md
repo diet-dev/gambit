@@ -1675,8 +1675,8 @@ Expected: FAIL — модуль не найден.
 import type { ServerInfo } from '../shared/remote'
 
 export type IpcMainLike = {
-  on: (channel: string, listener: (event: unknown, ...args: unknown[]) => void) => void
-  handle: (channel: string, listener: (...args: unknown[]) => unknown) => void
+  on(channel: string, listener: (event: unknown, ...args: unknown[]) => void): unknown
+  handle(channel: string, listener: (...args: unknown[]) => unknown): unknown
 }
 
 export type RegisterRemoteIpcOptions = {
