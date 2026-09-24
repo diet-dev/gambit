@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import { useChessGame } from './useChessGame'
 
@@ -9,6 +9,26 @@ describe('useChessGame', () => {
     const { result } = renderHook(() => useChessGame())
 
     expect(result.current.position).toBe(START_FEN)
+  })
+
+  it('reports applied moves with their origin', () => {
+    const onMove = vi.fn()
+    const { result } = renderHook(() => useChessGame(undefined, onMove))
+
+    act(() => {
+      result.current.playMove({ from: 'e2', to: 'e4' }, 'remote')
+    })
+
+    expect(onMove).toHaveBeenLastCalledWith({ from: 'e2', to: 'e4', promotion: 'q' }, 'remote')
+
+    act(() => {
+      result.current.onSquareClick({ square: 'e7' })
+    })
+    act(() => {
+      result.current.onSquareClick({ square: 'e5' })
+    })
+
+    expect(onMove).toHaveBeenLastCalledWith({ from: 'e7', to: 'e5', promotion: 'q' }, 'local')
   })
 
   it('accepts a legal move and updates the position', () => {

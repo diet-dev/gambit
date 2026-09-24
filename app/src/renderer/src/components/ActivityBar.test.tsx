@@ -6,9 +6,10 @@ describe('ActivityBar', () => {
   it('renders the activities and marks the active one', () => {
     const { container, getByRole } = render(<ActivityBar active="situations" onSelect={() => {}} />)
 
-    expect(container.querySelectorAll('.activity-button')).toHaveLength(2)
+    expect(container.querySelectorAll('.activity-button')).toHaveLength(3)
     expect(getByRole('button', { name: 'Ситуации' })).toHaveClass('activity-button-active')
     expect(getByRole('button', { name: 'Устройства' })).not.toHaveClass('activity-button-active')
+    expect(getByRole('button', { name: 'События' })).not.toHaveClass('activity-button-active')
   })
 
   it('calls onSelect when an activity is clicked', () => {

@@ -32,6 +32,16 @@ describe('App', () => {
     expect(container.querySelector('.left-panel .devices-panel')).toBeInTheDocument()
   })
 
+  it('switches the left panel to the events tab', () => {
+    const { container, getByRole, queryByRole } = render(<App />)
+
+    fireEvent.click(getByRole('button', { name: 'События' }))
+
+    expect(getByRole('button', { name: 'События' })).toHaveClass('activity-button-active')
+    expect(queryByRole('button', { name: /Мат в один ход/ })).not.toBeInTheDocument()
+    expect(container.querySelector('.left-panel .events-panel')).toBeInTheDocument()
+  })
+
   it('restarts the active situation by remounting the board', () => {
     const { container, getByRole } = render(<App />)
     const boardBefore = container.querySelector('.board')

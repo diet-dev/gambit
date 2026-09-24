@@ -252,6 +252,49 @@ code {
   color: var(--ev-c-text-2);
 }
 
+.events-panel {
+  padding: 12px;
+}
+
+.events-empty {
+  font-size: 14px;
+  color: var(--ev-c-text-2);
+}
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+}
+
+.event-item {
+  display: flex;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--ev-c-gray-3);
+  font-size: 13px;
+}
+
+.event-time {
+  flex: 0 0 auto;
+  color: var(--ev-c-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.event-text {
+  color: var(--ev-c-text-1);
+}
+
+.event-device-new .event-text {
+  color: #a78bfa;
+}
+
+.event-move .event-text {
+  color: var(--ev-c-text-2);
+}
+
 .situation-group-title {
   margin-bottom: 6px;
   font-size: 12px;

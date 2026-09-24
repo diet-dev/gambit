@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Chess } from 'chess.js'
+import type { EventOrigin } from '../events'
 import {
   kingSquareInCheck,
   legalMovesFrom,
@@ -19,6 +20,14 @@ type SquareClickArgs = {
   square: string
 }
 
+export type MoveInfo = {
+  from: string
+  to: string
+  promotion?: string
+}
+
+type OnMove = (move: MoveInfo, origin: EventOrigin) => void
+
 type UseChessGame = {
   position: string
   selectedSquare: string | null
@@ -27,10 +36,10 @@ type UseChessGame = {
   status: GameStatus
   onPieceDrop: (args: PieceDropArgs) => boolean
   onSquareClick: (args: SquareClickArgs) => void
-  playMove: (args: { from: string; to: string; promotion?: string }) => boolean
+  playMove: (args: MoveInfo, origin?: EventOrigin) => boolean
 }
 
-export function useChessGame(initialPosition?: string): UseChessGame {
+export function useChessGame(initialPosition?: string, onMove?: OnMove): UseChessGame {
   const [game] = useState(() => new Chess(initialPosition))
   const [position, setPosition] = useState(() => game.fen())
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
@@ -38,13 +47,23 @@ export function useChessGame(initialPosition?: string): UseChessGame {
   const [checkedSquare, setCheckedSquare] = useState<string | null>(() => kingSquareInCheck(game))
   const [status, setStatus] = useState<GameStatus>(() => statusOf(game))
 
+  const onMoveRef = useRef(onMove)
+  useEffect(() => {
+    onMoveRef.current = onMove
+  }, [onMove])
+
   const clearSelection = useCallback((): void => {
     setSelectedSquare(null)
     setPossibleMoves([])
   }, [])
 
   const applyMove = useCallback(
-    (sourceSquare: string, targetSquare: string, promotion = 'q'): boolean => {
+    (
+      sourceSquare: string,
+      targetSquare: string,
+      promotion = 'q',
+      origin: EventOrigin = 'local'
+    ): boolean => {
       try {
         game.move({ from: sourceSquare, to: targetSquare, promotion })
       } catch {
@@ -55,6 +74,7 @@ export function useChessGame(initialPosition?: string): UseChessGame {
       setCheckedSquare(kingSquareInCheck(game))
       setStatus(statusOf(game))
       clearSelection()
+      onMoveRef.current?.({ from: sourceSquare, to: targetSquare, promotion }, origin)
       return true
     },
     [game, clearSelection]
@@ -91,8 +111,8 @@ export function useChessGame(initialPosition?: string): UseChessGame {
   )
 
   const playMove = useCallback(
-    ({ from, to, promotion }: { from: string; to: string; promotion?: string }): boolean =>
-      applyMove(from, to, promotion),
+    ({ from, to, promotion }: MoveInfo, origin: EventOrigin = 'local'): boolean =>
+      applyMove(from, to, promotion, origin),
     [applyMove]
   )
 

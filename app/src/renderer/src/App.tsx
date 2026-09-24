@@ -3,9 +3,11 @@ import { Group, Panel, Separator, useDefaultLayout } from 'react-resizable-panel
 import ActivityBar, { type Activity } from './components/ActivityBar'
 import ChessGame from './components/ChessGame'
 import DevicesPanel from './components/DevicesPanel'
+import EventLogPanel from './components/EventLogPanel'
 import RemoteQrButton from './components/RemoteQrButton'
 import SituationCommentDialog from './components/SituationCommentDialog'
 import SituationList from './components/SituationList'
+import { useEventLog } from './hooks/useEventLog'
 import { DEFAULT_SITUATION_ID, SITUATION_GROUPS, findSituation } from './situations'
 
 function App(): React.JSX.Element {
@@ -13,6 +15,7 @@ function App(): React.JSX.Element {
   const [commentId, setCommentId] = useState<string | null>(null)
   const [instance, setInstance] = useState(0)
   const [activity, setActivity] = useState<Activity>('situations')
+  const { events, logMove } = useEventLog()
   const selected = findSituation(selectedId) ?? findSituation(DEFAULT_SITUATION_ID)!
   const commentSituation = commentId ? findSituation(commentId) : undefined
 
@@ -45,7 +48,7 @@ function App(): React.JSX.Element {
       >
         <Panel id="left" className="panel" defaultSize="30%" minSize={300} maxSize="50%">
           <div className="left-panel">
-            {activity === 'situations' ? (
+            {activity === 'situations' && (
               <SituationList
                 groups={SITUATION_GROUPS}
                 selectedId={selectedId}
@@ -53,15 +56,19 @@ function App(): React.JSX.Element {
                 onShowComment={setCommentId}
                 onReset={resetSituation}
               />
-            ) : (
-              <DevicesPanel />
             )}
+            {activity === 'devices' && <DevicesPanel />}
+            {activity === 'events' && <EventLogPanel events={events} />}
           </div>
         </Panel>
         <Separator className="separator" />
         <Panel id="right" className="panel" minSize="30%">
           <div className="right-panel">
-            <ChessGame key={`${selected.id}:${instance}`} initialPosition={selected.fen} />
+            <ChessGame
+              key={`${selected.id}:${instance}`}
+              initialPosition={selected.fen}
+              onMove={logMove}
+            />
             <RemoteQrButton />
           </div>
         </Panel>
