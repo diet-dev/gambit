@@ -70,6 +70,17 @@ describe('ClassesPanel', () => {
     expect(await findByText('8Б')).toBeInTheDocument()
   })
 
+  it('filters the class name to uppercase russian letters and digits', () => {
+    installApi([])
+    const { getByRole, getByLabelText } = render(<ClassesPanel />)
+
+    fireEvent.click(getByRole('button', { name: 'Добавить класс' }))
+    const input = getByLabelText(/Название/) as HTMLInputElement
+    fireEvent.change(input, { target: { value: '7а-8 б' } })
+
+    expect(input.value).toBe('7А8Б')
+  })
+
   it('rejects a duplicate class name', async () => {
     const api = installApi([{ id: 1, name: '7А', comment: '' }])
     const { getByRole, getByLabelText, findByText } = render(<ClassesPanel />)

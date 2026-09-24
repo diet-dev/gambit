@@ -53,7 +53,7 @@ function ClassFormDialog({
           <input
             value={name}
             onChange={(event) => {
-              setName(event.target.value)
+              setName(event.target.value.replace(/[^А-Яа-яЁё0-9]/g, '').toUpperCase())
               setNameError(null)
             }}
             required
