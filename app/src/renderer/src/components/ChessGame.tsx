@@ -82,7 +82,9 @@ function ChessGame({ initialPosition }: ChessGameProps): React.JSX.Element {
   return (
     <div className="chess-game">
       <div className="board">
-        <Chessboard options={{ position, onPieceDrop, onSquareClick, squareStyles }} />
+        <div className="board-square">
+          <Chessboard options={{ position, onPieceDrop, onSquareClick, squareStyles }} />
+        </div>
       </div>
       <div className="controls">
         <label className="bot-toggle">
