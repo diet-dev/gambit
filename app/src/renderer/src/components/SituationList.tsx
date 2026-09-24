@@ -20,11 +20,14 @@ function SituationList({
         <section key={group.title} className="situation-group">
           <h2 className="situation-group-title">{group.title}</h2>
           <ul>
-            {group.situations.map((situation) => {
+            {group.situations.map((situation, index) => {
               const active = situation.id === selectedId
 
               return (
                 <li key={situation.id} className="situation-item-wrapper">
+                  <span className="situation-number" aria-hidden="true">
+                    {index + 1}
+                  </span>
                   <button
                     type="button"
                     className={active ? 'situation-item situation-item-active' : 'situation-item'}

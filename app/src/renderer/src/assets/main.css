@@ -88,6 +88,18 @@ code {
   position: relative;
 }
 
+.situation-number {
+  position: absolute;
+  top: 50%;
+  left: -22px;
+  width: 12px;
+  transform: translateY(-50%);
+  color: var(--ev-c-text-3);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
 .situation-item {
   width: 100%;
   display: flex;

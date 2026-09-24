@@ -53,6 +53,29 @@ describe('SituationList', () => {
     expect(queryByRole('button', { name: /Подробнее: Мат Легаля/ })).not.toBeInTheDocument()
   })
 
+  it('numbers situations from one within each group', () => {
+    const { container } = render(
+      <SituationList
+        groups={SITUATION_GROUPS}
+        selectedId="start"
+        onSelect={() => {}}
+        onShowComment={() => {}}
+      />
+    )
+
+    const sections = Array.from(container.querySelectorAll('.situation-group'))
+    expect(sections.length).toBeGreaterThan(1)
+
+    for (const section of sections) {
+      const count = section.querySelectorAll('.situation-item').length
+      const numbers = Array.from(section.querySelectorAll('.situation-number')).map(
+        (element) => element.textContent
+      )
+
+      expect(numbers).toEqual(Array.from({ length: count }, (_, index) => String(index + 1)))
+    }
+  })
+
   it('calls onShowComment with the active situation id', () => {
     const onShowComment = vi.fn()
     const { getByRole } = render(
