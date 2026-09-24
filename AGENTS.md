@@ -1,8 +1,8 @@
 ## Project
 
-Gambit — настольное шахматное приложение (Electron + React + TypeScript). Весь код в `app/`; игровая логика — в `app/src/renderer/src`, процессы `main`/`preload` тонкие. Домен — `CONTEXT.md`, решения — `docs/adr/`.
+Gambit is a desktop chess application (Electron + React + TypeScript). All code lives in `app/`; the game logic sits in `app/src/renderer/src`, while the `main`/`preload` processes stay thin. Domain — `CONTEXT.md`, decisions — `docs/adr/`.
 
-Проверки запускай из `app/`: `npm run lint`, `npm run typecheck`, `npm test`.
+Checks run from `app/`. On changes, default to `npm run lint` and `npm run typecheck`. Run tests only on an explicit user request, and then narrowly (`npm run test:file -- <path>`, `npm run test:changed`); reserve a full `npm test` for large changes.
 
 ## Agent skills
 
@@ -21,4 +21,3 @@ Default five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `
 ### Domain docs
 
 Single-context: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
-
