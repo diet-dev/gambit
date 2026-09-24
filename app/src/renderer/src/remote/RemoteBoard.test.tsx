@@ -58,6 +58,15 @@ describe('RemoteBoard', () => {
     expect(container.querySelector('.status-bar')).toHaveTextContent('Ход белых')
   })
 
+  it('shows the rotate-to-portrait guard', () => {
+    vi.stubGlobal('WebSocket', FakeWebSocket)
+    const { container } = render(<RemoteBoard />)
+
+    expect(container.querySelector('.orientation-guard')).toHaveTextContent(
+      'Поверните телефон вертикально'
+    )
+  })
+
   it('highlights the king and shows the check status', () => {
     vi.stubGlobal('WebSocket', FakeWebSocket)
     const { container } = render(<RemoteBoard />)

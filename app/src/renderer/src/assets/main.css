@@ -67,6 +67,35 @@ code {
   aspect-ratio: 1 / 1;
 }
 
+.orientation-guard {
+  display: none;
+}
+
+.orientation-guard-text {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ev-c-text-1);
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .remote-game {
+    display: none;
+  }
+
+  .orientation-guard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    padding: 24px;
+    text-align: center;
+  }
+}
+
 .panels {
   flex: 1 1 auto;
   min-width: 0;
