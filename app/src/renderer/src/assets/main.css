@@ -217,6 +217,7 @@ code {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  padding: 0;
 }
 
 .device-item {
