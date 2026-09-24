@@ -44,6 +44,10 @@ function listenOn(server: Server, port: number): Promise<number> {
   })
 }
 
+function cacheControlFor(filePath: string): string {
+  return extname(filePath) === '.html' ? 'no-store' : 'public, max-age=31536000, immutable'
+}
+
 async function serveStaticFile(
   staticDir: string,
   request: IncomingMessage,
@@ -64,7 +68,8 @@ async function serveStaticFile(
   try {
     const content = await readFile(filePath)
     response.writeHead(200, {
-      'content-type': CONTENT_TYPES[extname(filePath)] ?? 'application/octet-stream'
+      'content-type': CONTENT_TYPES[extname(filePath)] ?? 'application/octet-stream',
+      'cache-control': cacheControlFor(filePath)
     })
     response.end(content)
   } catch {
@@ -78,7 +83,9 @@ async function proxyToDevServer(
   request: IncomingMessage,
   response: ServerResponse
 ): Promise<void> {
-  const target = `${devServerUrl}${request.url === '/' ? '/remote.html' : request.url}`
+  const parsed = new URL(request.url ?? '/', 'http://localhost')
+  const path = parsed.pathname === '/' ? '/remote.html' : parsed.pathname
+  const target = `${devServerUrl}${path}${parsed.search}`
   const proxied = await fetch(target)
   response.writeHead(proxied.status, {
     'content-type': proxied.headers.get('content-type') ?? 'application/octet-stream'

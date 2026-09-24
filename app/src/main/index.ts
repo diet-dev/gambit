@@ -19,7 +19,8 @@ async function startRemoteServer(): Promise<void> {
     }
   })
 
-  const url = `http://${getLanAddress(networkInterfaces())}:${remoteServer.port}/`
+  const token = Date.now().toString(36)
+  const url = `http://${getLanAddress(networkInterfaces())}:${remoteServer.port}/?v=${token}`
   let qrDataUrl = ''
   try {
     qrDataUrl = await QRCode.toDataURL(url)
