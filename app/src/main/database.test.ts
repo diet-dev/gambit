@@ -54,7 +54,55 @@ describe('openDatabase migrations', () => {
     ])
 
     const version = database.prepare('PRAGMA user_version').get() as { user_version: number }
-    expect(version.user_version).toBe(2)
+    expect(version.user_version).toBe(3)
+    database.close()
+  })
+
+  it('merges duplicate class names and enforces uniqueness', () => {
+    const path = join(mkdtempSync(join(tmpdir(), 'gambit-db-')), 'gambit.db')
+    const legacy = new DatabaseSync(path)
+    legacy.exec(`
+      CREATE TABLE classes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        comment TEXT NOT NULL DEFAULT ''
+      );
+      CREATE TABLE students (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        last_name TEXT NOT NULL,
+        first_name TEXT NOT NULL,
+        middle_name TEXT NOT NULL DEFAULT '',
+        class_id INTEGER REFERENCES classes(id),
+        rating INTEGER NOT NULL DEFAULT 0
+      );
+    `)
+    legacy.exec('PRAGMA user_version = 2')
+    legacy.exec(
+      "INSERT INTO classes (name, comment) VALUES ('7А', ''), ('7А', 'дубль'), ('8Б', '')"
+    )
+    legacy.exec(`
+      INSERT INTO students (last_name, first_name, class_id, rating) VALUES
+        ('Иванов', 'Иван', 1, 100),
+        ('Петров', 'Пётр', 2, 50),
+        ('Сидоров', 'Сидор', 3, 10)
+    `)
+    legacy.close()
+
+    const database = openDatabase(path)
+    const classes = database.prepare('SELECT id, name FROM classes ORDER BY name').all() as {
+      id: number
+      name: string
+    }[]
+    const petrov = database
+      .prepare("SELECT class_id AS classId FROM students WHERE last_name = 'Петров'")
+      .get() as { classId: number }
+
+    expect(classes).toEqual([
+      { id: 1, name: '7А' },
+      { id: 3, name: '8Б' }
+    ])
+    expect(petrov.classId).toBe(1)
+    expect(() => database.exec("INSERT INTO classes (name) VALUES ('7А')")).toThrow()
     database.close()
   })
 })

@@ -70,6 +70,19 @@ describe('ClassesPanel', () => {
     expect(await findByText('8Б')).toBeInTheDocument()
   })
 
+  it('rejects a duplicate class name', async () => {
+    const api = installApi([{ id: 1, name: '7А', comment: '' }])
+    const { getByRole, getByLabelText, findByText } = render(<ClassesPanel />)
+
+    await findByText('7А')
+    fireEvent.click(getByRole('button', { name: 'Добавить класс' }))
+    fireEvent.change(getByLabelText(/Название/), { target: { value: '7А' } })
+    fireEvent.click(getByRole('button', { name: 'Сохранить' }))
+
+    expect(await findByText('Класс с таким именем уже есть')).toBeInTheDocument()
+    expect(api.create).not.toHaveBeenCalled()
+  })
+
   it('deletes a class after confirmation', async () => {
     const api = installApi([{ id: 1, name: '7А', comment: '' }])
     const { getByRole, findByText, queryByText, findByRole } = render(<ClassesPanel />)

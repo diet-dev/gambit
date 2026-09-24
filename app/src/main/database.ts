@@ -52,4 +52,18 @@ function migrate(database: DatabaseSync): void {
     database.exec('ALTER TABLE students DROP COLUMN class_name')
     database.exec('PRAGMA user_version = 2')
   }
+
+  if (version < 3) {
+    database.exec(`
+      UPDATE students
+      SET class_id = (
+        SELECT MIN(c.id) FROM classes c
+        WHERE c.name = (SELECT name FROM classes WHERE id = students.class_id)
+      )
+      WHERE class_id NOT IN (SELECT MIN(id) FROM classes GROUP BY name)
+    `)
+    database.exec('DELETE FROM classes WHERE id NOT IN (SELECT MIN(id) FROM classes GROUP BY name)')
+    database.exec('CREATE UNIQUE INDEX IF NOT EXISTS classes_name_unique ON classes(name)')
+    database.exec('PRAGMA user_version = 3')
+  }
 }

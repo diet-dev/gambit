@@ -75,6 +75,7 @@ function ClassesPanel(): React.JSX.Element {
       {formOpen && (
         <ClassFormDialog
           schoolClass={editing}
+          classes={classes}
           onSubmit={submit}
           onClose={() => setFormOpen(false)}
         />

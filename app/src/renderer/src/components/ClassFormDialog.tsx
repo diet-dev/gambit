@@ -4,21 +4,37 @@ import Dialog from './Dialog'
 
 type ClassFormDialogProps = {
   schoolClass: SchoolClass | null
+  classes: SchoolClass[]
   onSubmit: (input: ClassInput) => void
   onClose: () => void
 }
 
 function ClassFormDialog({
   schoolClass,
+  classes,
   onSubmit,
   onClose
 }: ClassFormDialogProps): React.JSX.Element {
   const [name, setName] = useState(schoolClass?.name ?? '')
   const [comment, setComment] = useState(schoolClass?.comment ?? '')
+  const [nameError, setNameError] = useState<string | null>(null)
 
   function handleSubmit(event: React.FormEvent): void {
     event.preventDefault()
-    onSubmit({ name: name.trim(), comment })
+    const trimmed = name.trim()
+    if (trimmed === '') {
+      setNameError('Введите название')
+      return
+    }
+    const duplicate = classes.some(
+      (item) =>
+        item.id !== schoolClass?.id && item.name.toLocaleLowerCase() === trimmed.toLocaleLowerCase()
+    )
+    if (duplicate) {
+      setNameError('Класс с таким именем уже есть')
+      return
+    }
+    onSubmit({ name: trimmed, comment })
   }
 
   return (
@@ -34,7 +50,15 @@ function ClassFormDialog({
               *
             </span>
           </span>
-          <input value={name} onChange={(event) => setName(event.target.value)} required />
+          <input
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value)
+              setNameError(null)
+            }}
+            required
+          />
+          {nameError && <span className="entity-error">{nameError}</span>}
         </label>
         <label className="entity-field">
           <span>Комментарий</span>

@@ -25,6 +25,13 @@ describe('classStore', () => {
     ])
   })
 
+  it('rejects a duplicate class name', () => {
+    const { classes } = makeStores()
+    classes.create({ name: '7А', comment: '' })
+
+    expect(() => classes.create({ name: '7А', comment: '' })).toThrow()
+  })
+
   it('updates a class', () => {
     const { classes } = makeStores()
     const created = classes.create({ name: '7А', comment: '' })
