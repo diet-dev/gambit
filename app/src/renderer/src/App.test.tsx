@@ -72,6 +72,16 @@ describe('App', () => {
     expect(container.querySelector('[data-square="e2"] [data-piece="wP"]')).toBeInTheDocument()
   })
 
+  it('switches the left panel to the settings and help tabs', () => {
+    const { container, getByRole } = render(<App />)
+
+    fireEvent.click(getByRole('button', { name: 'Настройки' }))
+    expect(container.querySelector('.left-panel .settings-panel')).toBeInTheDocument()
+
+    fireEvent.click(getByRole('button', { name: 'Справка' }))
+    expect(container.querySelector('.left-panel .help-panel')).toBeInTheDocument()
+  })
+
   it('reflects the selected situation in the window title', () => {
     const { getByRole } = render(<App />)
 

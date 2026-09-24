@@ -63,6 +63,8 @@ function App(): React.JSX.Element {
             {activity === 'classes' && <ClassesPanel />}
             {activity === 'students' && <StudentsPanel />}
             {activity === 'events' && <EventLogPanel events={events} />}
+            {activity === 'settings' && <div className="settings-panel" />}
+            {activity === 'help' && <div className="help-panel" />}
           </div>
         </Panel>
         <Separator className="separator" />

@@ -112,6 +112,17 @@ code {
   border-right: 1px solid var(--ev-c-gray-3);
 }
 
+.activity-bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.activity-bar-bottom {
+  margin-top: auto;
+  padding-bottom: 4px;
+}
+
 .activity-button {
   position: relative;
   display: flex;
