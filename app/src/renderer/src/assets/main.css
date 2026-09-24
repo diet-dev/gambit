@@ -358,10 +358,35 @@ code {
   border-radius: 8px;
 }
 
+.remote-qr-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 .remote-qr-url {
   font-size: 22px;
   text-align: center;
   word-break: break-all;
+}
+
+.remote-qr-copy {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ev-c-text-2);
+  cursor: pointer;
+}
+
+.remote-qr-copy:hover {
+  color: var(--ev-c-text-1);
+  background: var(--ev-c-gray-3);
 }
 
 .dialog-overlay {

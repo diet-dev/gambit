@@ -51,4 +51,22 @@ describe('RemoteQrButton', () => {
 
     expect(queryByRole('dialog')).not.toBeInTheDocument()
   })
+
+  it('copies the address to the clipboard', async () => {
+    installApi(info)
+    const writeText = vi.fn(async () => {})
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true
+    })
+    const { getByRole, findByRole } = render(<RemoteQrButton />)
+
+    await waitFor(() => expect(getByRole('button', { name: /QR-код/ })).toBeEnabled())
+    fireEvent.click(getByRole('button', { name: /QR-код/ }))
+    await findByRole('dialog')
+
+    fireEvent.click(getByRole('button', { name: 'Скопировать ссылку' }))
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(info.url))
+  })
 })
