@@ -28,7 +28,7 @@ function App(): React.JSX.Element {
       defaultLayout={defaultLayout}
       onLayoutChanged={onLayoutChanged}
     >
-      <Panel id="left" className="panel" defaultSize="30%" minSize="10%" maxSize="50%">
+      <Panel id="left" className="panel" defaultSize="30%" minSize={300} maxSize="50%">
         <div className="left-panel">
           <SituationList
             groups={SITUATION_GROUPS}
