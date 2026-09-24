@@ -20,6 +20,16 @@ describe('App', () => {
     expect(container.querySelector('[data-square="e1"] [data-piece="wQ"]')).toBeInTheDocument()
   })
 
+  it('reflects the selected situation in the window title', () => {
+    const { getByRole } = render(<App />)
+
+    expect(document.title).toBe('Гамбит — Начальная позиция')
+
+    fireEvent.click(getByRole('button', { name: /Мат в один ход/ }))
+
+    expect(document.title).toBe('Гамбит — Мат в один ход')
+  })
+
   it('opens the comment dialog for the active situation and closes it on Escape', () => {
     const { queryByRole, getByRole } = render(<App />)
 

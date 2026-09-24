@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Group, Panel, Separator, useDefaultLayout } from 'react-resizable-panels'
 import ChessGame from './components/ChessGame'
 import SituationCommentDialog from './components/SituationCommentDialog'
@@ -10,6 +10,10 @@ function App(): React.JSX.Element {
   const [commentId, setCommentId] = useState<string | null>(null)
   const selected = findSituation(selectedId) ?? findSituation(DEFAULT_SITUATION_ID)!
   const commentSituation = commentId ? findSituation(commentId) : undefined
+
+  useEffect(() => {
+    document.title = `Гамбит — ${selected.title}`
+  }, [selected.title])
 
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: 'gambit-layout',
