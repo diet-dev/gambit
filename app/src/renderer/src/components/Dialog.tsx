@@ -4,10 +4,11 @@ import { X } from 'lucide-react'
 type DialogProps = {
   titleId: string
   onClose: () => void
+  className?: string
   children: React.ReactNode
 }
 
-function Dialog({ titleId, onClose, children }: DialogProps): React.JSX.Element {
+function Dialog({ titleId, onClose, className, children }: DialogProps): React.JSX.Element {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -28,7 +29,12 @@ function Dialog({ titleId, onClose, children }: DialogProps): React.JSX.Element 
 
   return (
     <div className="dialog-overlay">
-      <div className="comment-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div
+        className={className ? `comment-dialog ${className}` : 'comment-dialog'}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+      >
         <button
           ref={closeButtonRef}
           type="button"

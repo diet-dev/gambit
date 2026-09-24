@@ -31,7 +31,11 @@ function RemoteQrButton(): React.JSX.Element {
         <QrCode size={22} aria-hidden="true" />
       </button>
       {open && info && (
-        <Dialog titleId="remote-qr-title" onClose={() => setOpen(false)}>
+        <Dialog
+          titleId="remote-qr-title"
+          className="remote-qr-dialog"
+          onClose={() => setOpen(false)}
+        >
           <h2 id="remote-qr-title" className="comment-dialog-title">
             Управление с телефона
           </h2>

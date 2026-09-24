@@ -386,6 +386,14 @@ code {
   color: var(--ev-c-text-1);
 }
 
+.comment-dialog.remote-qr-dialog {
+  width: min(100%, 540px);
+}
+
+.remote-qr-dialog .comment-dialog-title {
+  text-align: center;
+}
+
 .comment-dialog-close {
   position: absolute;
   top: 12px;
