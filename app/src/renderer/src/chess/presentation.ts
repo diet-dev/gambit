@@ -49,6 +49,9 @@ export function statusBarClassName(status: GameStatus): string {
   if (status.kind === 'checkmate') {
     return 'status-bar status-bar-checkmate'
   }
+  if (status.kind === 'stalemate' || status.kind === 'draw') {
+    return 'status-bar status-bar-draw'
+  }
   if (status.kind === 'check') {
     return 'status-bar status-bar-check'
   }

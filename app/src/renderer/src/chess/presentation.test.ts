@@ -25,4 +25,17 @@ describe('statusBarClassName', () => {
     )
     expect(statusBarClassName({ kind: 'turn', turn: 'w' })).toBe('status-bar')
   })
+
+  it('marks every draw with the green modifier', () => {
+    expect(statusBarClassName({ kind: 'stalemate' })).toBe('status-bar status-bar-draw')
+    expect(statusBarClassName({ kind: 'draw', reason: 'insufficient-material' })).toBe(
+      'status-bar status-bar-draw'
+    )
+    expect(statusBarClassName({ kind: 'draw', reason: 'threefold-repetition' })).toBe(
+      'status-bar status-bar-draw'
+    )
+    expect(statusBarClassName({ kind: 'draw', reason: 'fifty-moves' })).toBe(
+      'status-bar status-bar-draw'
+    )
+  })
 })

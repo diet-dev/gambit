@@ -101,4 +101,19 @@ describe('RemoteBoard', () => {
     expect(statusBar).toHaveTextContent('Мат! Победа чёрных')
     expect(statusBar).toHaveClass('status-bar-checkmate')
   })
+
+  it('shows the draw status in green', () => {
+    vi.stubGlobal('WebSocket', FakeWebSocket)
+    const { container } = render(<RemoteBoard />)
+
+    act(() => {
+      lastSocket().onmessage?.({
+        data: JSON.stringify({ type: 'position', fen: '8/8/8/8/8/8/8/K6k w - - 0 1' })
+      })
+    })
+
+    const statusBar = container.querySelector('.status-bar')
+    expect(statusBar).toHaveTextContent('Ничья: недостаточно материала')
+    expect(statusBar).toHaveClass('status-bar-draw')
+  })
 })

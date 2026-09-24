@@ -723,6 +723,11 @@ code {
   color: var(--color-warning-fg);
 }
 
+.status-bar-draw {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-fg);
+}
+
 .chess-game .status-bar {
   margin-right: 50px;
 }

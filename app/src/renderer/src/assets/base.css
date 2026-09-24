@@ -35,6 +35,8 @@
   --color-accent: #a78bfa;
   --color-accent-contrast: #1b1b1f;
   --color-success: #4ade80;
+  --color-success-bg: #15803d;
+  --color-success-fg: #ffffff;
   --color-danger: #ef4444;
   --color-danger-bg: rgba(255, 0, 0, 0.75);
   --color-danger-fg: var(--ev-c-text-1);
@@ -74,6 +76,8 @@
   --color-accent: #5b21b6;
   --color-accent-contrast: #ffffff;
   --color-success: #15803d;
+  --color-success-bg: #15803d;
+  --color-success-fg: #ffffff;
   --color-danger: #b91c1c;
   --color-danger-bg: #b91c1c;
   --color-danger-fg: #ffffff;

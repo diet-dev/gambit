@@ -77,6 +77,24 @@ describe('ChessGame', () => {
     expect(container.querySelector('.status-bar')).not.toHaveClass('status-bar-checkmate')
   })
 
+  it('marks the status bar green on a draw', () => {
+    const { container } = render(<ChessGame initialPosition="8/8/8/8/8/8/8/K6k w - - 0 1" />)
+
+    const statusBar = container.querySelector('.status-bar')
+
+    expect(statusBar).toHaveTextContent('Ничья: недостаточно материала')
+    expect(statusBar).toHaveClass('status-bar-draw')
+  })
+
+  it('marks the status bar green on a stalemate', () => {
+    const { container } = render(<ChessGame initialPosition="7k/5Q2/6K1/8/8/8/8/8 b - - 0 1" />)
+
+    const statusBar = container.querySelector('.status-bar')
+
+    expect(statusBar).toHaveTextContent('Пат — ничья')
+    expect(statusBar).toHaveClass('status-bar-draw')
+  })
+
   it('shows a bot toggle that is off by default', () => {
     const { container } = render(<ChessGame />)
 
