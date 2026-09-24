@@ -1,12 +1,19 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import type { RemoteApi, RemoteMove, ServerInfo } from '../shared/remote'
 
-// Custom APIs for renderer
-const api = {}
+const remote: RemoteApi = {
+  publishPosition: (fen) => ipcRenderer.send('remote:position', fen),
+  onRemoteMove: (callback) => {
+    const listener = (_event: IpcRendererEvent, move: RemoteMove): void => callback(move)
+    ipcRenderer.on('remote:move', listener)
+    return () => ipcRenderer.removeListener('remote:move', listener)
+  },
+  getServerInfo: () => ipcRenderer.invoke('remote:server-info') as Promise<ServerInfo | null>
+}
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
+const api = { remote }
+
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
