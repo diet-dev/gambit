@@ -4,11 +4,13 @@ import { useRemoteSocket } from './useRemoteSocket'
 
 class FakeWebSocket {
   static instances: FakeWebSocket[] = []
+  static OPEN = 1
   onopen: (() => void) | null = null
   onmessage: ((event: { data: string }) => void) | null = null
   onclose: (() => void) | null = null
   sent: string[] = []
   closed = false
+  readyState = 1
 
   constructor(public url: string) {
     FakeWebSocket.instances.push(this)

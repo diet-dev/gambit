@@ -71,9 +71,12 @@ export function useRemoteSocket(): UseRemoteSocket {
       return false
     }
     setPosition(gameRef.current.fen())
-    socketRef.current?.send(
-      JSON.stringify({ type: 'move', from: sourceSquare, to: targetSquare, promotion: 'q' })
-    )
+    const socket = socketRef.current
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(
+        JSON.stringify({ type: 'move', from: sourceSquare, to: targetSquare, promotion: 'q' })
+      )
+    }
     return true
   }, [])
 
