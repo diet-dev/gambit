@@ -34,6 +34,20 @@ code {
   display: flex;
 }
 
+#remote-root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+.remote-board {
+  width: min(100vw, 100vh);
+  height: min(100vw, 100vh);
+  padding: 8px;
+}
+
 .panels {
   flex: 1 1 auto;
   min-width: 0;
