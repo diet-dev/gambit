@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import type { RemoteMove } from '../../../shared/remote'
 
 type UseRemoteBridgeOptions = {
@@ -7,6 +7,12 @@ type UseRemoteBridgeOptions = {
 }
 
 export function useRemoteBridge({ position, playMove }: UseRemoteBridgeOptions): void {
+  const positionRef = useRef(position)
+
+  useEffect(() => {
+    positionRef.current = position
+  }, [position])
+
   useEffect(() => {
     window.api?.remote?.publishPosition(position)
   }, [position])
@@ -17,7 +23,9 @@ export function useRemoteBridge({ position, playMove }: UseRemoteBridgeOptions):
       return
     }
     return api.onRemoteMove((move) => {
-      playMove(move)
+      if (!playMove(move)) {
+        api.publishPosition(positionRef.current)
+      }
     })
   }, [playMove])
 }

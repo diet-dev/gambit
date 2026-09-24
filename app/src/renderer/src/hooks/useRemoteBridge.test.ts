@@ -44,6 +44,45 @@ describe('useRemoteBridge', () => {
     expect(playMove).toHaveBeenCalledWith({ from: 'e2', to: 'e4' })
   })
 
+  it('re-publishes the current position when playMove rejects the move', () => {
+    let handler: ((move: RemoteMove) => void) | null = null
+    const publishPosition = vi.fn()
+    installApi({
+      publishPosition,
+      onRemoteMove: (callback) => {
+        handler = callback
+        return () => {}
+      }
+    })
+    const playMove = vi.fn(() => false)
+
+    renderHook(() => useRemoteBridge({ position: 'fen-a', playMove }))
+    publishPosition.mockClear()
+    handler!({ from: 'e2', to: 'e4' })
+
+    expect(publishPosition).toHaveBeenCalledTimes(1)
+    expect(publishPosition).toHaveBeenCalledWith('fen-a')
+  })
+
+  it('does not republish when playMove accepts the move', () => {
+    let handler: ((move: RemoteMove) => void) | null = null
+    const publishPosition = vi.fn()
+    installApi({
+      publishPosition,
+      onRemoteMove: (callback) => {
+        handler = callback
+        return () => {}
+      }
+    })
+    const playMove = vi.fn(() => true)
+
+    renderHook(() => useRemoteBridge({ position: 'fen-a', playMove }))
+    publishPosition.mockClear()
+    handler!({ from: 'e2', to: 'e4' })
+
+    expect(publishPosition).not.toHaveBeenCalled()
+  })
+
   it('unsubscribes on unmount', () => {
     const unsubscribe = vi.fn()
     installApi({ onRemoteMove: vi.fn(() => unsubscribe) })

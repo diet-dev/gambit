@@ -20,7 +20,12 @@ async function startRemoteServer(): Promise<void> {
   })
 
   const url = `http://${getLanAddress(networkInterfaces())}:${remoteServer.port}/`
-  const qrDataUrl = await QRCode.toDataURL(url)
+  let qrDataUrl = ''
+  try {
+    qrDataUrl = await QRCode.toDataURL(url)
+  } catch (error) {
+    console.error('Не удалось сгенерировать QR-код:', error)
+  }
   registerRemoteIpc({
     ipcMain,
     server: remoteServer,

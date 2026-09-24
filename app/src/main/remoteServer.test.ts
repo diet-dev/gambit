@@ -50,6 +50,35 @@ describe('createRemoteServer', () => {
     socket.close()
   })
 
+  it('closes a client that connects with a foreign origin', async () => {
+    const server = await start()
+    server.setPosition('8/8/8/8/8/8/8/K6k w - - 0 1')
+
+    const socket = new WebSocket(`ws://127.0.0.1:${server.port}/ws`, {
+      origin: 'http://evil.example'
+    })
+    const received = await new Promise<string | null>((resolve) => {
+      socket.once('message', (data) => resolve(data.toString()))
+      socket.once('close', () => resolve(null))
+      socket.once('error', () => resolve(null))
+    })
+
+    expect(received).toBeNull()
+  })
+
+  it('accepts a client whose origin matches the request host', async () => {
+    const server = await start()
+    server.setPosition('8/8/8/8/8/8/8/K6k w - - 0 1')
+
+    const socket = new WebSocket(`ws://127.0.0.1:${server.port}/ws`, {
+      origin: `http://127.0.0.1:${server.port}`
+    })
+    const message = await nextMessage(socket)
+
+    expect(message).toEqual({ type: 'position', fen: '8/8/8/8/8/8/8/K6k w - - 0 1' })
+    socket.close()
+  })
+
   it('forwards client moves to onMove', async () => {
     const onMove = vi.fn()
     const server = await start(onMove)

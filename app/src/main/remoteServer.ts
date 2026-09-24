@@ -34,7 +34,22 @@ export async function createRemoteServer(options: RemoteServerOptions): Promise<
     }
   }
 
-  wss.on('connection', (socket) => {
+  wss.on('connection', (socket, request) => {
+    const origin = request.headers.origin
+    if (origin) {
+      let originHost: string | null = null
+      try {
+        originHost = new URL(origin).hostname
+      } catch {
+        originHost = null
+      }
+      const requestHost = request.headers.host?.split(':')[0]
+      if (!originHost || originHost !== requestHost) {
+        socket.close()
+        return
+      }
+    }
+
     socket.send(JSON.stringify({ type: 'position', fen: lastPosition }))
     socket.on('message', (data) => {
       let parsed: unknown
