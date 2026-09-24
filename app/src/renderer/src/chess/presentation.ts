@@ -10,6 +10,11 @@ export const CHECKED_KING_STYLE: CSSProperties = {
     'radial-gradient(circle, transparent 35%, rgba(255, 0, 0, 0.75) 65%, rgba(255, 0, 0, 0.75) 100%)'
 }
 
+export const CHECK_KING_STYLE: CSSProperties = {
+  backgroundImage:
+    'radial-gradient(circle, transparent 35%, rgba(255, 215, 0, 0.8) 65%, rgba(255, 215, 0, 0.8) 100%)'
+}
+
 export function moveStyle(isCapture: boolean): CSSProperties {
   return {
     backgroundImage: isCapture
@@ -41,13 +46,20 @@ export function statusText(status: GameStatus): string {
 }
 
 export function statusBarClassName(status: GameStatus): string {
-  return status.kind === 'checkmate' ? 'status-bar status-bar-checkmate' : 'status-bar'
+  if (status.kind === 'checkmate') {
+    return 'status-bar status-bar-checkmate'
+  }
+  if (status.kind === 'check') {
+    return 'status-bar status-bar-check'
+  }
+  return 'status-bar'
 }
 
 export function squareStylesFor(state: {
   selectedSquare: string | null
   possibleMoves: PossibleMove[]
   checkedSquare: string | null
+  status: GameStatus
 }): Record<string, CSSProperties> {
   const styles: Record<string, CSSProperties> = {}
   if (state.selectedSquare) {
@@ -57,7 +69,8 @@ export function squareStylesFor(state: {
     styles[move.square] = moveStyle(move.isCapture)
   }
   if (state.checkedSquare) {
-    styles[state.checkedSquare] = CHECKED_KING_STYLE
+    styles[state.checkedSquare] =
+      state.status.kind === 'checkmate' ? CHECKED_KING_STYLE : CHECK_KING_STYLE
   }
   return styles
 }

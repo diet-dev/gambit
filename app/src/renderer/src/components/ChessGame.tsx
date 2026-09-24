@@ -33,7 +33,7 @@ function ChessGame({ initialPosition }: ChessGameProps): React.JSX.Element {
 
   useRemoteBridge({ position, playMove })
 
-  const squareStyles = squareStylesFor({ selectedSquare, possibleMoves, checkedSquare })
+  const squareStyles = squareStylesFor({ selectedSquare, possibleMoves, checkedSquare, status })
 
   return (
     <div className="chess-game">

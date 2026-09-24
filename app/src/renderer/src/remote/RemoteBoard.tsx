@@ -14,7 +14,7 @@ function RemoteBoard(): React.JSX.Element {
     onSquareClick
   } = useRemoteSocket()
 
-  const squareStyles = squareStylesFor({ selectedSquare, possibleMoves, checkedSquare })
+  const squareStyles = squareStylesFor({ selectedSquare, possibleMoves, checkedSquare, status })
 
   return (
     <>

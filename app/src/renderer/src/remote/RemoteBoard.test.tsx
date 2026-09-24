@@ -79,7 +79,7 @@ describe('RemoteBoard', () => {
 
     expect(container.querySelector('[data-square="e8"] > div')).toHaveStyle({
       backgroundImage:
-        'radial-gradient(circle, transparent 35%, rgba(255, 0, 0, 0.75) 65%, rgba(255, 0, 0, 0.75) 100%)'
+        'radial-gradient(circle, transparent 35%, rgba(255, 215, 0, 0.8) 65%, rgba(255, 215, 0, 0.8) 100%)'
     })
     expect(container.querySelector('.status-bar')).toHaveTextContent('Шах чёрным!')
   })

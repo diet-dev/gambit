@@ -45,6 +45,17 @@ describe('ChessGame', () => {
 
     expect(container.querySelector('[data-square="e8"] > div')).toHaveStyle({
       backgroundImage:
+        'radial-gradient(circle, transparent 35%, rgba(255, 215, 0, 0.8) 65%, rgba(255, 215, 0, 0.8) 100%)'
+    })
+  })
+
+  it('highlights the king square in red on checkmate', () => {
+    const { container } = render(
+      <ChessGame initialPosition="rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3" />
+    )
+
+    expect(container.querySelector('[data-square="e1"] > div')).toHaveStyle({
+      backgroundImage:
         'radial-gradient(circle, transparent 35%, rgba(255, 0, 0, 0.75) 65%, rgba(255, 0, 0, 0.75) 100%)'
     })
   })
