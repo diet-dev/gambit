@@ -49,6 +49,23 @@ describe('ChessGame', () => {
     })
   })
 
+  it('marks the status bar on checkmate', () => {
+    const { container } = render(
+      <ChessGame initialPosition="rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3" />
+    )
+
+    const statusBar = container.querySelector('.status-bar')
+
+    expect(statusBar).toHaveTextContent('Мат! Победа чёрных')
+    expect(statusBar).toHaveClass('status-bar-checkmate')
+  })
+
+  it('does not mark the status bar during a normal turn', () => {
+    const { container } = render(<ChessGame />)
+
+    expect(container.querySelector('.status-bar')).not.toHaveClass('status-bar-checkmate')
+  })
+
   it('shows a bot toggle that is off by default', () => {
     const { container } = render(<ChessGame />)
 

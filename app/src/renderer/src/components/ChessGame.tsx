@@ -94,7 +94,11 @@ function ChessGame({ initialPosition }: ChessGameProps): React.JSX.Element {
           Играть с ботом
         </label>
       </div>
-      <div className="status-bar">{isThinking ? 'Бот думает…' : statusText(status)}</div>
+      <div
+        className={status.kind === 'checkmate' ? 'status-bar status-bar-checkmate' : 'status-bar'}
+      >
+        {isThinking ? 'Бот думает…' : statusText(status)}
+      </div>
     </div>
   )
 }

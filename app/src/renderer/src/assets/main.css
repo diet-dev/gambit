@@ -165,6 +165,10 @@ code {
   text-align: center;
 }
 
+.status-bar-checkmate {
+  background-color: rgba(255, 0, 0, 0.75);
+}
+
 .logo {
   margin-bottom: 20px;
   -webkit-user-drag: none;
