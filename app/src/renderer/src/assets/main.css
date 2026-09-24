@@ -62,6 +62,36 @@ code {
   overflow-y: auto;
 }
 
+.left-panel::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.left-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.left-panel::-webkit-scrollbar-thumb {
+  background: rgba(121, 121, 121, 0.4);
+  border: 3px solid transparent;
+  border-radius: 0;
+  background-clip: padding-box;
+}
+
+.left-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.6);
+  background-clip: padding-box;
+}
+
+.left-panel::-webkit-scrollbar-thumb:active {
+  background: rgba(191, 191, 191, 0.75);
+  background-clip: padding-box;
+}
+
+.left-panel::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 .situation-list {
   display: flex;
   flex-direction: column;
