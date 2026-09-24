@@ -67,12 +67,12 @@ export async function createRemoteServer(options: RemoteServerOptions): Promise<
       broadcast(fen)
     },
     close: () =>
-      new Promise<void>((resolve) => {
+      new Promise<void>((resolve, reject) => {
         for (const client of wss.clients) {
           client.terminate()
         }
         wss.close(() => {
-          staticServer.close().then(resolve)
+          staticServer.close().then(resolve, reject)
         })
       })
   }
