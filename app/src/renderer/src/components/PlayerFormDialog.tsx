@@ -58,73 +58,81 @@ function PlayerFormDialog({
       <h2 id="player-form-title" className="comment-dialog-title">
         {player ? 'Игрок' : 'Новый игрок'}
       </h2>
-      <form className="entity-form" onSubmit={handleSubmit}>
+      <form className="entity-form player-form" onSubmit={handleSubmit}>
         <label className="entity-field">
-          <span>
+          <span className="entity-field-label">
             Фамилия{' '}
             <span className="entity-required" aria-hidden="true">
               *
             </span>
           </span>
-          <input
-            value={lastName}
-            onChange={(event) => setLastName(normalizePersonNameInput(event.target.value))}
-            required
-          />
+          <span className="entity-field-control">
+            <input
+              value={lastName}
+              onChange={(event) => setLastName(normalizePersonNameInput(event.target.value))}
+              required
+            />
+          </span>
         </label>
         <label className="entity-field">
-          <span>
+          <span className="entity-field-label">
             Имя{' '}
             <span className="entity-required" aria-hidden="true">
               *
             </span>
           </span>
-          <input
-            value={firstName}
-            onChange={(event) => setFirstName(normalizePersonNameInput(event.target.value))}
-            required
-          />
+          <span className="entity-field-control">
+            <input
+              value={firstName}
+              onChange={(event) => setFirstName(normalizePersonNameInput(event.target.value))}
+              required
+            />
+          </span>
         </label>
         <label className="entity-field">
-          <span>Отчество</span>
-          <input
-            value={middleName}
-            onChange={(event) => setMiddleName(normalizePersonNameInput(event.target.value))}
-          />
+          <span className="entity-field-label">Отчество</span>
+          <span className="entity-field-control">
+            <input
+              value={middleName}
+              onChange={(event) => setMiddleName(normalizePersonNameInput(event.target.value))}
+            />
+          </span>
         </label>
         <label className="entity-field">
-          <span>
+          <span className="entity-field-label">
             Группы{' '}
             <span className="entity-required" aria-hidden="true">
               *
             </span>
           </span>
-          <select
-            multiple
-            value={groupIds.map(String)}
-            onChange={(event) => {
-              setGroupIds(
-                Array.from(event.target.selectedOptions, (option) => Number(option.value))
-              )
-              setGroupsError(null)
-            }}
-            required
-          >
-            {groups.map((group) => (
-              <option key={group.id} value={group.id}>
-                {group.name}
-              </option>
-            ))}
-          </select>
-          {groups.length > 0 && (
-            <span className="entity-hint">
-              Для выбора нескольких групп удерживайте {modifierKey}
-            </span>
-          )}
-          {groups.length === 0 && (
-            <span className="entity-error">Сначала добавьте группу на вкладке «Группы»</span>
-          )}
-          {groupsError && <span className="entity-error">{groupsError}</span>}
+          <span className="entity-field-control">
+            <select
+              multiple
+              value={groupIds.map(String)}
+              onChange={(event) => {
+                setGroupIds(
+                  Array.from(event.target.selectedOptions, (option) => Number(option.value))
+                )
+                setGroupsError(null)
+              }}
+              required
+            >
+              {groups.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.name}
+                </option>
+              ))}
+            </select>
+            {groups.length > 0 && (
+              <span className="entity-hint">
+                Для выбора нескольких групп удерживайте {modifierKey}
+              </span>
+            )}
+            {groups.length === 0 && (
+              <span className="entity-error">Сначала добавьте группу на вкладке «Группы»</span>
+            )}
+            {groupsError && <span className="entity-error">{groupsError}</span>}
+          </span>
         </label>
         <div className="entity-actions">
           <button type="button" onClick={onClose}>

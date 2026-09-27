@@ -396,6 +396,26 @@ code {
   color: var(--ev-c-text-2);
 }
 
+.player-form .entity-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-form .entity-field-label {
+  flex: none;
+  width: 90px;
+  text-align: right;
+}
+
+.player-form .entity-field-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
 .entity-field input,
 .entity-field select {
   padding: 8px 10px;
