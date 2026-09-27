@@ -3,10 +3,14 @@ import { render, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import TournamentsPanel from './TournamentsPanel'
 import type { RemoteApi } from '../../../shared/remote'
+import type { Group } from '../../../shared/groups'
 import type {
+  Tournament,
   TournamentSettingsApi,
   TournamentSettingsInput,
-  TournamentSettingsWithUsage
+  TournamentSettingsWithUsage,
+  TournamentsApi,
+  TournamentInput
 } from '../../../shared/tournament'
 
 const remoteStub: RemoteApi = {
@@ -17,8 +21,16 @@ const remoteStub: RemoteApi = {
   onClientsChanged: vi.fn(() => () => {})
 }
 
-function installApi(initial: TournamentSettingsWithUsage[]): TournamentSettingsApi {
-  let settings = [...initial]
+function installApi(
+  settingsInit: TournamentSettingsWithUsage[],
+  tournamentsInit: Tournament[] = [],
+  groupsInit: Group[] = [{ id: 1, name: '7А', comment: '' }]
+): {
+  settingsApi: TournamentSettingsApi
+  tournamentsApi: TournamentsApi
+} {
+  let settings = [...settingsInit]
+  let tournaments = [...tournamentsInit]
   const settingsApi = {
     list: vi.fn(async () => settings),
     create: vi.fn(async (input: TournamentSettingsInput) => {
@@ -39,23 +51,46 @@ function installApi(initial: TournamentSettingsWithUsage[]): TournamentSettingsA
       settings = settings.filter((item) => item.id !== id)
     })
   }
+  const tournamentsApi = {
+    list: vi.fn(async () => tournaments),
+    create: vi.fn(async (input: TournamentInput) => {
+      const created = { id: tournaments.length + 1, ...input }
+      tournaments = [...tournaments, created]
+      return created
+    }),
+    update: vi.fn(async (id: number, input: TournamentInput) => {
+      tournaments = tournaments.map((item) => (item.id === id ? { ...item, ...input } : item))
+      return { id, ...input }
+    }),
+    remove: vi.fn(async (id: number) => {
+      tournaments = tournaments.filter((item) => item.id !== id)
+    })
+  }
   window.api = {
     remote: remoteStub,
     players: {
-      list: vi.fn(async () => []),
+      list: vi.fn(async () => [
+        {
+          id: 1,
+          lastName: 'Иванов',
+          firstName: 'Иван',
+          middleName: '',
+          groupIds: [1]
+        }
+      ]),
       create: vi.fn(),
       update: vi.fn(),
       remove: vi.fn()
     },
     groups: {
-      list: vi.fn(async () => []),
+      list: vi.fn(async () => groupsInit),
       create: vi.fn(),
       update: vi.fn(),
       remove: vi.fn()
     },
-    tournament: { settings: settingsApi }
+    tournament: { settings: settingsApi, tournaments: tournamentsApi }
   }
-  return settingsApi
+  return { settingsApi, tournamentsApi }
 }
 
 const standard: TournamentSettingsWithUsage = {
@@ -78,6 +113,71 @@ describe('TournamentsPanel', () => {
     expect(container.querySelector('.tournaments-settings')).not.toBeInTheDocument()
   })
 
+  it('lists tournaments with group, date and settings', async () => {
+    installApi(
+      [standard],
+      [
+        {
+          id: 1,
+          name: 'Осенний',
+          groupId: 1,
+          startDate: '2026-10-01',
+          settingsId: 1
+        }
+      ]
+    )
+    const { findByText } = render(<TournamentsPanel />)
+
+    expect(await findByText('Осенний')).toBeInTheDocument()
+    expect(await findByText('7А · 01.10.2026 · Стандарт')).toBeInTheDocument()
+  })
+
+  it('creates a tournament through the form', async () => {
+    const { tournamentsApi } = installApi([standard])
+    const user = userEvent.setup()
+    const { findByRole } = render(<TournamentsPanel />)
+
+    await user.click(await findByRole('button', { name: 'Добавить турнир' }))
+    const dialog = await findByRole('dialog')
+    await user.type(dialog.querySelector('input')!, 'Осенний')
+    await user.selectOptions(dialog.querySelectorAll('select')[0]!, '1')
+    await user.type(dialog.querySelector('input[type="date"]')!, '2026-10-01')
+    await user.selectOptions(dialog.querySelectorAll('select')[1]!, '1')
+    await user.click(await findByRole('button', { name: 'Создать' }))
+
+    await waitFor(() =>
+      expect(tournamentsApi.create).toHaveBeenCalledWith({
+        name: 'Осенний',
+        groupId: 1,
+        startDate: '2026-10-01',
+        settingsId: 1
+      })
+    )
+  })
+
+  it('deletes a tournament after confirmation', async () => {
+    const { tournamentsApi } = installApi(
+      [standard],
+      [
+        {
+          id: 1,
+          name: 'Осенний',
+          groupId: 1,
+          startDate: '2026-10-01',
+          settingsId: 1
+        }
+      ]
+    )
+    const user = userEvent.setup()
+    const { findByRole, queryByText } = render(<TournamentsPanel />)
+
+    await user.click(await findByRole('button', { name: 'Удалить: Осенний' }))
+    await user.click(await findByRole('button', { name: 'Удалить' }))
+
+    await waitFor(() => expect(tournamentsApi.remove).toHaveBeenCalledWith(1))
+    await waitFor(() => expect(queryByText('Осенний')).not.toBeInTheDocument())
+  })
+
   it('lists settings in the settings sub-tab', async () => {
     installApi([standard])
     const user = userEvent.setup()
@@ -91,7 +191,7 @@ describe('TournamentsPanel', () => {
   })
 
   it('creates a setting through the form', async () => {
-    const api = installApi([])
+    const { settingsApi } = installApi([])
     const user = userEvent.setup()
     const { getByRole, findByRole, findByText } = render(<TournamentsPanel />)
 
@@ -102,7 +202,7 @@ describe('TournamentsPanel', () => {
     await user.click(getByRole('button', { name: 'Создать' }))
 
     await waitFor(() =>
-      expect(api.create).toHaveBeenCalledWith({
+      expect(settingsApi.create).toHaveBeenCalledWith({
         name: 'Блиц',
         weakerPlaysWhite: true,
         drawScoring: 'weaker',
@@ -113,7 +213,7 @@ describe('TournamentsPanel', () => {
   })
 
   it('deletes a setting after confirmation', async () => {
-    const api = installApi([standard])
+    const { settingsApi } = installApi([standard])
     const user = userEvent.setup()
     const { getByRole, findByRole, queryByText } = render(<TournamentsPanel />)
 
@@ -121,7 +221,7 @@ describe('TournamentsPanel', () => {
     await user.click(await findByRole('button', { name: 'Удалить: Стандарт' }))
     await user.click(await findByRole('button', { name: 'Удалить' }))
 
-    await waitFor(() => expect(api.remove).toHaveBeenCalledWith(1))
+    await waitFor(() => expect(settingsApi.remove).toHaveBeenCalledWith(1))
     await waitFor(() => expect(queryByText('Стандарт')).not.toBeInTheDocument())
   })
 })

@@ -32,7 +32,11 @@ function createStore(): TournamentStore {
       used: false,
       ...input
     })),
-    removeSettings: vi.fn()
+    removeSettings: vi.fn(),
+    listTournaments: vi.fn(() => []),
+    createTournament: vi.fn((input) => ({ id: 1, ...input })),
+    updateTournament: vi.fn((id, input) => ({ id, ...input })),
+    removeTournament: vi.fn()
   }
 }
 
@@ -58,5 +62,28 @@ describe('registerTournamentIpc', () => {
 
     invoke('tournament:settings:remove', 3)
     expect(store.removeSettings).toHaveBeenCalledWith(3)
+
+    expect(invoke('tournament:tournaments:list')).toEqual([])
+
+    const tournamentInput = {
+      name: 'Осенний',
+      groupId: 1,
+      startDate: '2026-10-01',
+      settingsId: 2
+    }
+    expect(invoke('tournament:tournaments:create', tournamentInput)).toEqual({
+      id: 1,
+      ...tournamentInput
+    })
+    expect(store.createTournament).toHaveBeenCalledWith(tournamentInput)
+
+    expect(invoke('tournament:tournaments:update', 5, tournamentInput)).toEqual({
+      id: 5,
+      ...tournamentInput
+    })
+    expect(store.updateTournament).toHaveBeenCalledWith(5, tournamentInput)
+
+    invoke('tournament:tournaments:remove', 5)
+    expect(store.removeTournament).toHaveBeenCalledWith(5)
   })
 })

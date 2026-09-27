@@ -6,14 +6,20 @@ import { describe, expect, it } from 'vitest'
 import { openDatabase } from './database'
 
 describe('openDatabase', () => {
-  it('creates the fresh schema with groups, players and memberships', () => {
+  it('creates the fresh schema with groups, players, memberships, settings and tournaments', () => {
     const path = join(mkdtempSync(join(tmpdir(), 'gambit-db-')), 'gambit.db')
     const database = openDatabase(path)
 
     const tables = database
       .prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name")
       .all() as { name: string }[]
-    expect(tables.map((row) => row.name)).toEqual(['group_memberships', 'groups', 'players'])
+    expect(tables.map((row) => row.name)).toEqual([
+      'group_memberships',
+      'groups',
+      'players',
+      'tournament_settings',
+      'tournaments'
+    ])
 
     const version = database.prepare('PRAGMA user_version').get() as { user_version: number }
     expect(version.user_version).toBe(1)

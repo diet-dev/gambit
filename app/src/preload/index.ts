@@ -4,7 +4,9 @@ import type { RemoteApi, RemoteClient, RemoteMove, ServerInfo } from '../shared/
 import type { Player, PlayerInput, PlayersApi } from '../shared/players'
 import type { Group, GroupInput, GroupsApi } from '../shared/groups'
 import type {
+  Tournament,
   TournamentApi,
+  TournamentInput,
   TournamentSettings,
   TournamentSettingsInput,
   TournamentSettingsWithUsage
@@ -49,6 +51,14 @@ const tournament: TournamentApi = {
     update: (id: number, input: TournamentSettingsInput) =>
       ipcRenderer.invoke('tournament:settings:update', id, input) as Promise<TournamentSettings>,
     remove: (id: number) => ipcRenderer.invoke('tournament:settings:remove', id) as Promise<void>
+  },
+  tournaments: {
+    list: () => ipcRenderer.invoke('tournament:tournaments:list') as Promise<Tournament[]>,
+    create: (input: TournamentInput) =>
+      ipcRenderer.invoke('tournament:tournaments:create', input) as Promise<Tournament>,
+    update: (id: number, input: TournamentInput) =>
+      ipcRenderer.invoke('tournament:tournaments:update', id, input) as Promise<Tournament>,
+    remove: (id: number) => ipcRenderer.invoke('tournament:tournaments:remove', id) as Promise<void>
   }
 }
 

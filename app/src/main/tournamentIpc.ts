@@ -1,4 +1,4 @@
-import type { TournamentSettingsInput } from '../shared/tournament'
+import type { TournamentInput, TournamentSettingsInput } from '../shared/tournament'
 import type { IpcMainLike } from './remoteIpc'
 import type { TournamentStore } from './tournamentStore'
 
@@ -16,4 +16,14 @@ export function registerTournamentIpc({ ipcMain, store }: RegisterTournamentIpcO
     store.updateSettings(id as number, input as TournamentSettingsInput)
   )
   ipcMain.handle('tournament:settings:remove', (_event, id) => store.removeSettings(id as number))
+  ipcMain.handle('tournament:tournaments:list', () => store.listTournaments())
+  ipcMain.handle('tournament:tournaments:create', (_event, input) =>
+    store.createTournament(input as TournamentInput)
+  )
+  ipcMain.handle('tournament:tournaments:update', (_event, id, input) =>
+    store.updateTournament(id as number, input as TournamentInput)
+  )
+  ipcMain.handle('tournament:tournaments:remove', (_event, id) =>
+    store.removeTournament(id as number)
+  )
 }

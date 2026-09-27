@@ -41,6 +41,12 @@ function installApi(clients: RemoteClient[]): RemoteApi {
           ...input
         }),
         remove: async () => {}
+      },
+      tournaments: {
+        list: async () => [],
+        create: async (input) => ({ id: 1, ...input }),
+        update: async (id, input) => ({ id, ...input }),
+        remove: async () => {}
       }
     }
   }

@@ -60,6 +60,12 @@ function installApi(
         create: vi.fn(),
         update: vi.fn(),
         remove: vi.fn()
+      },
+      tournaments: {
+        list: vi.fn(async () => []),
+        create: vi.fn(),
+        update: vi.fn(),
+        remove: vi.fn()
       }
     }
   }

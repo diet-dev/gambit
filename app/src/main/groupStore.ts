@@ -44,6 +44,7 @@ export function createGroupStore(database: DatabaseSync): GroupStore {
       return get(group.id)
     },
     remove: (id) => {
+      const group = get(id)
       const soleOwner = database
         .prepare(
           `
@@ -60,11 +61,16 @@ export function createGroupStore(database: DatabaseSync): GroupStore {
         )
         .get(id, id) as { lastName: string; firstName: string } | undefined
       if (soleOwner) {
-        const group = get(id)
         const playerName = [soleOwner.lastName, soleOwner.firstName].filter(Boolean).join(' ')
         throw new Error(
           `Нельзя удалить группу «${group.name}»: она единственная для игрока ${playerName}`
         )
+      }
+      const tournament = database
+        .prepare('SELECT name FROM tournaments WHERE group_id = ? LIMIT 1')
+        .get(id) as { name: string } | undefined
+      if (tournament) {
+        throw new Error(`Нельзя удалить группу «${group.name}»: в ней есть турниры`)
       }
       database.prepare('DELETE FROM groups WHERE id = ?').run(id)
     }

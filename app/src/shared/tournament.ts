@@ -22,6 +22,24 @@ export type TournamentSettingsApi = {
   remove: (id: number) => Promise<void>
 }
 
+export type Tournament = {
+  id: number
+  name: string
+  groupId: number
+  startDate: string
+  settingsId: number
+}
+
+export type TournamentInput = Omit<Tournament, 'id'>
+
+export type TournamentsApi = {
+  list: () => Promise<Tournament[]>
+  create: (input: TournamentInput) => Promise<Tournament>
+  update: (id: number, input: TournamentInput) => Promise<Tournament>
+  remove: (id: number) => Promise<void>
+}
+
 export type TournamentApi = {
   settings: TournamentSettingsApi
+  tournaments: TournamentsApi
 }

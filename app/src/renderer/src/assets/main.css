@@ -339,6 +339,7 @@ code {
   color: var(--ev-c-text-1);
 }
 
+.tournaments-list .entity-add,
 .tournaments-settings .entity-add {
   margin-top: 12px;
 }

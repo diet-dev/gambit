@@ -2,12 +2,18 @@ import { describe, expect, it } from 'vitest'
 import { openDatabase } from './database'
 import { createGroupStore, type GroupStore } from './groupStore'
 import { createPlayerStore, type PlayerStore } from './playerStore'
+import { createTournamentStore, type TournamentStore } from './tournamentStore'
 
-function makeStores(): { groups: GroupStore; players: PlayerStore } {
+function makeStores(): {
+  groups: GroupStore
+  players: PlayerStore
+  tournaments: TournamentStore
+} {
   const database = openDatabase(':memory:')
   return {
     groups: createGroupStore(database),
-    players: createPlayerStore(database)
+    players: createPlayerStore(database),
+    tournaments: createTournamentStore(database)
   }
 }
 
@@ -89,5 +95,24 @@ describe('groupStore', () => {
 
     expect(groups.list().map((group) => group.name)).toEqual(['8Б'])
     expect(players.list()[0]).toMatchObject({ id: player.id, groupIds: [eightB.id] })
+  })
+
+  it('refuses to remove a group that has tournaments', () => {
+    const { groups, tournaments } = makeStores()
+    const sevenA = groups.create({ name: '7А', comment: '' })
+    const settings = tournaments.listSettings().find((item) => item.name === 'Стандарт')
+    expect(settings).toBeDefined()
+    if (!settings) {
+      return
+    }
+    tournaments.createTournament({
+      name: 'Осенний',
+      groupId: sevenA.id,
+      startDate: '2026-10-01',
+      settingsId: settings.id
+    })
+
+    expect(() => groups.remove(sevenA.id)).toThrow('Нельзя удалить группу «7А»: в ней есть турниры')
+    expect(groups.list()).toHaveLength(1)
   })
 })
