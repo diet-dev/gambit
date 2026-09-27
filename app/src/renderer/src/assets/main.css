@@ -314,6 +314,32 @@ code {
   padding: 12px;
 }
 
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background: var(--ev-c-black-soft);
+}
+
+.tabs-tab {
+  flex: 1;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ev-c-text-2);
+  font: inherit;
+  cursor: pointer;
+}
+
+.tabs-tab-active {
+  background: var(--color-surface);
+  color: var(--ev-c-text-1);
+}
+
+
 .entity-header {
   margin-bottom: 12px;
 }
