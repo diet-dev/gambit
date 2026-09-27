@@ -8,6 +8,7 @@ import EventLogPanel from './components/EventLogPanel'
 import HelpArticleOverlay from './components/HelpArticleOverlay'
 import HelpPanel from './components/HelpPanel'
 import RemoteQrButton from './components/RemoteQrButton'
+import RoundsPanel from './components/RoundsPanel'
 import SettingsPanel from './components/SettingsPanel'
 import SituationCommentDialog from './components/SituationCommentDialog'
 import SituationList from './components/SituationList'
@@ -76,6 +77,7 @@ function App(): React.JSX.Element {
             {activity === 'devices' && <DevicesPanel />}
             {activity === 'groups' && <GroupsPanel />}
             {activity === 'tournaments' && <TournamentsPanel />}
+            {activity === 'rounds' && <RoundsPanel />}
             {activity === 'players' && <PlayersPanel />}
             {activity === 'events' && <EventLogPanel events={events} />}
             {activity === 'settings' && <SettingsPanel />}
