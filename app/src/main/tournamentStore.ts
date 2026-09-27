@@ -1,11 +1,13 @@
 import type { DatabaseSync } from 'node:sqlite'
 import type {
+  Round,
   Tournament,
   TournamentInput,
   TournamentSettings,
   TournamentSettingsInput,
   TournamentSettingsWithUsage
 } from '../shared/tournament'
+
 export type TournamentStore = {
   listSettings: () => TournamentSettingsWithUsage[]
   createSettings: (input: TournamentSettingsInput) => TournamentSettings
@@ -15,6 +17,7 @@ export type TournamentStore = {
   createTournament: (input: TournamentInput) => Tournament
   updateTournament: (id: number, input: TournamentInput) => Tournament
   removeTournament: (id: number) => void
+  listRounds: (tournamentId: number) => Round[]
 }
 
 const SETTINGS_COLUMNS = `
@@ -32,6 +35,14 @@ const TOURNAMENT_COLUMNS = `
   name,
   group_id AS groupId,
   start_date AS startDate,
+  settings_id AS settingsId
+`
+
+const ROUND_COLUMNS = `
+  id,
+  tournament_id AS tournamentId,
+  seq,
+  played_date AS playedDate,
   settings_id AS settingsId
 `
 
@@ -135,6 +146,10 @@ export function createTournamentStore(database: DatabaseSync): TournamentStore {
     },
     removeTournament: (id) => {
       database.prepare('DELETE FROM tournaments WHERE id = ?').run(id)
-    }
+    },
+    listRounds: (tournamentId) =>
+      database
+        .prepare(`SELECT ${ROUND_COLUMNS} FROM rounds WHERE tournament_id = ? ORDER BY seq`)
+        .all(tournamentId) as unknown as Round[]
   }
 }

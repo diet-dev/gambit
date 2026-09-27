@@ -187,4 +187,47 @@ describe('tournamentStore settings', () => {
     store.removeTournament(created.id)
     expect(store.listTournaments()).toHaveLength(0)
   })
+
+  it('lists rounds of a tournament ordered by seq', () => {
+    const database = openDatabase(':memory:')
+    const store = createTournamentStore(database)
+    const groups = createGroupStore(database)
+    const group = groups.create({ name: '7А', comment: '' })
+    const settings = store.listSettings().find((item) => item.name === 'Стандарт')
+    expect(settings).toBeDefined()
+    if (!settings) {
+      return
+    }
+    const tournament = store.createTournament({
+      name: 'Осенний',
+      groupId: group.id,
+      startDate: '2026-10-01',
+      settingsId: settings.id
+    })
+
+    expect(store.listRounds(tournament.id)).toEqual([])
+
+    const insert = database.prepare(
+      'INSERT INTO rounds (tournament_id, seq, played_date, settings_id) VALUES (?, ?, ?, ?)'
+    )
+    insert.run(tournament.id, 2, '2026-10-02', settings.id)
+    insert.run(tournament.id, 1, '2026-10-01', settings.id)
+
+    expect(store.listRounds(tournament.id)).toEqual([
+      {
+        id: expect.any(Number),
+        tournamentId: tournament.id,
+        seq: 1,
+        playedDate: '2026-10-01',
+        settingsId: settings.id
+      },
+      {
+        id: expect.any(Number),
+        tournamentId: tournament.id,
+        seq: 2,
+        playedDate: '2026-10-02',
+        settingsId: settings.id
+      }
+    ])
+  })
 })

@@ -36,7 +36,8 @@ function createStore(): TournamentStore {
     listTournaments: vi.fn(() => []),
     createTournament: vi.fn((input) => ({ id: 1, ...input })),
     updateTournament: vi.fn((id, input) => ({ id, ...input })),
-    removeTournament: vi.fn()
+    removeTournament: vi.fn(),
+    listRounds: vi.fn(() => [])
   }
 }
 
@@ -85,5 +86,8 @@ describe('registerTournamentIpc', () => {
 
     invoke('tournament:tournaments:remove', 5)
     expect(store.removeTournament).toHaveBeenCalledWith(5)
+
+    invoke('tournament:rounds:list', 5)
+    expect(store.listRounds).toHaveBeenCalledWith(5)
   })
 })

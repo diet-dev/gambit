@@ -88,7 +88,11 @@ function installApi(
       update: vi.fn(),
       remove: vi.fn()
     },
-    tournament: { settings: settingsApi, tournaments: tournamentsApi }
+    tournament: {
+      settings: settingsApi,
+      tournaments: tournamentsApi,
+      rounds: { list: vi.fn(async () => []) }
+    }
   }
   return { settingsApi, tournamentsApi }
 }

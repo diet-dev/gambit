@@ -31,26 +31,19 @@ function installApi(initial: RemoteClient[]): { emit: (clients: RemoteClient[]) 
     },
     tournament: {
       settings: {
-        list: async () => [],
-        create: async (input) => ({
-          id: 1,
-          createdAt: '',
-          used: false,
-          ...input
-        }),
-        update: async (id, input) => ({
-          id,
-          createdAt: '',
-          used: false,
-          ...input
-        }),
-        remove: async () => {}
+        list: vi.fn(async () => []),
+        create: vi.fn(),
+        update: vi.fn(),
+        remove: vi.fn()
       },
       tournaments: {
-        list: async () => [],
-        create: async (input) => ({ id: 1, ...input }),
-        update: async (id, input) => ({ id, ...input }),
-        remove: async () => {}
+        list: vi.fn(async () => []),
+        create: vi.fn(),
+        update: vi.fn(),
+        remove: vi.fn()
+      },
+      rounds: {
+        list: vi.fn(async () => [])
       }
     }
   }

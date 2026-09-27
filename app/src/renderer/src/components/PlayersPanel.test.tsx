@@ -66,6 +66,9 @@ function installApi(
         create: vi.fn(),
         update: vi.fn(),
         remove: vi.fn()
+      },
+      rounds: {
+        list: vi.fn(async () => [])
       }
     }
   }

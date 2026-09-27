@@ -53,6 +53,9 @@ function installApi(initial: Group[]): GroupsApi {
         create: vi.fn(),
         update: vi.fn(),
         remove: vi.fn()
+      },
+      rounds: {
+        list: vi.fn(async () => [])
       }
     }
   }

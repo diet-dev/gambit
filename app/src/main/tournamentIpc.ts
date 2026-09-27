@@ -26,4 +26,7 @@ export function registerTournamentIpc({ ipcMain, store }: RegisterTournamentIpcO
   ipcMain.handle('tournament:tournaments:remove', (_event, id) =>
     store.removeTournament(id as number)
   )
+  ipcMain.handle('tournament:rounds:list', (_event, tournamentId) =>
+    store.listRounds(tournamentId as number)
+  )
 }

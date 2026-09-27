@@ -39,7 +39,20 @@ export type TournamentsApi = {
   remove: (id: number) => Promise<void>
 }
 
+export type Round = {
+  id: number
+  tournamentId: number
+  seq: number
+  playedDate: string
+  settingsId: number
+}
+
+export type RoundsApi = {
+  list: (tournamentId: number) => Promise<Round[]>
+}
+
 export type TournamentApi = {
   settings: TournamentSettingsApi
   tournaments: TournamentsApi
+  rounds: RoundsApi
 }

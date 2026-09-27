@@ -55,6 +55,14 @@ function migrate(database: DatabaseSync): void {
         start_date TEXT NOT NULL,
         settings_id INTEGER NOT NULL REFERENCES tournament_settings(id)
       );
+      CREATE TABLE IF NOT EXISTS rounds (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tournament_id INTEGER NOT NULL REFERENCES tournaments(id),
+        seq INTEGER NOT NULL,
+        played_date TEXT NOT NULL,
+        settings_id INTEGER NOT NULL REFERENCES tournament_settings(id),
+        UNIQUE (tournament_id, seq)
+      );
     `)
     database
       .prepare(
