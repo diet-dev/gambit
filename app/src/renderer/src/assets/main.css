@@ -415,6 +415,11 @@ code {
   color: var(--color-danger);
 }
 
+.entity-hint {
+  font-size: 12px;
+  color: var(--ev-c-text-2);
+}
+
 .entity-actions {
   display: flex;
   justify-content: flex-end;

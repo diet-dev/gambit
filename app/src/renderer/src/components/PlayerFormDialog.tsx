@@ -18,6 +18,8 @@ function finalizePersonName(value: string): string {
   return value.replace(/-+$/, '')
 }
 
+const modifierKey = /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? '⌘ Cmd' : 'Ctrl'
+
 type PlayerFormDialogProps = {
   player: Player | null
   groups: Group[]
@@ -114,6 +116,11 @@ function PlayerFormDialog({
               </option>
             ))}
           </select>
+          {groups.length > 0 && (
+            <span className="entity-hint">
+              Для выбора нескольких групп удерживайте {modifierKey}
+            </span>
+          )}
           {groups.length === 0 && (
             <span className="entity-error">Сначала добавьте группу на вкладке «Группы»</span>
           )}
