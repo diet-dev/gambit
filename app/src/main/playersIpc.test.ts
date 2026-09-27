@@ -38,7 +38,7 @@ describe('registerPlayersIpc', () => {
       lastName: 'Иванов',
       firstName: 'Иван',
       middleName: '',
-      groupId: 1,
+      groupIds: [1],
       rating: 0
     }
     expect(invoke('players:create', input)).toEqual({ id: 1, ...input })

@@ -60,7 +60,7 @@ function PlayersPanel(): React.JSX.Element {
             <li key={player.id} className="entity-item">
               <span className="entity-name">{playerName(player)}</span>
               <span className="entity-sub">
-                {player.groupId !== null ? (groupNames.get(player.groupId) ?? '—') : '—'}
+                {player.groupIds.map((id) => groupNames.get(id) ?? '—').join(', ')}
               </span>
               <span className="entity-value">{player.rating}</span>
               <button

@@ -59,7 +59,7 @@ const ivanov: Player = {
   lastName: 'Иванов',
   firstName: 'Иван',
   middleName: 'Иванович',
-  groupId: 1,
+  groupIds: [1, 2],
   rating: 100
 }
 
@@ -76,16 +76,16 @@ describe('PlayersPanel', () => {
     expect(await findByText('Игроков пока нет')).toBeInTheDocument()
   })
 
-  it('lists players with their group name', async () => {
+  it('lists players with their group names', async () => {
     installApi([ivanov], groups)
     const { findByText, container } = render(<PlayersPanel />)
 
     expect(await findByText('Иванов Иван Иванович')).toBeInTheDocument()
-    expect(container).toHaveTextContent('7А')
+    expect(container).toHaveTextContent('7А, 8Б')
     expect(container).toHaveTextContent('100')
   })
 
-  it('creates a player with the chosen group', async () => {
+  it('creates a player with the selected groups', async () => {
     const { playersApi } = installApi([], groups)
     const user = userEvent.setup()
     const { getByRole, getByLabelText, findByText } = render(<PlayersPanel />)
@@ -93,7 +93,7 @@ describe('PlayersPanel', () => {
     await user.click(getByRole('button', { name: 'Добавить игрока' }))
     await user.type(getByLabelText(/Фамилия/), 'Петров')
     await user.type(getByLabelText(/Имя/), 'Пётр')
-    await user.selectOptions(getByRole('combobox'), '2')
+    await user.selectOptions(getByRole('listbox'), ['1', '2'])
     await user.click(getByRole('button', { name: 'Сохранить' }))
 
     await waitFor(() =>
@@ -101,14 +101,14 @@ describe('PlayersPanel', () => {
         lastName: 'Петров',
         firstName: 'Пётр',
         middleName: '',
-        groupId: 2,
+        groupIds: [1, 2],
         rating: 0
       })
     )
     expect(await findByText('Петров Пётр')).toBeInTheDocument()
   })
 
-  it('allows creating a player without a group', async () => {
+  it('requires at least one group', async () => {
     const { playersApi } = installApi([], groups)
     const user = userEvent.setup()
     const { getByRole, getByLabelText, findByText } = render(<PlayersPanel />)
@@ -118,16 +118,19 @@ describe('PlayersPanel', () => {
     await user.type(getByLabelText(/Имя/), 'Пётр')
     await user.click(getByRole('button', { name: 'Сохранить' }))
 
-    await waitFor(() =>
-      expect(playersApi.create).toHaveBeenCalledWith({
-        lastName: 'Петров',
-        firstName: 'Пётр',
-        middleName: '',
-        groupId: null,
-        rating: 0
-      })
-    )
-    expect(await findByText('Петров Пётр')).toBeInTheDocument()
+    expect(await findByText('Выберите хотя бы одну группу')).toBeInTheDocument()
+    expect(playersApi.create).not.toHaveBeenCalled()
+  })
+
+  it('blocks saving when there are no groups at all', async () => {
+    installApi([], [])
+    const user = userEvent.setup()
+    const { getByRole } = render(<PlayersPanel />)
+
+    await user.click(getByRole('button', { name: 'Добавить игрока' }))
+
+    expect(getByRole('button', { name: 'Сохранить' })).toBeDisabled()
+    expect(getByTextSafe(getByRole('dialog'), 'Сначала добавьте группу')).toBeInTheDocument()
   })
 
   it('deletes a player after confirmation', async () => {
@@ -142,3 +145,13 @@ describe('PlayersPanel', () => {
     await waitFor(() => expect(queryByText('Иванов Иван Иванович')).not.toBeInTheDocument())
   })
 })
+
+function getByTextSafe(container: HTMLElement, text: string): HTMLElement {
+  const element = Array.from(container.querySelectorAll('.entity-error')).find((item) =>
+    item.textContent?.includes(text)
+  )
+  if (!element) {
+    throw new Error(`Expected error text "${text}" not found`)
+  }
+  return element as HTMLElement
+}

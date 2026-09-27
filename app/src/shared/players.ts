@@ -3,7 +3,7 @@ export type Player = {
   lastName: string
   firstName: string
   middleName: string
-  groupId: number | null
+  groupIds: number[]
   rating: number
 }
 

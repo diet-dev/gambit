@@ -23,40 +23,60 @@ describe('playerStore', () => {
     const { players, groups } = makeStores()
     const group = groups.create({ name: '7А', comment: '' })
 
-    const created = players.create({ ...input, groupId: group.id })
+    const created = players.create({ ...input, groupIds: [group.id] })
 
     expect(created.id).toBeGreaterThan(0)
-    expect(created).toMatchObject({ ...input, groupId: group.id })
+    expect(created).toMatchObject({ ...input, groupIds: [group.id] })
     expect(players.list()).toEqual([created])
   })
 
-  it('updates a player including the group', () => {
+  it('rejects a player without groups', () => {
+    const { players } = makeStores()
+
+    expect(() => players.create({ ...input, groupIds: [] })).toThrow(
+      'У игрока должна быть минимум одна группа'
+    )
+  })
+
+  it('updates a player including groups', () => {
     const { players, groups } = makeStores()
     const sevenA = groups.create({ name: '7А', comment: '' })
     const eightB = groups.create({ name: '8Б', comment: '' })
-    const created = players.create({ ...input, groupId: sevenA.id })
+    const nineV = groups.create({ name: '9В', comment: '' })
+    const created = players.create({ ...input, groupIds: [sevenA.id] })
 
-    const updated = players.update({ ...created, rating: 250, groupId: eightB.id })
+    const updated = players.update({ ...created, rating: 250, groupIds: [eightB.id, nineV.id] })
 
-    expect(updated).toMatchObject({ id: created.id, rating: 250, groupId: eightB.id })
-    expect(players.list()[0].groupId).toBe(eightB.id)
+    expect(updated).toMatchObject({ id: created.id, rating: 250, groupIds: [eightB.id, nineV.id] })
+    expect(players.list()[0].groupIds).toEqual([eightB.id, nineV.id])
   })
 
-  it('clears the group without deleting the player', () => {
+  it('rejects clearing all groups on update', () => {
     const { players, groups } = makeStores()
     const group = groups.create({ name: '7А', comment: '' })
-    const created = players.create({ ...input, groupId: group.id })
+    const created = players.create({ ...input, groupIds: [group.id] })
 
-    const updated = players.update({ ...created, groupId: null })
+    expect(() => players.update({ ...created, groupIds: [] })).toThrow(
+      'У игрока должна быть минимум одна группа'
+    )
+  })
 
-    expect(updated).toMatchObject({ id: created.id, groupId: null })
-    expect(players.list()[0].groupId).toBe(null)
+  it('keeps memberships of other players when regrouping one', () => {
+    const { players, groups } = makeStores()
+    const sevenA = groups.create({ name: '7А', comment: '' })
+    const eightB = groups.create({ name: '8Б', comment: '' })
+    players.create({ ...input, lastName: 'Иванов', groupIds: [sevenA.id] })
+    const petrov = players.create({ ...input, lastName: 'Петров', groupIds: [sevenA.id] })
+
+    players.update({ ...petrov, groupIds: [eightB.id] })
+
+    expect(players.list().find((p) => p.lastName === 'Иванов')?.groupIds).toEqual([sevenA.id])
   })
 
   it('removes a player', () => {
     const { players, groups } = makeStores()
     const group = groups.create({ name: '7А', comment: '' })
-    const created = players.create({ ...input, groupId: group.id })
+    const created = players.create({ ...input, groupIds: [group.id] })
 
     players.remove(created.id)
 
@@ -66,8 +86,8 @@ describe('playerStore', () => {
   it('lists players ordered by last name', () => {
     const { players, groups } = makeStores()
     const group = groups.create({ name: '7А', comment: '' })
-    players.create({ ...input, lastName: 'Яковлев', groupId: group.id })
-    players.create({ ...input, lastName: 'Абрамов', groupId: group.id })
+    players.create({ ...input, lastName: 'Яковлев', groupIds: [group.id] })
+    players.create({ ...input, lastName: 'Абрамов', groupIds: [group.id] })
 
     expect(players.list().map((player) => player.lastName)).toEqual(['Абрамов', 'Яковлев'])
   })

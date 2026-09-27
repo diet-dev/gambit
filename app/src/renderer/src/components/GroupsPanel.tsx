@@ -10,6 +10,7 @@ function GroupsPanel(): React.JSX.Element {
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Group | null>(null)
   const [deleting, setDeleting] = useState<Group | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   function openCreate(): void {
     setEditing(null)
@@ -32,8 +33,12 @@ function GroupsPanel(): React.JSX.Element {
 
   async function confirmDelete(): Promise<void> {
     if (deleting) {
-      await remove(deleting.id)
-      setDeleting(null)
+      try {
+        await remove(deleting.id)
+        setDeleting(null)
+      } catch (error) {
+        setDeleteError(error instanceof Error ? error.message : 'Не удалось удалить группу')
+      }
     }
   }
 
@@ -64,7 +69,10 @@ function GroupsPanel(): React.JSX.Element {
                 type="button"
                 className="entity-action"
                 aria-label={`Удалить: ${group.name}`}
-                onClick={() => setDeleting(group)}
+                onClick={() => {
+                  setDeleteError(null)
+                  setDeleting(group)
+                }}
               >
                 <Trash2 size={16} aria-hidden="true" />
               </button>
@@ -90,6 +98,7 @@ function GroupsPanel(): React.JSX.Element {
             Удалить группу?
           </h2>
           <p className="comment-dialog-text">{deleting.name}</p>
+          {deleteError && <p className="entity-error">{deleteError}</p>}
           <div className="entity-actions">
             <button type="button" onClick={() => setDeleting(null)}>
               Отмена

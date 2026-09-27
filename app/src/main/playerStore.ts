@@ -13,9 +13,23 @@ const COLUMNS = `
   p.last_name AS lastName,
   p.first_name AS firstName,
   p.middle_name AS middleName,
-  (SELECT m.group_id FROM group_memberships m WHERE m.player_id = p.id LIMIT 1) AS groupId,
+  (SELECT GROUP_CONCAT(m.group_id) FROM group_memberships m WHERE m.player_id = p.id) AS groupIds,
   p.rating AS rating
 `
+
+function assertHasGroup(groupIds: number[]): void {
+  if (groupIds.length === 0) {
+    throw new Error('У игрока должна быть минимум одна группа')
+  }
+}
+
+function mapRow(row: unknown): Player {
+  const record = row as Omit<Player, 'groupIds'> & { groupIds: string | null }
+  return {
+    ...record,
+    groupIds: record.groupIds === null ? [] : record.groupIds.split(',').map(Number)
+  }
+}
 
 function withTransaction<T>(database: DatabaseSync, run: () => T): T {
   database.exec('BEGIN')
@@ -31,14 +45,12 @@ function withTransaction<T>(database: DatabaseSync, run: () => T): T {
 
 export function createPlayerStore(database: DatabaseSync): PlayerStore {
   function get(id: number): Player {
-    return database
-      .prepare(`SELECT ${COLUMNS} FROM players p WHERE p.id = ?`)
-      .get(id) as unknown as Player
+    return mapRow(database.prepare(`SELECT ${COLUMNS} FROM players p WHERE p.id = ?`).get(id))
   }
 
-  function setGroup(playerId: number, groupId: number | null): void {
+  function setGroups(playerId: number, groupIds: number[]): void {
     database.prepare('DELETE FROM group_memberships WHERE player_id = ?').run(playerId)
-    if (groupId !== null) {
+    for (const groupId of new Set(groupIds)) {
       database
         .prepare('INSERT INTO group_memberships (group_id, player_id) VALUES (?, ?)')
         .run(groupId, playerId)
@@ -51,26 +63,29 @@ export function createPlayerStore(database: DatabaseSync): PlayerStore {
         .prepare(
           `SELECT ${COLUMNS} FROM players p ORDER BY p.last_name COLLATE NOCASE, p.first_name COLLATE NOCASE`
         )
-        .all() as unknown as Player[],
+        .all()
+        .map(mapRow),
     create: (input) =>
       withTransaction(database, () => {
+        assertHasGroup(input.groupIds)
         const info = database
           .prepare(
             'INSERT INTO players (last_name, first_name, middle_name, rating) VALUES (?, ?, ?, ?)'
           )
           .run(input.lastName, input.firstName, input.middleName, input.rating)
         const id = Number(info.lastInsertRowid)
-        setGroup(id, input.groupId)
+        setGroups(id, input.groupIds)
         return get(id)
       }),
     update: (player) =>
       withTransaction(database, () => {
+        assertHasGroup(player.groupIds)
         database
           .prepare(
             'UPDATE players SET last_name = ?, first_name = ?, middle_name = ?, rating = ? WHERE id = ?'
           )
           .run(player.lastName, player.firstName, player.middleName, player.rating, player.id)
-        setGroup(player.id, player.groupId)
+        setGroups(player.id, player.groupIds)
         return get(player.id)
       }),
     remove: (id) => {

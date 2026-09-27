@@ -44,6 +44,28 @@ export function createGroupStore(database: DatabaseSync): GroupStore {
       return get(group.id)
     },
     remove: (id) => {
+      const soleOwner = database
+        .prepare(
+          `
+          SELECT p.last_name AS lastName, p.first_name AS firstName
+          FROM players p
+          WHERE EXISTS (
+            SELECT 1 FROM group_memberships m WHERE m.player_id = p.id AND m.group_id = ?
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM group_memberships m2 WHERE m2.player_id = p.id AND m2.group_id <> ?
+          )
+          LIMIT 1
+          `
+        )
+        .get(id, id) as { lastName: string; firstName: string } | undefined
+      if (soleOwner) {
+        const group = get(id)
+        const playerName = [soleOwner.lastName, soleOwner.firstName].filter(Boolean).join(' ')
+        throw new Error(
+          `Нельзя удалить группу «${group.name}»: она единственная для игрока ${playerName}`
+        )
+      }
       database.prepare('DELETE FROM groups WHERE id = ?').run(id)
     }
   }

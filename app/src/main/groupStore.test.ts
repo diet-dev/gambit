@@ -51,20 +51,46 @@ describe('groupStore', () => {
     expect(updated).toEqual({ id: created.id, name: '7Б', comment: 'изменён' })
   })
 
-  it('removes a group and cascades its memberships', () => {
+  it('refuses to remove a group that is the only one for a player', () => {
     const { groups, players } = makeStores()
-    const group = groups.create({ name: '7А', comment: '' })
+    const sevenA = groups.create({ name: '7А', comment: '' })
+    const eightB = groups.create({ name: '8Б', comment: '' })
     players.create({
       lastName: 'Иванов',
       firstName: 'Иван',
       middleName: '',
-      groupId: group.id,
+      groupIds: [sevenA.id],
+      rating: 0
+    })
+    players.create({
+      lastName: 'Петров',
+      firstName: 'Пётр',
+      middleName: '',
+      groupIds: [sevenA.id, eightB.id],
       rating: 0
     })
 
-    groups.remove(group.id)
+    expect(() => groups.remove(sevenA.id)).toThrow(
+      'Нельзя удалить группу «7А»: она единственная для игрока Иванов Иван'
+    )
+    expect(groups.list()).toHaveLength(2)
+  })
 
-    expect(groups.list()).toHaveLength(0)
-    expect(players.list()[0]).toMatchObject({ groupId: null })
+  it('removes a group and cascades its memberships when players have other groups', () => {
+    const { groups, players } = makeStores()
+    const sevenA = groups.create({ name: '7А', comment: '' })
+    const eightB = groups.create({ name: '8Б', comment: '' })
+    const player = players.create({
+      lastName: 'Иванов',
+      firstName: 'Иван',
+      middleName: '',
+      groupIds: [sevenA.id, eightB.id],
+      rating: 0
+    })
+
+    groups.remove(sevenA.id)
+
+    expect(groups.list().map((group) => group.name)).toEqual(['8Б'])
+    expect(players.list()[0]).toMatchObject({ id: player.id, groupIds: [eightB.id] })
   })
 })

@@ -105,4 +105,20 @@ describe('GroupsPanel', () => {
     await waitFor(() => expect(api.remove).toHaveBeenCalledWith(1))
     await waitFor(() => expect(queryByText('7А')).not.toBeInTheDocument())
   })
+
+  it('keeps the dialog open with the error when the removal is rejected', async () => {
+    const api = installApi([{ id: 1, name: '7А', comment: '' }])
+    api.remove = vi.fn(async () => {
+      throw new Error('Нельзя удалить группу «7А»: она единственная для игрока Иванов Иван')
+    })
+    const { getByRole, findByText, findByRole, queryByText } = render(<GroupsPanel />)
+
+    await findByText('7А')
+    fireEvent.click(getByRole('button', { name: 'Удалить: 7А' }))
+    fireEvent.click(await findByRole('button', { name: 'Удалить' }))
+
+    expect(await findByText(/она единственная для игрока/)).toBeInTheDocument()
+    expect(getByRole('dialog')).toBeInTheDocument()
+    expect(queryByText('Удалить группу?')).not.toBeNull()
+  })
 })

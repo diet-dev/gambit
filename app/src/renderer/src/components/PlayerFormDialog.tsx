@@ -34,16 +34,21 @@ function PlayerFormDialog({
   const [lastName, setLastName] = useState(player?.lastName ?? '')
   const [firstName, setFirstName] = useState(player?.firstName ?? '')
   const [middleName, setMiddleName] = useState(player?.middleName ?? '')
-  const [groupId, setGroupId] = useState<number | null>(player?.groupId ?? null)
+  const [groupIds, setGroupIds] = useState<number[]>(player?.groupIds ?? [])
   const [rating, setRating] = useState(String(player?.rating ?? 0))
+  const [groupsError, setGroupsError] = useState<string | null>(null)
 
   function handleSubmit(event: React.FormEvent): void {
     event.preventDefault()
+    if (groupIds.length === 0) {
+      setGroupsError('Выберите хотя бы одну группу')
+      return
+    }
     onSubmit({
       lastName: finalizePersonName(lastName),
       firstName: finalizePersonName(firstName),
       middleName: finalizePersonName(middleName),
-      groupId,
+      groupIds,
       rating: Number(rating) || 0
     })
   }
@@ -88,14 +93,23 @@ function PlayerFormDialog({
           />
         </label>
         <label className="entity-field">
-          <span>Группа</span>
+          <span>
+            Группы{' '}
+            <span className="entity-required" aria-hidden="true">
+              *
+            </span>
+          </span>
           <select
-            value={groupId ?? ''}
-            onChange={(event) =>
-              setGroupId(event.target.value === '' ? null : Number(event.target.value))
-            }
+            multiple
+            value={groupIds.map(String)}
+            onChange={(event) => {
+              setGroupIds(
+                Array.from(event.target.selectedOptions, (option) => Number(option.value))
+              )
+              setGroupsError(null)
+            }}
+            required
           >
-            <option value="">Без группы</option>
             {groups.map((group) => (
               <option key={group.id} value={group.id}>
                 {group.name}
@@ -105,6 +119,7 @@ function PlayerFormDialog({
           {groups.length === 0 && (
             <span className="entity-error">Сначала добавьте группу на вкладке «Группы»</span>
           )}
+          {groupsError && <span className="entity-error">{groupsError}</span>}
         </label>
         <label className="entity-field">
           <span>Рейтинг</span>
@@ -114,7 +129,9 @@ function PlayerFormDialog({
           <button type="button" onClick={onClose}>
             Отмена
           </button>
-          <button type="submit">Сохранить</button>
+          <button type="submit" disabled={groups.length === 0}>
+            Сохранить
+          </button>
         </div>
       </form>
     </Dialog>
