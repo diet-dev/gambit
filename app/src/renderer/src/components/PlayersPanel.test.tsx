@@ -59,8 +59,7 @@ const ivanov: Player = {
   lastName: 'Иванов',
   firstName: 'Иван',
   middleName: 'Иванович',
-  groupIds: [1, 2],
-  rating: 100
+  groupIds: [1, 2]
 }
 
 const groups: Group[] = [
@@ -82,7 +81,6 @@ describe('PlayersPanel', () => {
 
     expect(await findByText('Иванов Иван Иванович')).toBeInTheDocument()
     expect(container).toHaveTextContent('7А, 8Б')
-    expect(container).toHaveTextContent('100')
   })
 
   it('creates a player with the selected groups', async () => {
@@ -101,8 +99,7 @@ describe('PlayersPanel', () => {
         lastName: 'Петров',
         firstName: 'Пётр',
         middleName: '',
-        groupIds: [1, 2],
-        rating: 0
+        groupIds: [1, 2]
       })
     )
     expect(await findByText('Петров Пётр')).toBeInTheDocument()

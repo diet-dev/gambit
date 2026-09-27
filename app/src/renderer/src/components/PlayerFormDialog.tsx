@@ -35,7 +35,6 @@ function PlayerFormDialog({
   const [firstName, setFirstName] = useState(player?.firstName ?? '')
   const [middleName, setMiddleName] = useState(player?.middleName ?? '')
   const [groupIds, setGroupIds] = useState<number[]>(player?.groupIds ?? [])
-  const [rating, setRating] = useState(String(player?.rating ?? 0))
   const [groupsError, setGroupsError] = useState<string | null>(null)
 
   function handleSubmit(event: React.FormEvent): void {
@@ -48,8 +47,7 @@ function PlayerFormDialog({
       lastName: finalizePersonName(lastName),
       firstName: finalizePersonName(firstName),
       middleName: finalizePersonName(middleName),
-      groupIds,
-      rating: Number(rating) || 0
+      groupIds
     })
   }
 
@@ -120,10 +118,6 @@ function PlayerFormDialog({
             <span className="entity-error">Сначала добавьте группу на вкладке «Группы»</span>
           )}
           {groupsError && <span className="entity-error">{groupsError}</span>}
-        </label>
-        <label className="entity-field">
-          <span>Рейтинг</span>
-          <input type="number" value={rating} onChange={(event) => setRating(event.target.value)} />
         </label>
         <div className="entity-actions">
           <button type="button" onClick={onClose}>

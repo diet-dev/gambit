@@ -13,8 +13,7 @@ const COLUMNS = `
   p.last_name AS lastName,
   p.first_name AS firstName,
   p.middle_name AS middleName,
-  (SELECT GROUP_CONCAT(m.group_id) FROM group_memberships m WHERE m.player_id = p.id) AS groupIds,
-  p.rating AS rating
+  (SELECT GROUP_CONCAT(m.group_id) FROM group_memberships m WHERE m.player_id = p.id) AS groupIds
 `
 
 function assertHasGroup(groupIds: number[]): void {
@@ -69,10 +68,8 @@ export function createPlayerStore(database: DatabaseSync): PlayerStore {
       withTransaction(database, () => {
         assertHasGroup(input.groupIds)
         const info = database
-          .prepare(
-            'INSERT INTO players (last_name, first_name, middle_name, rating) VALUES (?, ?, ?, ?)'
-          )
-          .run(input.lastName, input.firstName, input.middleName, input.rating)
+          .prepare('INSERT INTO players (last_name, first_name, middle_name) VALUES (?, ?, ?)')
+          .run(input.lastName, input.firstName, input.middleName)
         const id = Number(info.lastInsertRowid)
         setGroups(id, input.groupIds)
         return get(id)
@@ -81,10 +78,8 @@ export function createPlayerStore(database: DatabaseSync): PlayerStore {
       withTransaction(database, () => {
         assertHasGroup(player.groupIds)
         database
-          .prepare(
-            'UPDATE players SET last_name = ?, first_name = ?, middle_name = ?, rating = ? WHERE id = ?'
-          )
-          .run(player.lastName, player.firstName, player.middleName, player.rating, player.id)
+          .prepare('UPDATE players SET last_name = ?, first_name = ?, middle_name = ? WHERE id = ?')
+          .run(player.lastName, player.firstName, player.middleName, player.id)
         setGroups(player.id, player.groupIds)
         return get(player.id)
       }),

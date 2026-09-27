@@ -14,8 +14,7 @@ function makeStores(): { players: PlayerStore; groups: GroupStore } {
 const input = {
   lastName: 'Иванов',
   firstName: 'Иван',
-  middleName: 'Иванович',
-  rating: 100
+  middleName: 'Иванович'
 }
 
 describe('playerStore', () => {
@@ -45,9 +44,9 @@ describe('playerStore', () => {
     const nineV = groups.create({ name: '9В', comment: '' })
     const created = players.create({ ...input, groupIds: [sevenA.id] })
 
-    const updated = players.update({ ...created, rating: 250, groupIds: [eightB.id, nineV.id] })
+    const updated = players.update({ ...created, groupIds: [eightB.id, nineV.id] })
 
-    expect(updated).toMatchObject({ id: created.id, rating: 250, groupIds: [eightB.id, nineV.id] })
+    expect(updated).toMatchObject({ id: created.id, groupIds: [eightB.id, nineV.id] })
     expect(players.list()[0].groupIds).toEqual([eightB.id, nineV.id])
   })
 

@@ -59,15 +59,13 @@ describe('groupStore', () => {
       lastName: 'Иванов',
       firstName: 'Иван',
       middleName: '',
-      groupIds: [sevenA.id],
-      rating: 0
+      groupIds: [sevenA.id]
     })
     players.create({
       lastName: 'Петров',
       firstName: 'Пётр',
       middleName: '',
-      groupIds: [sevenA.id, eightB.id],
-      rating: 0
+      groupIds: [sevenA.id, eightB.id]
     })
 
     expect(() => groups.remove(sevenA.id)).toThrow(
@@ -84,8 +82,7 @@ describe('groupStore', () => {
       lastName: 'Иванов',
       firstName: 'Иван',
       middleName: '',
-      groupIds: [sevenA.id, eightB.id],
-      rating: 0
+      groupIds: [sevenA.id, eightB.id]
     })
 
     groups.remove(sevenA.id)

@@ -32,8 +32,7 @@ function migrate(database: DatabaseSync): void {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         last_name TEXT NOT NULL,
         first_name TEXT NOT NULL,
-        middle_name TEXT NOT NULL DEFAULT '',
-        rating INTEGER NOT NULL DEFAULT 0
+        middle_name TEXT NOT NULL DEFAULT ''
       );
       CREATE TABLE IF NOT EXISTS group_memberships (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

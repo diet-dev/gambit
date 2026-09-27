@@ -38,8 +38,7 @@ describe('registerPlayersIpc', () => {
       lastName: 'Иванов',
       firstName: 'Иван',
       middleName: '',
-      groupIds: [1],
-      rating: 0
+      groupIds: [1]
     }
     expect(invoke('players:create', input)).toEqual({ id: 1, ...input })
     expect(store.create).toHaveBeenCalledWith(input)

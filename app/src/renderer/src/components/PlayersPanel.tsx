@@ -62,7 +62,6 @@ function PlayersPanel(): React.JSX.Element {
               <span className="entity-sub">
                 {player.groupIds.map((id) => groupNames.get(id) ?? '—').join(', ')}
               </span>
-              <span className="entity-value">{player.rating}</span>
               <button
                 type="button"
                 className="entity-action"

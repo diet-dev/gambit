@@ -365,14 +365,6 @@ code {
   color: var(--ev-c-text-2);
 }
 
-.entity-value {
-  min-width: 32px;
-  text-align: right;
-  font-size: 13px;
-  color: var(--ev-c-text-1);
-  font-variant-numeric: tabular-nums;
-}
-
 .entity-action {
   display: inline-flex;
   align-items: center;

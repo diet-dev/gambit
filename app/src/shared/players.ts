@@ -4,7 +4,6 @@ export type Player = {
   firstName: string
   middleName: string
   groupIds: number[]
-  rating: number
 }
 
 export type PlayerInput = Omit<Player, 'id'>
