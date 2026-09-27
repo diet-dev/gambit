@@ -230,4 +230,104 @@ describe('tournamentStore settings', () => {
       }
     ])
   })
+
+  it('previews the first round from the group players and saves it', () => {
+    const database = openDatabase(':memory:')
+    const store = createTournamentStore(database)
+    const groups = createGroupStore(database)
+    const playersDb = database.prepare("INSERT INTO players (last_name, first_name) VALUES (?, '')")
+    const ids = ['Волков', 'Абрамов', 'Борисов', 'Гаврилов'].map((lastName) =>
+      Number(playersDb.run(lastName).lastInsertRowid)
+    )
+    const group = groups.create({ name: '7А', comment: '' })
+    const join = database.prepare(
+      'INSERT INTO group_memberships (group_id, player_id) VALUES (?, ?)'
+    )
+    ids.forEach((id) => join.run(group.id, id))
+    const settings = store.listSettings()[0]
+    const tournament = store.createTournament({
+      name: 'Осенний',
+      groupId: group.id,
+      startDate: '2026-10-01',
+      settingsId: settings.id
+    })
+
+    const preview = store.previewPairs(tournament.id)
+    expect(preview.seq).toBe(1)
+    expect(preview.pairs).toEqual([
+      { player1Id: ids[1], player2Id: ids[2] },
+      { player1Id: ids[0], player2Id: ids[3] }
+    ])
+    expect(preview.restingPlayerId).toBe(null)
+
+    const { round, pairs } = store.createRound({
+      tournamentId: tournament.id,
+      playedDate: '2026-10-05',
+      settingsId: settings.id,
+      pairs: preview.pairs.map((pair, index) => ({
+        ...pair,
+        result: index === 0 ? ('player2_win' as const) : ('draw' as const)
+      }))
+    })
+
+    expect(round).toMatchObject({
+      tournamentId: tournament.id,
+      seq: 1,
+      playedDate: '2026-10-05',
+      settingsId: settings.id
+    })
+    expect(pairs.map((pair) => pair.result)).toEqual(['player2_win', 'draw'])
+    expect(store.listRounds(tournament.id)).toHaveLength(1)
+  })
+
+  it('previews the second round from the first round results and validates on save', () => {
+    const database = openDatabase(':memory:')
+    const store = createTournamentStore(database)
+    const groups = createGroupStore(database)
+    const playersDb = database.prepare("INSERT INTO players (last_name, first_name) VALUES (?, '')")
+    const ids = ['Абрамов', 'Борисов', 'Волков'].map((lastName) =>
+      Number(playersDb.run(lastName).lastInsertRowid)
+    )
+    const group = groups.create({ name: '7А', comment: '' })
+    const join = database.prepare(
+      'INSERT INTO group_memberships (group_id, player_id) VALUES (?, ?)'
+    )
+    ids.forEach((id) => join.run(group.id, id))
+    const settings = store.listSettings()[0]
+    const tournament = store.createTournament({
+      name: 'Осенний',
+      groupId: group.id,
+      startDate: '2026-10-01',
+      settingsId: settings.id
+    })
+
+    store.createRound({
+      tournamentId: tournament.id,
+      playedDate: '2026-10-05',
+      settingsId: settings.id,
+      pairs: [{ player1Id: ids[0], player2Id: ids[1], result: 'player1_win' }]
+    })
+
+    const preview = store.previewPairs(tournament.id)
+    expect(preview.seq).toBe(2)
+    expect(preview.pairs).toEqual([{ player1Id: ids[1], player2Id: ids[2] }])
+    expect(preview.restingPlayerId).toBe(ids[0])
+
+    expect(() =>
+      store.createRound({
+        tournamentId: tournament.id,
+        playedDate: '2026-10-12',
+        settingsId: settings.id,
+        pairs: [{ player1Id: ids[0], player2Id: ids[1], result: 'draw' }]
+      })
+    ).toThrow('Пары не совпадают с расчётными для этого раунда')
+
+    store.createRound({
+      tournamentId: tournament.id,
+      playedDate: '2026-10-12',
+      settingsId: settings.id,
+      pairs: [{ player1Id: ids[1], player2Id: ids[2], result: 'draw' }]
+    })
+    expect(store.listRounds(tournament.id)).toHaveLength(2)
+  })
 })

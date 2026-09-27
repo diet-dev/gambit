@@ -47,8 +47,41 @@ export type Round = {
   settingsId: number
 }
 
+export type PairResult =
+  'player1_win' | 'player2_win' | 'draw' | 'player1_absent' | 'player2_absent'
+
+export type RoundPair = {
+  id: number
+  roundId: number
+  boardNo: number
+  player1Id: number
+  player2Id: number
+  result: PairResult
+}
+
+export type RoundPairInput = {
+  player1Id: number
+  player2Id: number
+  result: PairResult
+}
+
+export type RoundPairsPreview = {
+  seq: number
+  pairs: { player1Id: number; player2Id: number }[]
+  restingPlayerId: number | null
+}
+
+export type RoundCreateInput = {
+  tournamentId: number
+  playedDate: string
+  settingsId: number
+  pairs: RoundPairInput[]
+}
+
 export type RoundsApi = {
   list: (tournamentId: number) => Promise<Round[]>
+  preview: (tournamentId: number) => Promise<RoundPairsPreview>
+  create: (input: RoundCreateInput) => Promise<{ round: Round; pairs: RoundPair[] }>
 }
 
 export type TournamentApi = {

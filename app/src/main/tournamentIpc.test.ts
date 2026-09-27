@@ -37,7 +37,18 @@ function createStore(): TournamentStore {
     createTournament: vi.fn((input) => ({ id: 1, ...input })),
     updateTournament: vi.fn((id, input) => ({ id, ...input })),
     removeTournament: vi.fn(),
-    listRounds: vi.fn(() => [])
+    listRounds: vi.fn(() => []),
+    previewPairs: vi.fn(() => ({ seq: 1, pairs: [], restingPlayerId: null })),
+    createRound: vi.fn(() => ({
+      round: {
+        id: 1,
+        tournamentId: 1,
+        seq: 1,
+        playedDate: '2026-10-05',
+        settingsId: 1
+      },
+      pairs: []
+    }))
   }
 }
 
@@ -89,5 +100,17 @@ describe('registerTournamentIpc', () => {
 
     invoke('tournament:rounds:list', 5)
     expect(store.listRounds).toHaveBeenCalledWith(5)
+
+    invoke('tournament:rounds:preview', 5)
+    expect(store.previewPairs).toHaveBeenCalledWith(5)
+
+    const roundInput = {
+      tournamentId: 5,
+      playedDate: '2026-10-05',
+      settingsId: 1,
+      pairs: [{ player1Id: 1, player2Id: 2, result: 'draw' }]
+    }
+    invoke('tournament:rounds:create', roundInput)
+    expect(store.createRound).toHaveBeenCalledWith(roundInput)
   })
 })

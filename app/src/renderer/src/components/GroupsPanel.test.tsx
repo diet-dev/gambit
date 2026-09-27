@@ -55,7 +55,12 @@ function installApi(initial: Group[]): GroupsApi {
         remove: vi.fn()
       },
       rounds: {
-        list: vi.fn(async () => [])
+        list: vi.fn(async () => []),
+        preview: vi.fn(async () => ({ seq: 1, pairs: [], restingPlayerId: null })),
+        create: vi.fn(async () => ({
+          round: { id: 1, tournamentId: 1, seq: 1, playedDate: '', settingsId: 1 },
+          pairs: []
+        }))
       }
     }
   }

@@ -13,6 +13,7 @@ import SettingsPanel from './components/SettingsPanel'
 import SituationCommentDialog from './components/SituationCommentDialog'
 import SituationList from './components/SituationList'
 import PlayersPanel from './components/PlayersPanel'
+import RoundFormOverlay from './components/RoundFormOverlay'
 import TournamentsPanel from './components/TournamentsPanel'
 import { useEventLog } from './hooks/useEventLog'
 import { findHelpArticle } from './help/articles'
@@ -24,6 +25,9 @@ function App(): React.JSX.Element {
   const [instance, setInstance] = useState(0)
   const [activity, setActivity] = useState<Activity>('situations')
   const [helpArticleId, setHelpArticleId] = useState<string | null>(null)
+  const [selectedTournamentId, setSelectedTournamentId] = useState<number | null>(null)
+  const [roundFormOpen, setRoundFormOpen] = useState(false)
+  const [roundFormSavedAt, setRoundFormSavedAt] = useState(0)
   const { events, logMove } = useEventLog()
   const selected = findSituation(selectedId) ?? findSituation(DEFAULT_SITUATION_ID)!
   const commentSituation = commentId ? findSituation(commentId) : undefined
@@ -77,7 +81,14 @@ function App(): React.JSX.Element {
             {activity === 'devices' && <DevicesPanel />}
             {activity === 'groups' && <GroupsPanel />}
             {activity === 'tournaments' && <TournamentsPanel />}
-            {activity === 'rounds' && <RoundsPanel />}
+            {activity === 'rounds' && (
+              <RoundsPanel
+                selectedTournamentId={selectedTournamentId}
+                onSelectTournament={setSelectedTournamentId}
+                onCreateRound={() => setRoundFormOpen(true)}
+                savedAt={roundFormSavedAt}
+              />
+            )}
             {activity === 'players' && <PlayersPanel />}
             {activity === 'events' && <EventLogPanel events={events} />}
             {activity === 'settings' && <SettingsPanel />}
@@ -97,6 +108,17 @@ function App(): React.JSX.Element {
             <RemoteQrButton />
             {activity === 'help' && helpArticle && (
               <HelpArticleOverlay article={helpArticle} onClose={() => setHelpArticleId(null)} />
+            )}
+            {activity === 'rounds' && roundFormOpen && (
+              <RoundFormOverlay
+                key={`${selectedTournamentId}:${roundFormSavedAt}`}
+                tournamentId={selectedTournamentId}
+                onClose={() => setRoundFormOpen(false)}
+                onSaved={() => {
+                  setRoundFormOpen(false)
+                  setRoundFormSavedAt((value) => value + 1)
+                }}
+              />
             )}
           </div>
         </Panel>

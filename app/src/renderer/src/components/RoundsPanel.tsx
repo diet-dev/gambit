@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import type { Round } from '../../../shared/tournament'
 import { useRounds } from '../hooks/useRounds'
 import { useTournaments } from '../hooks/useTournaments'
@@ -9,11 +9,28 @@ function formatDate(isoDate: string): string {
   return `${day}.${month}.${year}`
 }
 
-function RoundsPanel(): React.JSX.Element {
+type RoundsPanelProps = {
+  selectedTournamentId: number | null
+  onSelectTournament: (tournamentId: number | null) => void
+  onCreateRound: () => void
+  savedAt: number
+}
+
+function RoundsPanel({
+  selectedTournamentId,
+  onSelectTournament,
+  onCreateRound,
+  savedAt
+}: RoundsPanelProps): React.JSX.Element {
   const { tournaments } = useTournaments()
   const { settings } = useTournamentSettings()
-  const [tournamentId, setTournamentId] = useState<number | null>(null)
-  const { rounds } = useRounds(tournamentId)
+  const { rounds, reload } = useRounds(selectedTournamentId)
+
+  useEffect(() => {
+    if (savedAt > 0) {
+      void reload()
+    }
+  }, [savedAt, reload])
 
   const settingsNames = new Map(settings.map((item) => [item.id, item.name]))
 
@@ -22,9 +39,9 @@ function RoundsPanel(): React.JSX.Element {
       <label className="entity-field">
         <span>Турнир</span>
         <select
-          value={tournamentId ?? ''}
+          value={selectedTournamentId ?? ''}
           onChange={(event) =>
-            setTournamentId(event.target.value === '' ? null : Number(event.target.value))
+            onSelectTournament(event.target.value === '' ? null : Number(event.target.value))
           }
         >
           <option value="">Выберите турнир</option>
@@ -38,7 +55,14 @@ function RoundsPanel(): React.JSX.Element {
           <span className="entity-error">Сначала создайте турнир на подвкладке «Турниры»</span>
         )}
       </label>
-      {tournamentId !== null &&
+      {selectedTournamentId !== null && (
+        <div className="rounds-header">
+          <button type="button" className="entity-add" onClick={onCreateRound}>
+            Создать раунд
+          </button>
+        </div>
+      )}
+      {selectedTournamentId !== null &&
         (rounds.length === 0 ? (
           <p className="entity-empty">Раундов пока нет</p>
         ) : (

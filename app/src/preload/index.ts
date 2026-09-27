@@ -5,6 +5,9 @@ import type { Player, PlayerInput, PlayersApi } from '../shared/players'
 import type { Group, GroupInput, GroupsApi } from '../shared/groups'
 import type {
   Round,
+  RoundCreateInput,
+  RoundPair,
+  RoundPairsPreview,
   Tournament,
   TournamentApi,
   TournamentInput,
@@ -63,7 +66,14 @@ const tournament: TournamentApi = {
   },
   rounds: {
     list: (tournamentId: number) =>
-      ipcRenderer.invoke('tournament:rounds:list', tournamentId) as Promise<Round[]>
+      ipcRenderer.invoke('tournament:rounds:list', tournamentId) as Promise<Round[]>,
+    preview: (tournamentId: number) =>
+      ipcRenderer.invoke('tournament:rounds:preview', tournamentId) as Promise<RoundPairsPreview>,
+    create: (input: RoundCreateInput) =>
+      ipcRenderer.invoke('tournament:rounds:create', input) as Promise<{
+        round: Round
+        pairs: RoundPair[]
+      }>
   }
 }
 

@@ -25,7 +25,12 @@ const standard = {
 
 function installApi(tournaments: Tournament[], rounds: Round[]): RoundsApi {
   const roundsApi = {
-    list: vi.fn(async () => rounds)
+    list: vi.fn(async () => rounds),
+    preview: vi.fn(async () => ({ seq: 1, pairs: [], restingPlayerId: null })),
+    create: vi.fn(async () => ({
+      round: { id: 1, tournamentId: 1, seq: 1, playedDate: '', settingsId: 1 },
+      pairs: []
+    }))
   }
   window.api = {
     remote: remoteStub,
@@ -63,7 +68,14 @@ function installApi(tournaments: Tournament[], rounds: Round[]): RoundsApi {
 describe('RoundsPanel', () => {
   it('hints to create a tournament when there are none', async () => {
     installApi([], [])
-    const { getByRole, findByText, queryByRole } = render(<RoundsPanel />)
+    const { getByRole, findByText, queryByRole } = render(
+      <RoundsPanel
+        selectedTournamentId={null}
+        onSelectTournament={() => {}}
+        onCreateRound={() => {}}
+        savedAt={0}
+      />
+    )
 
     expect(getByRole('combobox')).toBeEnabled()
     expect(await findByText('Сначала создайте турнир на подвкладке «Турниры»')).toBeInTheDocument()
@@ -73,7 +85,14 @@ describe('RoundsPanel', () => {
   it('shows an empty state for a tournament without rounds', async () => {
     installApi([{ id: 1, name: 'Осенний', groupId: 1, startDate: '2026-10-01', settingsId: 1 }], [])
     const user = userEvent.setup()
-    const { getByRole, findByText } = render(<RoundsPanel />)
+    const { getByRole, findByText } = render(
+      <RoundsPanel
+        selectedTournamentId={1}
+        onSelectTournament={() => {}}
+        onCreateRound={() => {}}
+        savedAt={0}
+      />
+    )
 
     await user.selectOptions(getByRole('combobox'), '1')
 
@@ -89,7 +108,14 @@ describe('RoundsPanel', () => {
       ]
     )
     const user = userEvent.setup()
-    const { getByRole, findByText } = render(<RoundsPanel />)
+    const { getByRole, findByText } = render(
+      <RoundsPanel
+        selectedTournamentId={1}
+        onSelectTournament={() => {}}
+        onCreateRound={() => {}}
+        savedAt={0}
+      />
+    )
 
     await user.selectOptions(getByRole('combobox'), '1')
 
@@ -106,7 +132,14 @@ describe('RoundsPanel', () => {
       [{ id: 1, tournamentId: 1, seq: 1, playedDate: '2026-10-01', settingsId: 1 }]
     )
     const user = userEvent.setup()
-    const { getByRole, findByText, queryByText } = render(<RoundsPanel />)
+    const { getByRole, findByText, queryByText } = render(
+      <RoundsPanel
+        selectedTournamentId={1}
+        onSelectTournament={() => {}}
+        onCreateRound={() => {}}
+        savedAt={0}
+      />
+    )
 
     await user.selectOptions(getByRole('combobox'), '1')
     await findByText('№1')

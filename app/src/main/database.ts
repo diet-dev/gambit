@@ -63,6 +63,15 @@ function migrate(database: DatabaseSync): void {
         settings_id INTEGER NOT NULL REFERENCES tournament_settings(id),
         UNIQUE (tournament_id, seq)
       );
+      CREATE TABLE IF NOT EXISTS round_pairs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        round_id INTEGER NOT NULL REFERENCES rounds(id) ON DELETE CASCADE,
+        board_no INTEGER NOT NULL,
+        player1_id INTEGER NOT NULL REFERENCES players(id),
+        player2_id INTEGER NOT NULL REFERENCES players(id),
+        result TEXT NOT NULL,
+        UNIQUE (round_id, board_no)
+      );
     `)
     database
       .prepare(

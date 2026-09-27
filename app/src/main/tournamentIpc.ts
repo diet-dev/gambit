@@ -1,4 +1,8 @@
-import type { TournamentInput, TournamentSettingsInput } from '../shared/tournament'
+import type {
+  TournamentInput,
+  TournamentSettingsInput,
+  RoundCreateInput
+} from '../shared/tournament'
 import type { IpcMainLike } from './remoteIpc'
 import type { TournamentStore } from './tournamentStore'
 
@@ -28,5 +32,11 @@ export function registerTournamentIpc({ ipcMain, store }: RegisterTournamentIpcO
   )
   ipcMain.handle('tournament:rounds:list', (_event, tournamentId) =>
     store.listRounds(tournamentId as number)
+  )
+  ipcMain.handle('tournament:rounds:preview', (_event, tournamentId) =>
+    store.previewPairs(tournamentId as number)
+  )
+  ipcMain.handle('tournament:rounds:create', (_event, input) =>
+    store.createRound(input as RoundCreateInput)
   )
 }
