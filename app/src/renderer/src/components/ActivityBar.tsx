@@ -6,11 +6,12 @@ import {
   School,
   ScrollText,
   Settings,
+  Trophy,
   type LucideIcon
 } from 'lucide-react'
 
 export type Activity =
-  'situations' | 'groups' | 'players' | 'devices' | 'events' | 'settings' | 'help'
+  'situations' | 'groups' | 'tournaments' | 'players' | 'devices' | 'events' | 'settings' | 'help'
 
 type ActivityBarProps = {
   active: Activity
@@ -23,6 +24,7 @@ const TOP_ITEMS: Item[] = [
   { id: 'situations', icon: ListChecks, title: 'Ситуации' },
   { id: 'groups', icon: School, title: 'Группы' },
   { id: 'players', icon: GraduationCap, title: 'Игроки' },
+  { id: 'tournaments', icon: Trophy, title: 'Турниры' },
   { id: 'devices', icon: MonitorSmartphone, title: 'Устройства' },
   { id: 'events', icon: ScrollText, title: 'События' }
 ]

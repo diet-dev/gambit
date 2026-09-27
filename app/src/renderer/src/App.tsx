@@ -12,6 +12,7 @@ import SettingsPanel from './components/SettingsPanel'
 import SituationCommentDialog from './components/SituationCommentDialog'
 import SituationList from './components/SituationList'
 import PlayersPanel from './components/PlayersPanel'
+import TournamentsPanel from './components/TournamentsPanel'
 import { useEventLog } from './hooks/useEventLog'
 import { findHelpArticle } from './help/articles'
 import { DEFAULT_SITUATION_ID, SITUATION_GROUPS, findSituation } from './situations'
@@ -74,6 +75,7 @@ function App(): React.JSX.Element {
             )}
             {activity === 'devices' && <DevicesPanel />}
             {activity === 'groups' && <GroupsPanel />}
+            {activity === 'tournaments' && <TournamentsPanel />}
             {activity === 'players' && <PlayersPanel />}
             {activity === 'events' && <EventLogPanel events={events} />}
             {activity === 'settings' && <SettingsPanel />}

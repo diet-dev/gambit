@@ -42,6 +42,16 @@ describe('App', () => {
     expect(container.querySelector('.left-panel .events-panel')).toBeInTheDocument()
   })
 
+  it('switches the left panel to the tournaments tab', () => {
+    const { container, getByRole, queryByRole } = render(<App />)
+
+    fireEvent.click(getByRole('button', { name: 'Турниры' }))
+
+    expect(getByRole('button', { name: 'Турниры' })).toHaveClass('activity-button-active')
+    expect(queryByRole('button', { name: /Мат в один ход/ })).not.toBeInTheDocument()
+    expect(container.querySelector('.left-panel .tournaments-panel')).toBeInTheDocument()
+  })
+
   it('switches the left panel to the groups tab', () => {
     const { container, getByRole, queryByRole } = render(<App />)
 
