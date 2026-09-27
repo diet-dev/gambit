@@ -1,46 +1,47 @@
 import { useState } from 'react'
-import type { ClassInput, SchoolClass } from '../../../shared/classes'
+import type { Group, GroupInput } from '../../../shared/groups'
+import { finalizeGroupName, normalizeGroupNameInput } from '../../../shared/groupName'
 import Dialog from './Dialog'
 
-type ClassFormDialogProps = {
-  schoolClass: SchoolClass | null
-  classes: SchoolClass[]
-  onSubmit: (input: ClassInput) => void
+type GroupFormDialogProps = {
+  group: Group | null
+  groups: Group[]
+  onSubmit: (input: GroupInput) => void
   onClose: () => void
 }
 
-function ClassFormDialog({
-  schoolClass,
-  classes,
+function GroupFormDialog({
+  group,
+  groups,
   onSubmit,
   onClose
-}: ClassFormDialogProps): React.JSX.Element {
-  const [name, setName] = useState(schoolClass?.name ?? '')
-  const [comment, setComment] = useState(schoolClass?.comment ?? '')
+}: GroupFormDialogProps): React.JSX.Element {
+  const [name, setName] = useState(group?.name ?? '')
+  const [comment, setComment] = useState(group?.comment ?? '')
   const [nameError, setNameError] = useState<string | null>(null)
 
   function handleSubmit(event: React.FormEvent): void {
     event.preventDefault()
-    const trimmed = name.trim()
-    if (trimmed === '') {
+    const finalName = finalizeGroupName(name)
+    if (finalName === '') {
       setNameError('Введите название')
       return
     }
-    const duplicate = classes.some(
-      (item) =>
-        item.id !== schoolClass?.id && item.name.toLocaleLowerCase() === trimmed.toLocaleLowerCase()
-    )
+    if (finalName !== name) {
+      setName(finalName)
+    }
+    const duplicate = groups.some((item) => item.id !== group?.id && item.name === finalName)
     if (duplicate) {
-      setNameError('Класс с таким именем уже есть')
+      setNameError('Группа с таким именем уже есть')
       return
     }
-    onSubmit({ name: trimmed, comment })
+    onSubmit({ name: finalName, comment })
   }
 
   return (
-    <Dialog titleId="class-form-title" className="entity-form-dialog" onClose={onClose}>
-      <h2 id="class-form-title" className="comment-dialog-title">
-        {schoolClass ? 'Класс' : 'Новый класс'}
+    <Dialog titleId="group-form-title" className="entity-form-dialog" onClose={onClose}>
+      <h2 id="group-form-title" className="comment-dialog-title">
+        {group ? 'Группа' : 'Новая группа'}
       </h2>
       <form className="entity-form" onSubmit={handleSubmit}>
         <label className="entity-field">
@@ -53,7 +54,7 @@ function ClassFormDialog({
           <input
             value={name}
             onChange={(event) => {
-              setName(event.target.value.replace(/[^А-Яа-яЁё0-9]/g, '').toUpperCase())
+              setName(normalizeGroupNameInput(event.target.value))
               setNameError(null)
             }}
             required
@@ -75,4 +76,4 @@ function ClassFormDialog({
   )
 }
 
-export default ClassFormDialog
+export default GroupFormDialog

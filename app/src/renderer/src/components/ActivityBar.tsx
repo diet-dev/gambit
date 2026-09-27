@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 
 export type Activity =
-  'situations' | 'classes' | 'students' | 'devices' | 'events' | 'settings' | 'help'
+  'situations' | 'groups' | 'players' | 'devices' | 'events' | 'settings' | 'help'
 
 type ActivityBarProps = {
   active: Activity
@@ -21,8 +21,8 @@ type Item = { id: Activity; icon: LucideIcon; title: string }
 
 const TOP_ITEMS: Item[] = [
   { id: 'situations', icon: ListChecks, title: 'Ситуации' },
-  { id: 'classes', icon: School, title: 'Классы' },
-  { id: 'students', icon: GraduationCap, title: 'Ученики' },
+  { id: 'groups', icon: School, title: 'Группы' },
+  { id: 'players', icon: GraduationCap, title: 'Игроки' },
   { id: 'devices', icon: MonitorSmartphone, title: 'Устройства' },
   { id: 'events', icon: ScrollText, title: 'События' }
 ]

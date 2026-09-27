@@ -1,27 +1,27 @@
 import { useState } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
-import type { ClassInput, SchoolClass } from '../../../shared/classes'
-import { useClasses } from '../hooks/useClasses'
-import ClassFormDialog from './ClassFormDialog'
+import type { Group, GroupInput } from '../../../shared/groups'
+import { useGroups } from '../hooks/useGroups'
+import GroupFormDialog from './GroupFormDialog'
 import Dialog from './Dialog'
 
-function ClassesPanel(): React.JSX.Element {
-  const { classes, create, update, remove } = useClasses()
+function GroupsPanel(): React.JSX.Element {
+  const { groups, create, update, remove } = useGroups()
   const [formOpen, setFormOpen] = useState(false)
-  const [editing, setEditing] = useState<SchoolClass | null>(null)
-  const [deleting, setDeleting] = useState<SchoolClass | null>(null)
+  const [editing, setEditing] = useState<Group | null>(null)
+  const [deleting, setDeleting] = useState<Group | null>(null)
 
   function openCreate(): void {
     setEditing(null)
     setFormOpen(true)
   }
 
-  function openEdit(schoolClass: SchoolClass): void {
-    setEditing(schoolClass)
+  function openEdit(group: Group): void {
+    setEditing(group)
     setFormOpen(true)
   }
 
-  async function submit(input: ClassInput): Promise<void> {
+  async function submit(input: GroupInput): Promise<void> {
     if (editing) {
       await update({ ...input, id: editing.id })
     } else {
@@ -38,33 +38,33 @@ function ClassesPanel(): React.JSX.Element {
   }
 
   return (
-    <div className="entity-panel classes-panel">
+    <div className="entity-panel groups-panel">
       <div className="entity-header">
         <button type="button" className="entity-add" onClick={openCreate}>
-          Добавить класс
+          Добавить группу
         </button>
       </div>
-      {classes.length === 0 ? (
-        <p className="entity-empty">Классов пока нет</p>
+      {groups.length === 0 ? (
+        <p className="entity-empty">Групп пока нет</p>
       ) : (
         <ul className="entity-list">
-          {classes.map((schoolClass) => (
-            <li key={schoolClass.id} className="entity-item">
-              <span className="entity-name">{schoolClass.name}</span>
-              <span className="entity-sub">{schoolClass.comment}</span>
+          {groups.map((group) => (
+            <li key={group.id} className="entity-item">
+              <span className="entity-name">{group.name}</span>
+              <span className="entity-sub">{group.comment}</span>
               <button
                 type="button"
                 className="entity-action"
-                aria-label={`Изменить: ${schoolClass.name}`}
-                onClick={() => openEdit(schoolClass)}
+                aria-label={`Изменить: ${group.name}`}
+                onClick={() => openEdit(group)}
               >
                 <Pencil size={16} aria-hidden="true" />
               </button>
               <button
                 type="button"
                 className="entity-action"
-                aria-label={`Удалить: ${schoolClass.name}`}
-                onClick={() => setDeleting(schoolClass)}
+                aria-label={`Удалить: ${group.name}`}
+                onClick={() => setDeleting(group)}
               >
                 <Trash2 size={16} aria-hidden="true" />
               </button>
@@ -73,21 +73,21 @@ function ClassesPanel(): React.JSX.Element {
         </ul>
       )}
       {formOpen && (
-        <ClassFormDialog
-          schoolClass={editing}
-          classes={classes}
+        <GroupFormDialog
+          group={editing}
+          groups={groups}
           onSubmit={submit}
           onClose={() => setFormOpen(false)}
         />
       )}
       {deleting && (
         <Dialog
-          titleId="class-delete-title"
+          titleId="group-delete-title"
           className="entity-delete-dialog"
           onClose={() => setDeleting(null)}
         >
-          <h2 id="class-delete-title" className="comment-dialog-title">
-            Удалить класс?
+          <h2 id="group-delete-title" className="comment-dialog-title">
+            Удалить группу?
           </h2>
           <p className="comment-dialog-text">{deleting.name}</p>
           <div className="entity-actions">
@@ -104,4 +104,4 @@ function ClassesPanel(): React.JSX.Element {
   )
 }
 
-export default ClassesPanel
+export default GroupsPanel

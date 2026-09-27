@@ -8,10 +8,10 @@ import { createRemoteServer, type RemoteServer } from './remoteServer'
 import { getLanAddress } from './lan'
 import { registerRemoteIpc } from './remoteIpc'
 import { openDatabase } from './database'
-import { createStudentStore } from './studentStore'
-import { registerStudentsIpc } from './studentsIpc'
-import { createClassStore } from './classStore'
-import { registerClassesIpc } from './classesIpc'
+import { createPlayerStore } from './playerStore'
+import { registerPlayersIpc } from './playersIpc'
+import { createGroupStore } from './groupStore'
+import { registerGroupsIpc } from './groupsIpc'
 import type { DatabaseSync } from 'node:sqlite'
 
 let remoteServer: RemoteServer | null = null
@@ -84,8 +84,8 @@ app.whenReady().then(async () => {
   })
 
   database = openDatabase(join(app.getPath('userData'), 'gambit', 'gambit.db'))
-  registerStudentsIpc({ ipcMain, store: createStudentStore(database) })
-  registerClassesIpc({ ipcMain, store: createClassStore(database) })
+  registerPlayersIpc({ ipcMain, store: createPlayerStore(database) })
+  registerGroupsIpc({ ipcMain, store: createGroupStore(database) })
 
   try {
     await startRemoteServer()

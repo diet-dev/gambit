@@ -8,8 +8,8 @@ describe('ActivityBar', () => {
 
     expect(container.querySelectorAll('.activity-button')).toHaveLength(7)
     expect(getByRole('button', { name: 'Ситуации' })).toHaveClass('activity-button-active')
-    expect(getByRole('button', { name: 'Классы' })).not.toHaveClass('activity-button-active')
-    expect(getByRole('button', { name: 'Ученики' })).not.toHaveClass('activity-button-active')
+    expect(getByRole('button', { name: 'Группы' })).not.toHaveClass('activity-button-active')
+    expect(getByRole('button', { name: 'Игроки' })).not.toHaveClass('activity-button-active')
     expect(getByRole('button', { name: 'Устройства' })).not.toHaveClass('activity-button-active')
     expect(getByRole('button', { name: 'События' })).not.toHaveClass('activity-button-active')
     expect(getByRole('button', { name: 'Настройки' })).not.toHaveClass('activity-button-active')

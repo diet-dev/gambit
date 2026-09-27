@@ -1,8 +1,8 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import type { RemoteApi, RemoteClient, RemoteMove, ServerInfo } from '../shared/remote'
-import type { Student, StudentInput, StudentsApi } from '../shared/students'
-import type { ClassInput, ClassesApi, SchoolClass } from '../shared/classes'
+import type { Player, PlayerInput, PlayersApi } from '../shared/players'
+import type { Group, GroupInput, GroupsApi } from '../shared/groups'
 
 const remote: RemoteApi = {
   publishPosition: (fen) => ipcRenderer.send('remote:position', fen),
@@ -20,24 +20,21 @@ const remote: RemoteApi = {
   }
 }
 
-const students: StudentsApi = {
-  list: () => ipcRenderer.invoke('students:list') as Promise<Student[]>,
-  create: (student: StudentInput) =>
-    ipcRenderer.invoke('students:create', student) as Promise<Student>,
-  update: (student: Student) => ipcRenderer.invoke('students:update', student) as Promise<Student>,
-  remove: (id: number) => ipcRenderer.invoke('students:remove', id) as Promise<void>
+const players: PlayersApi = {
+  list: () => ipcRenderer.invoke('players:list') as Promise<Player[]>,
+  create: (player: PlayerInput) => ipcRenderer.invoke('players:create', player) as Promise<Player>,
+  update: (player: Player) => ipcRenderer.invoke('players:update', player) as Promise<Player>,
+  remove: (id: number) => ipcRenderer.invoke('players:remove', id) as Promise<void>
 }
 
-const classes: ClassesApi = {
-  list: () => ipcRenderer.invoke('classes:list') as Promise<SchoolClass[]>,
-  create: (input: ClassInput) =>
-    ipcRenderer.invoke('classes:create', input) as Promise<SchoolClass>,
-  update: (schoolClass: SchoolClass) =>
-    ipcRenderer.invoke('classes:update', schoolClass) as Promise<SchoolClass>,
-  remove: (id: number) => ipcRenderer.invoke('classes:remove', id) as Promise<void>
+const groups: GroupsApi = {
+  list: () => ipcRenderer.invoke('groups:list') as Promise<Group[]>,
+  create: (input: GroupInput) => ipcRenderer.invoke('groups:create', input) as Promise<Group>,
+  update: (group: Group) => ipcRenderer.invoke('groups:update', group) as Promise<Group>,
+  remove: (id: number) => ipcRenderer.invoke('groups:remove', id) as Promise<void>
 }
 
-const api = { remote, students, classes }
+const api = { remote, players, groups }
 
 if (process.contextIsolated) {
   try {

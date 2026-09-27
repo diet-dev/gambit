@@ -42,24 +42,24 @@ describe('App', () => {
     expect(container.querySelector('.left-panel .events-panel')).toBeInTheDocument()
   })
 
-  it('switches the left panel to the classes tab', () => {
+  it('switches the left panel to the groups tab', () => {
     const { container, getByRole, queryByRole } = render(<App />)
 
-    fireEvent.click(getByRole('button', { name: 'Классы' }))
+    fireEvent.click(getByRole('button', { name: 'Группы' }))
 
-    expect(getByRole('button', { name: 'Классы' })).toHaveClass('activity-button-active')
+    expect(getByRole('button', { name: 'Группы' })).toHaveClass('activity-button-active')
     expect(queryByRole('button', { name: /Мат в один ход/ })).not.toBeInTheDocument()
-    expect(container.querySelector('.left-panel .classes-panel')).toBeInTheDocument()
+    expect(container.querySelector('.left-panel .groups-panel')).toBeInTheDocument()
   })
 
-  it('switches the left panel to the students tab', () => {
+  it('switches the left panel to the players tab', () => {
     const { container, getByRole, queryByRole } = render(<App />)
 
-    fireEvent.click(getByRole('button', { name: 'Ученики' }))
+    fireEvent.click(getByRole('button', { name: 'Игроки' }))
 
-    expect(getByRole('button', { name: 'Ученики' })).toHaveClass('activity-button-active')
+    expect(getByRole('button', { name: 'Игроки' })).toHaveClass('activity-button-active')
     expect(queryByRole('button', { name: /Мат в один ход/ })).not.toBeInTheDocument()
-    expect(container.querySelector('.left-panel .students-panel')).toBeInTheDocument()
+    expect(container.querySelector('.left-panel .players-panel')).toBeInTheDocument()
   })
 
   it('restarts the active situation by remounting the board', () => {

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Group, Panel, Separator, useDefaultLayout } from 'react-resizable-panels'
 import ActivityBar, { type Activity } from './components/ActivityBar'
 import ChessGame from './components/ChessGame'
-import ClassesPanel from './components/ClassesPanel'
+import GroupsPanel from './components/GroupsPanel'
 import DevicesPanel from './components/DevicesPanel'
 import EventLogPanel from './components/EventLogPanel'
 import HelpArticleOverlay from './components/HelpArticleOverlay'
@@ -11,7 +11,7 @@ import RemoteQrButton from './components/RemoteQrButton'
 import SettingsPanel from './components/SettingsPanel'
 import SituationCommentDialog from './components/SituationCommentDialog'
 import SituationList from './components/SituationList'
-import StudentsPanel from './components/StudentsPanel'
+import PlayersPanel from './components/PlayersPanel'
 import { useEventLog } from './hooks/useEventLog'
 import { findHelpArticle } from './help/articles'
 import { DEFAULT_SITUATION_ID, SITUATION_GROUPS, findSituation } from './situations'
@@ -73,8 +73,8 @@ function App(): React.JSX.Element {
               />
             )}
             {activity === 'devices' && <DevicesPanel />}
-            {activity === 'classes' && <ClassesPanel />}
-            {activity === 'students' && <StudentsPanel />}
+            {activity === 'groups' && <GroupsPanel />}
+            {activity === 'players' && <PlayersPanel />}
             {activity === 'events' && <EventLogPanel events={events} />}
             {activity === 'settings' && <SettingsPanel />}
             {activity === 'help' && (

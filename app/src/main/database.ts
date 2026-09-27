@@ -8,62 +8,58 @@ export function openDatabase(path: string): DatabaseSync {
   }
   const database = new DatabaseSync(path)
   database.exec('PRAGMA journal_mode = WAL')
+  database.exec('PRAGMA foreign_keys = ON')
   migrate(database)
   return database
 }
 
 function migrate(database: DatabaseSync): void {
-  const row = database.prepare('PRAGMA user_version').get() as { user_version: number }
-  const version = row.user_version
+  const version = currentVersion(database)
 
-  if (version < 1) {
+  if (version >= 1 && !hasTable(database, 'groups')) {
+    dropLegacySchema(database)
+  }
+
+  if (currentVersion(database) < 1) {
     database.exec(`
-      CREATE TABLE IF NOT EXISTS students (
+      CREATE TABLE IF NOT EXISTS groups (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        comment TEXT NOT NULL DEFAULT ''
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS groups_name_unique ON groups(name);
+      CREATE TABLE IF NOT EXISTS players (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         last_name TEXT NOT NULL,
         first_name TEXT NOT NULL,
         middle_name TEXT NOT NULL DEFAULT '',
-        class_name TEXT NOT NULL DEFAULT '',
         rating INTEGER NOT NULL DEFAULT 0
-      )
+      );
+      CREATE TABLE IF NOT EXISTS group_memberships (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+        player_id INTEGER NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+        UNIQUE (group_id, player_id)
+      );
     `)
     database.exec('PRAGMA user_version = 1')
   }
+}
 
-  if (version < 2) {
-    database.exec(`
-      CREATE TABLE IF NOT EXISTS classes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        comment TEXT NOT NULL DEFAULT ''
-      )
-    `)
-    database.exec('ALTER TABLE students ADD COLUMN class_id INTEGER REFERENCES classes(id)')
-    database.exec(`
-      INSERT INTO classes (name)
-      SELECT DISTINCT class_name FROM students
-      WHERE class_name IS NOT NULL AND class_name <> ''
-    `)
-    database.exec(`
-      UPDATE students
-      SET class_id = (SELECT id FROM classes WHERE classes.name = students.class_name)
-      WHERE class_name IS NOT NULL AND class_name <> ''
-    `)
-    database.exec('ALTER TABLE students DROP COLUMN class_name')
-    database.exec('PRAGMA user_version = 2')
-  }
+function currentVersion(database: DatabaseSync): number {
+  const row = database.prepare('PRAGMA user_version').get() as { user_version: number }
+  return row.user_version
+}
 
-  if (version < 3) {
-    database.exec(`
-      UPDATE students
-      SET class_id = (
-        SELECT MIN(c.id) FROM classes c
-        WHERE c.name = (SELECT name FROM classes WHERE id = students.class_id)
-      )
-      WHERE class_id NOT IN (SELECT MIN(id) FROM classes GROUP BY name)
-    `)
-    database.exec('DELETE FROM classes WHERE id NOT IN (SELECT MIN(id) FROM classes GROUP BY name)')
-    database.exec('CREATE UNIQUE INDEX IF NOT EXISTS classes_name_unique ON classes(name)')
-    database.exec('PRAGMA user_version = 3')
-  }
+function hasTable(database: DatabaseSync, name: string): boolean {
+  const row = database
+    .prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?")
+    .get(name)
+  return row !== undefined
+}
+
+function dropLegacySchema(database: DatabaseSync): void {
+  database.exec('DROP TABLE IF EXISTS students')
+  database.exec('DROP TABLE IF EXISTS classes')
+  database.exec('PRAGMA user_version = 0')
 }
