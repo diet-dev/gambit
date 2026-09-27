@@ -30,6 +30,9 @@ export type GenerationResult = {
 }
 
 export function swapFor(result: PairResult, settings: SwapSettings): boolean {
+  if (result === 'both_absent') {
+    return false
+  }
   if (result === 'draw') {
     return settings.drawScoring === 'weaker'
   }

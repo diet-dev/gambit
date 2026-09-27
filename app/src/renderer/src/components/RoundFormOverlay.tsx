@@ -9,13 +9,27 @@ import { usePlayers } from '../hooks/usePlayers'
 import { useTournaments } from '../hooks/useTournaments'
 import { useTournamentSettings } from '../hooks/useTournamentSettings'
 
-const RESULT_OPTIONS: { value: PairResult; label: string }[] = [
-  { value: 'player1_win', label: 'Победа 1-го' },
-  { value: 'player2_win', label: 'Победа 2-го' },
-  { value: 'draw', label: 'Ничья' },
-  { value: 'player1_absent', label: 'Неявка 1-го' },
-  { value: 'player2_absent', label: 'Неявка 2-го' }
-]
+const RESULT_LABELS: Record<PairResult, string> = {
+  player1_win: 'Победа',
+  player2_win: 'Победа',
+  draw: 'Ничья',
+  player1_absent: 'Неявка',
+  player2_absent: 'Неявка',
+  both_absent: 'Неявка обоих'
+}
+
+function resultLabel(
+  result: PairResult,
+  playerById: Map<number, { lastName: string; firstName: string; middleName: string }>,
+  pair: { player1Id: number; player2Id: number }
+): string {
+  if (result === 'draw' || result === 'both_absent') {
+    return RESULT_LABELS[result]
+  }
+  const playerId =
+    result === 'player1_win' || result === 'player1_absent' ? pair.player1Id : pair.player2Id
+  return `${RESULT_LABELS[result]}: ${playerLabel(playerById, playerId)}`
+}
 
 type PairDraft = {
   player1Id: number
@@ -120,8 +134,8 @@ function RoundFormOverlay({
     const next = [...pairs]
     const current = next[pairIndex]
     const previous = next[pairIndex - 1]
-    next[pairIndex - 1] = { ...previous, player1Id: current.player1Id }
-    next[pairIndex] = { ...current, player1Id: previous.player1Id }
+    next[pairIndex - 1] = { ...previous, player2Id: current.player1Id }
+    next[pairIndex] = { ...current, player1Id: previous.player2Id }
     setPairs(next)
   }
 
@@ -132,8 +146,8 @@ function RoundFormOverlay({
     const next = [...pairs]
     const current = next[pairIndex]
     const following = next[pairIndex + 1]
-    next[pairIndex + 1] = { ...following, player2Id: current.player2Id }
-    next[pairIndex] = { ...current, player2Id: following.player2Id }
+    next[pairIndex + 1] = { ...following, player1Id: current.player2Id }
+    next[pairIndex] = { ...current, player2Id: following.player1Id }
     setPairs(next)
   }
 
@@ -238,9 +252,6 @@ function RoundFormOverlay({
             {pairs.map((pair, index) => (
               <div key={`${pair.player1Id}-${pair.player2Id}`} className="pair-plate">
                 <div className="pair-plate-slot">
-                  <span className="pair-plate-name">
-                    {index + 1}. {playerLabel(playerById, pair.player1Id)}
-                  </span>
                   <span className="pair-plate-arrows">
                     <button
                       type="button"
@@ -259,10 +270,10 @@ function RoundFormOverlay({
                       <ArrowDown size={14} aria-hidden="true" />
                     </button>
                   </span>
+                  <span className="pair-plate-name">{playerLabel(playerById, pair.player1Id)}</span>
                 </div>
                 <span className="pair-plate-vs">—</span>
                 <div className="pair-plate-slot">
-                  <span className="pair-plate-name">{playerLabel(playerById, pair.player2Id)}</span>
                   <span className="pair-plate-arrows">
                     <button
                       type="button"
@@ -281,10 +292,11 @@ function RoundFormOverlay({
                       <ArrowDown size={14} aria-hidden="true" />
                     </button>
                   </span>
+                  <span className="pair-plate-name">{playerLabel(playerById, pair.player2Id)}</span>
                 </div>
                 <label className="pair-plate-result">
-                  <span>Исход</span>
                   <select
+                    aria-label={`Исход пары ${index + 1}`}
                     value={pair.result ?? ''}
                     onChange={(event) => setResult(index, event.target.value as PairResult)}
                     required
@@ -292,9 +304,18 @@ function RoundFormOverlay({
                     <option value="" disabled>
                       Выберите исход
                     </option>
-                    {RESULT_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
+                    {(
+                      [
+                        'player1_win',
+                        'player2_win',
+                        'draw',
+                        'player1_absent',
+                        'player2_absent',
+                        'both_absent'
+                      ] as PairResult[]
+                    ).map((result) => (
+                      <option key={result} value={result}>
+                        {resultLabel(result, playerById, pair)}
                       </option>
                     ))}
                   </select>

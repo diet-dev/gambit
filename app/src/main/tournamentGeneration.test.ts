@@ -33,6 +33,11 @@ describe('swapFor', () => {
     )
   })
 
+  it('never swaps when both players are absent', () => {
+    expect(swapFor('both_absent', defaultSettings)).toBe(false)
+    expect(swapFor('both_absent', { ...defaultSettings, absenceScoring: 'no_effect' })).toBe(false)
+  })
+
   it('mirrors colors when the stronger player plays white', () => {
     const settings = { ...defaultSettings, weakerPlaysWhite: false }
     expect(swapFor('player1_win', settings)).toBe(true)

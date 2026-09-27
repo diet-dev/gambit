@@ -48,7 +48,7 @@ export type Round = {
 }
 
 export type PairResult =
-  'player1_win' | 'player2_win' | 'draw' | 'player1_absent' | 'player2_absent'
+  'player1_win' | 'player2_win' | 'draw' | 'player1_absent' | 'player2_absent' | 'both_absent'
 
 export type RoundPair = {
   id: number
