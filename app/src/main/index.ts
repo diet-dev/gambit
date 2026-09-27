@@ -12,6 +12,8 @@ import { createPlayerStore } from './playerStore'
 import { registerPlayersIpc } from './playersIpc'
 import { createGroupStore } from './groupStore'
 import { registerGroupsIpc } from './groupsIpc'
+import { createTournamentStore } from './tournamentStore'
+import { registerTournamentIpc } from './tournamentIpc'
 import type { DatabaseSync } from 'node:sqlite'
 
 let remoteServer: RemoteServer | null = null
@@ -86,6 +88,7 @@ app.whenReady().then(async () => {
   database = openDatabase(join(app.getPath('userData'), 'gambit', 'gambit.db'))
   registerPlayersIpc({ ipcMain, store: createPlayerStore(database) })
   registerGroupsIpc({ ipcMain, store: createGroupStore(database) })
+  registerTournamentIpc({ ipcMain, store: createTournamentStore(database) })
 
   try {
     await startRemoteServer()

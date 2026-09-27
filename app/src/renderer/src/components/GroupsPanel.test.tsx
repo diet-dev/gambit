@@ -37,7 +37,19 @@ function installApi(initial: Group[]): GroupsApi {
       groups = groups.filter((item) => item.id !== id)
     })
   }
-  window.api = { remote: remoteStub, players: playersStub, groups: groupsApi }
+  window.api = {
+    remote: remoteStub,
+    players: playersStub,
+    groups: groupsApi,
+    tournament: {
+      settings: {
+        list: vi.fn(async () => []),
+        create: vi.fn(),
+        update: vi.fn(),
+        remove: vi.fn()
+      }
+    }
+  }
   return groupsApi
 }
 

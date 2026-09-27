@@ -3,6 +3,12 @@ import { electronAPI } from '@electron-toolkit/preload'
 import type { RemoteApi, RemoteClient, RemoteMove, ServerInfo } from '../shared/remote'
 import type { Player, PlayerInput, PlayersApi } from '../shared/players'
 import type { Group, GroupInput, GroupsApi } from '../shared/groups'
+import type {
+  TournamentApi,
+  TournamentSettings,
+  TournamentSettingsInput,
+  TournamentSettingsWithUsage
+} from '../shared/tournament'
 
 const remote: RemoteApi = {
   publishPosition: (fen) => ipcRenderer.send('remote:position', fen),
@@ -34,7 +40,19 @@ const groups: GroupsApi = {
   remove: (id: number) => ipcRenderer.invoke('groups:remove', id) as Promise<void>
 }
 
-const api = { remote, players, groups }
+const tournament: TournamentApi = {
+  settings: {
+    list: () =>
+      ipcRenderer.invoke('tournament:settings:list') as Promise<TournamentSettingsWithUsage[]>,
+    create: (input: TournamentSettingsInput) =>
+      ipcRenderer.invoke('tournament:settings:create', input) as Promise<TournamentSettings>,
+    update: (id: number, input: TournamentSettingsInput) =>
+      ipcRenderer.invoke('tournament:settings:update', id, input) as Promise<TournamentSettings>,
+    remove: (id: number) => ipcRenderer.invoke('tournament:settings:remove', id) as Promise<void>
+  }
+}
+
+const api = { remote, players, groups, tournament }
 
 if (process.contextIsolated) {
   try {

@@ -40,7 +40,22 @@ function migrate(database: DatabaseSync): void {
         player_id INTEGER NOT NULL REFERENCES players(id) ON DELETE CASCADE,
         UNIQUE (group_id, player_id)
       );
+      CREATE TABLE IF NOT EXISTS tournament_settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        weaker_plays_white INTEGER NOT NULL DEFAULT 1,
+        draw_scoring TEXT NOT NULL,
+        absence_scoring TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
     `)
+    database
+      .prepare(
+        `INSERT INTO tournament_settings (name, weaker_plays_white, draw_scoring, absence_scoring, created_at)
+         SELECT 'Стандарт', 1, 'weaker', 'loss', ?
+         WHERE NOT EXISTS (SELECT 1 FROM tournament_settings WHERE name = 'Стандарт')`
+      )
+      .run(new Date().toISOString())
     database.exec('PRAGMA user_version = 1')
   }
 }

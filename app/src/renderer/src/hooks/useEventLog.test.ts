@@ -28,6 +28,24 @@ function installApi(initial: RemoteClient[]): { emit: (clients: RemoteClient[]) 
       create: async (input) => ({ id: 1, ...input }),
       update: async (group) => group,
       remove: async () => {}
+    },
+    tournament: {
+      settings: {
+        list: async () => [],
+        create: async (input) => ({
+          id: 1,
+          createdAt: '',
+          used: false,
+          ...input
+        }),
+        update: async (id, input) => ({
+          id,
+          createdAt: '',
+          used: false,
+          ...input
+        }),
+        remove: async () => {}
+      }
     }
   }
   return {
