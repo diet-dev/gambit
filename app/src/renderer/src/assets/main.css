@@ -997,6 +997,44 @@ code {
   resize: vertical;
 }
 
+.situation-save-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 760px;
+}
+
+.situation-save-form .entity-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.situation-save-form .entity-field:has(textarea) {
+  align-items: flex-start;
+}
+
+.situation-save-form .entity-field-label {
+  flex: none;
+  width: 150px;
+  text-align: right;
+}
+
+.situation-save-form .entity-field-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.situation-save-form .entity-sub,
+.situation-save-form .entity-error,
+.situation-save-form .entity-actions {
+  margin: 0;
+  padding-left: 162px;
+}
+
 .status-bar {
   flex: 0 0 auto;
   padding: 8px 12px;

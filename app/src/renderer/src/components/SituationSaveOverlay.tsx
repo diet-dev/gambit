@@ -80,77 +80,87 @@ function SituationSaveOverlay({
         }}
       >
         <label className="entity-field">
-          <span>
+          <span className="entity-field-label">
             Группа{' '}
             <span className="entity-required" aria-hidden="true">
               *
             </span>
           </span>
-          <select
-            value={groupId === null ? '' : String(groupId)}
-            onChange={(event) => {
-              const value = event.target.value
-              setGroupId(value === '' || value === NEW_GROUP ? NEW_GROUP : Number(value))
-            }}
-            required
-          >
-            <option value="" disabled>
-              Выберите группу
-            </option>
-            <option value={NEW_GROUP}>Новая группа</option>
-            {groups.map((group) => (
-              <option key={group.id} value={group.id}>
-                {group.name}
+          <span className="entity-field-control">
+            <select
+              value={groupId === null ? '' : String(groupId)}
+              onChange={(event) => {
+                const value = event.target.value
+                setGroupId(value === '' || value === NEW_GROUP ? NEW_GROUP : Number(value))
+              }}
+              required
+            >
+              <option value="" disabled>
+                Выберите группу
               </option>
-            ))}
-          </select>
+              <option value={NEW_GROUP}>Новая группа</option>
+              {groups.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.name}
+                </option>
+              ))}
+            </select>
+          </span>
         </label>
         {newGroupSelected && (
           <label className="entity-field">
-            <span>
+            <span className="entity-field-label">
               Название группы{' '}
               <span className="entity-required" aria-hidden="true">
                 *
               </span>
             </span>
-            <input
-              value={groupName}
-              onChange={(event) => setGroupName(normalizeHeadingInput(event.target.value))}
-              placeholder="Например: Мои позиции"
-              required
-            />
+            <span className="entity-field-control">
+              <input
+                value={groupName}
+                onChange={(event) => setGroupName(normalizeHeadingInput(event.target.value))}
+                placeholder="Например: Мои позиции"
+                required
+              />
+            </span>
           </label>
         )}
         <label className="entity-field">
-          <span>
+          <span className="entity-field-label">
             Название ситуации{' '}
             <span className="entity-required" aria-hidden="true">
               *
             </span>
           </span>
-          <input
-            value={title}
-            onChange={(event) => setTitle(normalizeHeadingInput(event.target.value))}
-            placeholder="Например: Мат на диагонали"
-            required
-          />
+          <span className="entity-field-control">
+            <input
+              value={title}
+              onChange={(event) => setTitle(normalizeHeadingInput(event.target.value))}
+              placeholder="Например: Мат на диагонали"
+              required
+            />
+          </span>
         </label>
         <label className="entity-field">
-          <span>Описание</span>
-          <input
-            value={description}
-            onChange={(event) => setDescription(normalizeHeadingInput(event.target.value))}
-            placeholder="Короткая подпись в списке"
-          />
+          <span className="entity-field-label">Описание</span>
+          <span className="entity-field-control">
+            <input
+              value={description}
+              onChange={(event) => setDescription(normalizeHeadingInput(event.target.value))}
+              placeholder="Короткая подпись в списке"
+            />
+          </span>
         </label>
         <label className="entity-field">
-          <span>Комментарий</span>
-          <textarea
-            value={comment}
-            onChange={(event) => setComment(event.target.value)}
-            placeholder="Разжёванный разбор позиции для кнопки «Подробнее»"
-            rows={5}
-          />
+          <span className="entity-field-label">Комментарий</span>
+          <span className="entity-field-control">
+            <textarea
+              value={comment}
+              onChange={(event) => setComment(event.target.value)}
+              placeholder="Разжёванный разбор позиции для кнопки «Подробнее»"
+              rows={5}
+            />
+          </span>
         </label>
         <p className="entity-sub">Позиция: {fen}</p>
         {error !== null && <p className="entity-error">{error}</p>}
