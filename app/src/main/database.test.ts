@@ -11,18 +11,22 @@ describe('openDatabase', () => {
     const database = openDatabase(path)
 
     const tables = database
-      .prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name")
+      .prepare(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
+      )
       .all() as { name: string }[]
     expect(tables.map((row) => row.name)).toEqual([
       'group_memberships',
       'groups',
       'players',
+      'round_pairs',
+      'rounds',
       'tournament_settings',
       'tournaments'
     ])
 
     const version = database.prepare('PRAGMA user_version').get() as { user_version: number }
-    expect(version.user_version).toBe(1)
+    expect(version.user_version).toBe(2)
 
     const foreignKeys = database.prepare('PRAGMA foreign_keys').get() as { foreign_keys: number }
     expect(foreignKeys.foreign_keys).toBe(1)
@@ -35,6 +39,8 @@ describe('openDatabase', () => {
 
     const groupInfo = database.prepare("INSERT INTO groups (name) VALUES ('7А')").run()
     const groupId = Number(groupInfo.lastInsertRowid)
+    const otherGroupInfo = database.prepare("INSERT INTO groups (name) VALUES ('7Б')").run()
+    const otherGroupId = Number(otherGroupInfo.lastInsertRowid)
     const playerInfo = database
       .prepare("INSERT INTO players (last_name, first_name) VALUES ('Иванов', 'Иван')")
       .run()
@@ -42,16 +48,16 @@ describe('openDatabase', () => {
     database
       .prepare('INSERT INTO group_memberships (group_id, player_id) VALUES (?, ?)')
       .run(groupId, playerId)
+    database
+      .prepare('INSERT INTO group_memberships (group_id, player_id) VALUES (?, ?)')
+      .run(otherGroupId, playerId)
 
     database.prepare('DELETE FROM groups WHERE id = ?').run(groupId)
     const afterGroupDelete = database
       .prepare('SELECT COUNT(*) AS count FROM group_memberships')
       .get() as { count: number }
-    expect(afterGroupDelete.count).toBe(0)
+    expect(afterGroupDelete.count).toBe(1)
 
-    database
-      .prepare('INSERT INTO group_memberships (group_id, player_id) VALUES (?, ?)')
-      .run(groupId, playerId)
     database.prepare('DELETE FROM players WHERE id = ?').run(playerId)
     const afterPlayerDelete = database
       .prepare('SELECT COUNT(*) AS count FROM group_memberships')
@@ -85,12 +91,22 @@ describe('openDatabase', () => {
     const database = openDatabase(path)
 
     const tables = database
-      .prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name")
+      .prepare(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
+      )
       .all() as { name: string }[]
-    expect(tables.map((row) => row.name)).toEqual(['group_memberships', 'groups', 'players'])
+    expect(tables.map((row) => row.name)).toEqual([
+      'group_memberships',
+      'groups',
+      'players',
+      'round_pairs',
+      'rounds',
+      'tournament_settings',
+      'tournaments'
+    ])
 
     const version = database.prepare('PRAGMA user_version').get() as { user_version: number }
-    expect(version.user_version).toBe(1)
+    expect(version.user_version).toBe(2)
 
     database.close()
   })

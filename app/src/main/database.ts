@@ -55,6 +55,19 @@ function migrate(database: DatabaseSync): void {
         start_date TEXT NOT NULL,
         settings_id INTEGER NOT NULL REFERENCES tournament_settings(id)
       );
+    `)
+    database
+      .prepare(
+        `INSERT INTO tournament_settings (name, weaker_plays_white, draw_scoring, absence_scoring, created_at)
+         SELECT 'Стандарт', 1, 'weaker', 'loss', ?
+         WHERE NOT EXISTS (SELECT 1 FROM tournament_settings WHERE name = 'Стандарт')`
+      )
+      .run(new Date().toISOString())
+    database.exec('PRAGMA user_version = 1')
+  }
+
+  if (currentVersion(database) < 2) {
+    database.exec(`
       CREATE TABLE IF NOT EXISTS rounds (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         tournament_id INTEGER NOT NULL REFERENCES tournaments(id),
@@ -73,14 +86,7 @@ function migrate(database: DatabaseSync): void {
         UNIQUE (round_id, board_no)
       );
     `)
-    database
-      .prepare(
-        `INSERT INTO tournament_settings (name, weaker_plays_white, draw_scoring, absence_scoring, created_at)
-         SELECT 'Стандарт', 1, 'weaker', 'loss', ?
-         WHERE NOT EXISTS (SELECT 1 FROM tournament_settings WHERE name = 'Стандарт')`
-      )
-      .run(new Date().toISOString())
-    database.exec('PRAGMA user_version = 1')
+    database.exec('PRAGMA user_version = 2')
   }
 }
 
