@@ -67,7 +67,7 @@ function RoundsPanel({
           <p className="entity-empty">Раундов пока нет</p>
         ) : (
           <ul className="entity-list">
-            {rounds.map((round: Round) => (
+            {[...rounds].reverse().map((round: Round) => (
               <li key={round.id} className="entity-item">
                 <span className="entity-name">№{round.seq}</span>
                 <span className="entity-sub">
