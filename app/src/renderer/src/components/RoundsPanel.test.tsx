@@ -26,6 +26,7 @@ const standard = {
 function installApi(tournaments: Tournament[], rounds: Round[]): RoundsApi {
   const roundsApi = {
     list: vi.fn(async () => rounds),
+    results: vi.fn(async () => []),
     preview: vi.fn(async () => ({ seq: 1, pairs: [], restingPlayerId: null })),
     create: vi.fn(async () => ({
       round: { id: 1, tournamentId: 1, seq: 1, playedDate: '', settingsId: 1 },
@@ -73,6 +74,7 @@ describe('RoundsPanel', () => {
         selectedTournamentId={null}
         onSelectTournament={() => {}}
         onCreateRound={() => {}}
+        onOpenRound={() => {}}
         savedAt={0}
       />
     )
@@ -90,10 +92,12 @@ describe('RoundsPanel', () => {
         selectedTournamentId={1}
         onSelectTournament={() => {}}
         onCreateRound={() => {}}
+        onOpenRound={() => {}}
         savedAt={0}
       />
     )
 
+    await findByText('Осенний')
     await user.selectOptions(getByRole('combobox'), '1')
 
     expect(await findByText('Раундов пока нет')).toBeInTheDocument()
@@ -113,10 +117,12 @@ describe('RoundsPanel', () => {
         selectedTournamentId={1}
         onSelectTournament={() => {}}
         onCreateRound={() => {}}
+        onOpenRound={() => {}}
         savedAt={0}
       />
     )
 
+    await findByText('Осенний')
     await user.selectOptions(getByRole('combobox'), '1')
 
     expect(await findByText('№1')).toBeInTheDocument()
@@ -126,24 +132,51 @@ describe('RoundsPanel', () => {
     expect(roundsApi.list).toHaveBeenCalledWith(1)
   })
 
+  it('opens round results on click', async () => {
+    installApi(
+      [{ id: 1, name: 'Осенний', groupId: 1, startDate: '2026-10-01', settingsId: 1 }],
+      [{ id: 7, tournamentId: 1, seq: 2, playedDate: '2026-10-08', settingsId: 1 }]
+    )
+    const onOpenRound = vi.fn()
+    const user = userEvent.setup()
+    const { getByRole, findByText } = render(
+      <RoundsPanel
+        selectedTournamentId={1}
+        onSelectTournament={() => {}}
+        onCreateRound={() => {}}
+        onOpenRound={onOpenRound}
+        savedAt={0}
+      />
+    )
+
+    await findByText('Осенний')
+    await user.selectOptions(getByRole('combobox'), '1')
+    await user.click(await findByText('№2'))
+
+    expect(onOpenRound).toHaveBeenCalledWith(expect.objectContaining({ id: 7, seq: 2 }))
+  })
+
   it('clears the list when the tournament is deselected', async () => {
     installApi(
       [{ id: 1, name: 'Осенний', groupId: 1, startDate: '2026-10-01', settingsId: 1 }],
       [{ id: 1, tournamentId: 1, seq: 1, playedDate: '2026-10-01', settingsId: 1 }]
     )
     const user = userEvent.setup()
-    const { getByRole, findByText, queryByText } = render(
-      <RoundsPanel
-        selectedTournamentId={1}
-        onSelectTournament={() => {}}
-        onCreateRound={() => {}}
-        savedAt={0}
-      />
+    const props = {
+      onSelectTournament: () => {},
+      onCreateRound: () => {},
+      onOpenRound: () => {},
+      savedAt: 0
+    }
+    const { getByRole, findByText, queryByText, rerender } = render(
+      <RoundsPanel selectedTournamentId={1} {...props} />
     )
 
+    await findByText('Осенний')
     await user.selectOptions(getByRole('combobox'), '1')
     await findByText('№1')
-    await user.selectOptions(getByRole('combobox'), '')
+
+    rerender(<RoundsPanel selectedTournamentId={null} {...props} />)
 
     await waitFor(() => expect(queryByText('№1')).not.toBeInTheDocument())
     expect(queryByText('Раундов пока нет')).not.toBeInTheDocument()

@@ -1,16 +1,19 @@
 import type { DatabaseSync } from 'node:sqlite'
 import type {
+  PairResult,
   Round,
   RoundCreateInput,
+  RoundOutcome,
   RoundPair,
   RoundPairsPreview,
+  RoundResultsRow,
   Tournament,
   TournamentInput,
   TournamentSettings,
   TournamentSettingsInput,
   TournamentSettingsWithUsage
 } from '../shared/tournament'
-import { generateRound } from './tournamentGeneration'
+import { generateRound, orderFor } from './tournamentGeneration'
 
 export type TournamentStore = {
   listSettings: () => TournamentSettingsWithUsage[]
@@ -22,6 +25,7 @@ export type TournamentStore = {
   updateTournament: (id: number, input: TournamentInput) => Tournament
   removeTournament: (id: number) => void
   listRounds: (tournamentId: number) => Round[]
+  roundResults: (roundId: number) => RoundResultsRow[]
   previewPairs: (tournamentId: number) => RoundPairsPreview
   createRound: (input: RoundCreateInput) => { round: Round; pairs: RoundPair[] }
 }
@@ -52,13 +56,31 @@ const ROUND_COLUMNS = `
   settings_id AS settingsId
 `
 
-type SettingsRow = Omit<TournamentSettingsWithUsage, 'weakerPlaysWhite'> & {
+type SettingsRow = Omit<TournamentSettingsWithUsage, 'weakerPlaysWhite' | 'used'> & {
   weakerPlaysWhite: number
+  used: number
 }
 
 function mapSettingsRow(row: SettingsRow): TournamentSettingsWithUsage {
-  const { weakerPlaysWhite, ...rest } = row
-  return { ...rest, weakerPlaysWhite: weakerPlaysWhite !== 0 }
+  const { weakerPlaysWhite, used, ...rest } = row
+  return { ...rest, weakerPlaysWhite: weakerPlaysWhite !== 0, used: used !== 0 }
+}
+
+function pairOutcomes(result: PairResult): [RoundOutcome, RoundOutcome] {
+  switch (result) {
+    case 'player1_win':
+      return ['win', 'loss']
+    case 'player2_win':
+      return ['loss', 'win']
+    case 'draw':
+      return ['draw', 'draw']
+    case 'player1_absent':
+      return ['forfeit_loss', 'forfeit_win']
+    case 'player2_absent':
+      return ['forfeit_win', 'forfeit_loss']
+    case 'both_absent':
+      return ['no_game', 'no_game']
+  }
 }
 
 export function createTournamentStore(database: DatabaseSync): TournamentStore {
@@ -76,6 +98,12 @@ export function createTournamentStore(database: DatabaseSync): TournamentStore {
       .get(id) as unknown as Tournament
   }
 
+  function getRound(roundId: number): Round {
+    return database
+      .prepare(`SELECT ${ROUND_COLUMNS} FROM rounds WHERE id = ?`)
+      .get(roundId) as unknown as Round
+  }
+
   function listRoundPairs(roundId: number): RoundPair[] {
     return database
       .prepare(
@@ -86,17 +114,25 @@ export function createTournamentStore(database: DatabaseSync): TournamentStore {
       .all(roundId) as unknown as RoundPair[]
   }
 
-  function listTournamentPlayers(tournamentId: number): { id: number; lastName: string }[] {
+  function listTournamentPlayers(
+    tournamentId: number
+  ): { id: number; lastName: string; firstName: string; middleName: string }[] {
     const tournament = getTournament(tournamentId)
     return database
       .prepare(
-        `SELECT p.id, p.last_name AS lastName
+        `SELECT p.id, p.last_name AS lastName, p.first_name AS firstName,
+                p.middle_name AS middleName
          FROM players p
          JOIN group_memberships m ON m.player_id = p.id
          WHERE m.group_id = ?
          ORDER BY p.last_name COLLATE NOCASE, p.first_name COLLATE NOCASE`
       )
-      .all(tournament.groupId) as unknown as { id: number; lastName: string }[]
+      .all(tournament.groupId) as unknown as {
+      id: number
+      lastName: string
+      firstName: string
+      middleName: string
+    }[]
   }
 
   function lastRound(tournamentId: number): Round | null {
@@ -202,6 +238,42 @@ export function createTournamentStore(database: DatabaseSync): TournamentStore {
       database
         .prepare(`SELECT ${ROUND_COLUMNS} FROM rounds WHERE tournament_id = ? ORDER BY seq`)
         .all(tournamentId) as unknown as Round[],
+    roundResults: (roundId) => {
+      const round = getRound(roundId)
+      const pairs = listRoundPairs(roundId)
+      const players = listTournamentPlayers(round.tournamentId)
+      const ladder = orderFor({
+        seq: round.seq + 1,
+        players,
+        prevRound: {
+          seq: round.seq,
+          settings: getSettings(round.settingsId),
+          pairs: pairs.map((pair) => ({
+            player1Id: pair.player1Id,
+            player2Id: pair.player2Id,
+            result: pair.result
+          }))
+        }
+      })
+      const outcomes = new Map<number, RoundOutcome>()
+      for (const pair of pairs) {
+        const [first, second] = pairOutcomes(pair.result)
+        outcomes.set(pair.player1Id, first)
+        outcomes.set(pair.player2Id, second)
+      }
+      const playerById = new Map(players.map((player) => [player.id, player]))
+      return ladder.map((playerId, index) => {
+        const player = playerById.get(playerId)
+        return {
+          position: index + 1,
+          playerId,
+          lastName: player?.lastName ?? '',
+          firstName: player?.firstName ?? '',
+          middleName: player?.middleName ?? '',
+          outcome: outcomes.get(playerId) ?? 'resting'
+        }
+      })
+    },
     previewPairs: (tournamentId) => {
       const players = listTournamentPlayers(tournamentId)
       const prev = lastRound(tournamentId)

@@ -9,6 +9,7 @@ import HelpArticleOverlay from './components/HelpArticleOverlay'
 import HelpPanel from './components/HelpPanel'
 import RemoteQrButton from './components/RemoteQrButton'
 import RoundsPanel from './components/RoundsPanel'
+import RoundResultsOverlay from './components/RoundResultsOverlay'
 import SettingsPanel from './components/SettingsPanel'
 import SituationCommentDialog from './components/SituationCommentDialog'
 import SituationList from './components/SituationList'
@@ -18,6 +19,7 @@ import TournamentsPanel from './components/TournamentsPanel'
 import { useEventLog } from './hooks/useEventLog'
 import { findHelpArticle } from './help/articles'
 import { DEFAULT_SITUATION_ID, SITUATION_GROUPS, findSituation } from './situations'
+import type { Round } from '../../shared/tournament'
 
 function App(): React.JSX.Element {
   const [selectedId, setSelectedId] = useState(DEFAULT_SITUATION_ID)
@@ -28,6 +30,7 @@ function App(): React.JSX.Element {
   const [selectedTournamentId, setSelectedTournamentId] = useState<number | null>(null)
   const [roundFormOpen, setRoundFormOpen] = useState(false)
   const [roundFormSavedAt, setRoundFormSavedAt] = useState(0)
+  const [viewingRound, setViewingRound] = useState<Round | null>(null)
   const { events, logMove } = useEventLog()
   const selected = findSituation(selectedId) ?? findSituation(DEFAULT_SITUATION_ID)!
   const commentSituation = commentId ? findSituation(commentId) : undefined
@@ -85,7 +88,14 @@ function App(): React.JSX.Element {
               <RoundsPanel
                 selectedTournamentId={selectedTournamentId}
                 onSelectTournament={setSelectedTournamentId}
-                onCreateRound={() => setRoundFormOpen(true)}
+                onCreateRound={() => {
+                  setViewingRound(null)
+                  setRoundFormOpen(true)
+                }}
+                onOpenRound={(round) => {
+                  setRoundFormOpen(false)
+                  setViewingRound(round)
+                }}
                 savedAt={roundFormSavedAt}
               />
             )}
@@ -118,6 +128,13 @@ function App(): React.JSX.Element {
                   setRoundFormOpen(false)
                   setRoundFormSavedAt((value) => value + 1)
                 }}
+              />
+            )}
+            {activity === 'rounds' && viewingRound !== null && (
+              <RoundResultsOverlay
+                key={viewingRound.id}
+                round={viewingRound}
+                onClose={() => setViewingRound(null)}
               />
             )}
           </div>

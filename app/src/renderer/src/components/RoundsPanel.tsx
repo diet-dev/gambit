@@ -13,6 +13,7 @@ type RoundsPanelProps = {
   selectedTournamentId: number | null
   onSelectTournament: (tournamentId: number | null) => void
   onCreateRound: () => void
+  onOpenRound: (round: Round) => void
   savedAt: number
 }
 
@@ -20,6 +21,7 @@ function RoundsPanel({
   selectedTournamentId,
   onSelectTournament,
   onCreateRound,
+  onOpenRound,
   savedAt
 }: RoundsPanelProps): React.JSX.Element {
   const { tournaments } = useTournaments()
@@ -68,13 +70,20 @@ function RoundsPanel({
         ) : (
           <ul className="entity-list">
             {[...rounds].reverse().map((round: Round) => (
-              <li key={round.id} className="entity-item">
-                <span className="entity-name">№{round.seq}</span>
-                <span className="entity-sub">
-                  {[formatDate(round.playedDate), settingsNames.get(round.settingsId) ?? '—'].join(
-                    ' · '
-                  )}
-                </span>
+              <li key={round.id} className="entity-item rounds-item">
+                <button
+                  type="button"
+                  className="rounds-item-open"
+                  onClick={() => onOpenRound(round)}
+                >
+                  <span className="entity-name">№{round.seq}</span>
+                  <span className="entity-sub">
+                    {[
+                      formatDate(round.playedDate),
+                      settingsNames.get(round.settingsId) ?? '—'
+                    ].join(' · ')}
+                  </span>
+                </button>
               </li>
             ))}
           </ul>

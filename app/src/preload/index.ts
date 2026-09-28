@@ -8,6 +8,7 @@ import type {
   RoundCreateInput,
   RoundPair,
   RoundPairsPreview,
+  RoundResultsRow,
   Tournament,
   TournamentApi,
   TournamentInput,
@@ -67,6 +68,8 @@ const tournament: TournamentApi = {
   rounds: {
     list: (tournamentId: number) =>
       ipcRenderer.invoke('tournament:rounds:list', tournamentId) as Promise<Round[]>,
+    results: (roundId: number) =>
+      ipcRenderer.invoke('tournament:rounds:results', roundId) as Promise<RoundResultsRow[]>,
     preview: (tournamentId: number) =>
       ipcRenderer.invoke('tournament:rounds:preview', tournamentId) as Promise<RoundPairsPreview>,
     create: (input: RoundCreateInput) =>

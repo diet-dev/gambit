@@ -349,6 +349,53 @@ code {
   margin-bottom: 12px;
 }
 
+.entity-item.rounds-item {
+  padding: 0;
+}
+
+.rounds-item-open {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rounds-item-open:hover {
+  background: var(--color-surface-hover);
+}
+
+.round-results-table {
+  width: 100%;
+  margin-top: 16px;
+  border-collapse: collapse;
+}
+
+.round-results-table th,
+.round-results-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.round-results-table th {
+  font-size: 12px;
+  color: var(--ev-c-text-2);
+}
+
+.round-results-table td:first-child {
+  width: 64px;
+  color: var(--ev-c-text-2);
+}
+
 .round-form-overlay {
   position: absolute;
   inset: 0;

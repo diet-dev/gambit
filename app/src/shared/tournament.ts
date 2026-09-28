@@ -50,6 +50,18 @@ export type Round = {
 export type PairResult =
   'player1_win' | 'player2_win' | 'draw' | 'player1_absent' | 'player2_absent' | 'both_absent'
 
+export type RoundOutcome =
+  'win' | 'loss' | 'draw' | 'forfeit_win' | 'forfeit_loss' | 'no_game' | 'resting'
+
+export type RoundResultsRow = {
+  position: number
+  playerId: number
+  lastName: string
+  firstName: string
+  middleName: string
+  outcome: RoundOutcome
+}
+
 export type RoundPair = {
   id: number
   roundId: number
@@ -80,6 +92,7 @@ export type RoundCreateInput = {
 
 export type RoundsApi = {
   list: (tournamentId: number) => Promise<Round[]>
+  results: (roundId: number) => Promise<RoundResultsRow[]>
   preview: (tournamentId: number) => Promise<RoundPairsPreview>
   create: (input: RoundCreateInput) => Promise<{ round: Round; pairs: RoundPair[] }>
 }

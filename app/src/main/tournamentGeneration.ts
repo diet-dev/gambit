@@ -51,7 +51,7 @@ export function generateRound(input: GenerationInput): GenerationResult {
   return pairUp(order, input.seq)
 }
 
-function orderFor(input: GenerationInput): number[] {
+export function orderFor(input: GenerationInput): number[] {
   if (input.seq === 1 || input.prevRound === null) {
     return [...input.players]
       .sort((a, b) => a.lastName.localeCompare(b.lastName, 'ru') || a.id - b.id)
