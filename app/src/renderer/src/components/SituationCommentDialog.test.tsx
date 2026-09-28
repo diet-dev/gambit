@@ -1,9 +1,17 @@
 import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, render } from '@testing-library/react'
 import SituationCommentDialog from './SituationCommentDialog'
-import { findSituation } from '../situations'
+import type { Situation } from '../../../shared/situations'
 
-const situation = findSituation('legal-mate')!
+const situation: Situation = {
+  id: 2,
+  groupId: 1,
+  title: 'Мат Легаля',
+  description: 'Классическая ловушка в дебюте.',
+  comment: 'Белые жертвуют ферзя, чтобы заманить чёрного короля под удар лёгких фигур.',
+  fen: 'rn1q1bnr/ppp1kB1p/3p2p1/3NN3/4P3/8/PPPP1PPP/R1BbK2R b KQ - 2 7',
+  sortOrder: 1
+}
 
 describe('SituationCommentDialog', () => {
   it('renders the situation title and comment', () => {

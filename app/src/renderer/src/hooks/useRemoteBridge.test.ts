@@ -52,6 +52,9 @@ function installApi(overrides: Partial<RemoteApi> = {}): RemoteApi {
     },
     database: {
       exportSnapshot: vi.fn(async () => null)
+    },
+    situations: {
+      list: vi.fn(async () => [])
     }
   }
   return remote

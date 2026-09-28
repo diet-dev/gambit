@@ -52,7 +52,10 @@ function installApi(databaseApi: DatabaseApi): void {
         }))
       }
     },
-    database: databaseApi
+    database: databaseApi,
+    situations: {
+      list: vi.fn(async () => [])
+    }
   }
 }
 

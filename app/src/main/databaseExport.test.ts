@@ -29,7 +29,7 @@ describe('exportDatabaseSnapshot', () => {
     const groups = snapshot.prepare('SELECT name FROM groups').all() as { name: string }[]
     expect(groups).toEqual([{ name: '7А' }])
     const version = snapshot.prepare('PRAGMA user_version').get() as { user_version: number }
-    expect(version.user_version).toBe(3)
+    expect(version.user_version).toBe(4)
     snapshot.close()
     database.close()
   })

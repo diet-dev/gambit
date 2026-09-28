@@ -55,6 +55,9 @@ function installApi(initial: RemoteClient[]): { emit: (clients: RemoteClient[]) 
     },
     database: {
       exportSnapshot: vi.fn(async () => null)
+    },
+    situations: {
+      list: vi.fn(async () => [])
     }
   }
   return {

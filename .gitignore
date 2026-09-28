@@ -1,3 +1,4 @@
 .agents/skills/
 .superpowers/
 .playwright-mcp/
+app/*.tsbuildinfo

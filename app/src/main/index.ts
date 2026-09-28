@@ -15,6 +15,8 @@ import { createGroupStore } from './groupStore'
 import { registerGroupsIpc } from './groupsIpc'
 import { createTournamentStore } from './tournamentStore'
 import { registerTournamentIpc } from './tournamentIpc'
+import { createSituationStore } from './situationStore'
+import { registerSituationsIpc } from './situationsIpc'
 import type { DatabaseSync } from 'node:sqlite'
 
 let remoteServer: RemoteServer | null = null
@@ -90,6 +92,7 @@ app.whenReady().then(async () => {
   registerPlayersIpc({ ipcMain, store: createPlayerStore(database) })
   registerGroupsIpc({ ipcMain, store: createGroupStore(database) })
   registerTournamentIpc({ ipcMain, store: createTournamentStore(database) })
+  registerSituationsIpc({ ipcMain, store: createSituationStore(database) })
 
   ipcMain.handle('database:export', async () => {
     if (database === null) {

@@ -21,12 +21,14 @@ describe('openDatabase', () => {
       'players',
       'round_pairs',
       'rounds',
+      'situation_groups',
+      'situations',
       'tournament_settings',
       'tournaments'
     ])
 
     const version = database.prepare('PRAGMA user_version').get() as { user_version: number }
-    expect(version.user_version).toBe(3)
+    expect(version.user_version).toBe(4)
 
     const foreignKeys = database.prepare('PRAGMA foreign_keys').get() as { foreign_keys: number }
     expect(foreignKeys.foreign_keys).toBe(1)
@@ -101,12 +103,14 @@ describe('openDatabase', () => {
       'players',
       'round_pairs',
       'rounds',
+      'situation_groups',
+      'situations',
       'tournament_settings',
       'tournaments'
     ])
 
     const version = database.prepare('PRAGMA user_version').get() as { user_version: number }
-    expect(version.user_version).toBe(3)
+    expect(version.user_version).toBe(4)
 
     database.close()
   })

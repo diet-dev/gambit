@@ -1,4 +1,4 @@
-import { type Situation } from '../situations'
+import { type Situation } from '../../../shared/situations'
 import Dialog from './Dialog'
 
 type SituationCommentDialogProps = {

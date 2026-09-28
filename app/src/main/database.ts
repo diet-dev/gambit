@@ -1,6 +1,7 @@
 import { mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
+import { SITUATION_SEED } from './situationSeed'
 
 export function openDatabase(path: string): DatabaseSync {
   if (path !== ':memory:') {
@@ -105,6 +106,48 @@ function migrate(database: DatabaseSync): void {
       );
     `)
     database.exec('PRAGMA user_version = 3')
+  }
+
+  if (currentVersion(database) < 4) {
+    database.exec(`
+      CREATE TABLE situation_groups (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        sort_order INTEGER NOT NULL
+      );
+      CREATE TABLE situations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL REFERENCES situation_groups(id) ON DELETE CASCADE,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        comment TEXT NOT NULL DEFAULT '',
+        fen TEXT NOT NULL UNIQUE,
+        sort_order INTEGER NOT NULL,
+        UNIQUE (group_id, title)
+      );
+    `)
+    const insertGroup = database.prepare(
+      'INSERT INTO situation_groups (name, sort_order) VALUES (?, ?)'
+    )
+    const insertSituation = database.prepare(
+      `INSERT INTO situations (group_id, title, description, comment, fen, sort_order)
+       VALUES (?, ?, ?, ?, ?, ?)`
+    )
+    for (const group of SITUATION_SEED) {
+      const groupInfo = insertGroup.run(group.name, group.sortOrder)
+      const groupId = Number(groupInfo.lastInsertRowid)
+      for (const situation of group.situations) {
+        insertSituation.run(
+          groupId,
+          situation.title,
+          situation.description,
+          situation.comment,
+          situation.fen,
+          situation.sortOrder
+        )
+      }
+    }
+    database.exec('PRAGMA user_version = 4')
   }
 }
 

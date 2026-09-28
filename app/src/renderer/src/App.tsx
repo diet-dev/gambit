@@ -18,13 +18,15 @@ import RoundFormOverlay from './components/RoundFormOverlay'
 import TournamentChartOverlay from './components/TournamentChartOverlay'
 import TournamentsPanel from './components/TournamentsPanel'
 import { useEventLog } from './hooks/useEventLog'
+import { useSituations } from './hooks/useSituations'
 import { findHelpArticle } from './help/articles'
-import { DEFAULT_SITUATION_ID, SITUATION_GROUPS, findSituation } from './situations'
+import { findSituation, firstSituation } from '../../shared/situations'
 import type { Round, Tournament } from '../../shared/tournament'
 
 function App(): React.JSX.Element {
-  const [selectedId, setSelectedId] = useState(DEFAULT_SITUATION_ID)
-  const [commentId, setCommentId] = useState<string | null>(null)
+  const { groups } = useSituations()
+  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [commentId, setCommentId] = useState<number | null>(null)
   const [instance, setInstance] = useState(0)
   const [activity, setActivity] = useState<Activity>('situations')
   const [helpArticleId, setHelpArticleId] = useState<string | null>(null)
@@ -34,13 +36,13 @@ function App(): React.JSX.Element {
   const [viewingRound, setViewingRound] = useState<Round | null>(null)
   const [chartTournament, setChartTournament] = useState<Tournament | null>(null)
   const { events, logMove } = useEventLog()
-  const selected = findSituation(selectedId) ?? findSituation(DEFAULT_SITUATION_ID)!
-  const commentSituation = commentId ? findSituation(commentId) : undefined
+  const selected = findSituation(groups, selectedId) ?? firstSituation(groups)
+  const commentSituation = commentId === null ? undefined : findSituation(groups, commentId)
   const helpArticle = findHelpArticle(helpArticleId)
 
   useEffect(() => {
-    document.title = `Гамбит — ${selected.title}`
-  }, [selected.title])
+    document.title = selected ? `Гамбит — ${selected.title}` : 'Гамбит'
+  }, [selected])
 
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: 'gambit-layout',
@@ -54,7 +56,7 @@ function App(): React.JSX.Element {
     }
   }
 
-  function selectSituation(id: string): void {
+  function selectSituation(id: number): void {
     setSelectedId(id)
     setCommentId(null)
   }
@@ -76,8 +78,8 @@ function App(): React.JSX.Element {
           <div className="left-panel">
             {activity === 'situations' && (
               <SituationList
-                groups={SITUATION_GROUPS}
-                selectedId={selectedId}
+                groups={groups}
+                selectedId={selected?.id ?? null}
                 onSelect={selectSituation}
                 onShowComment={setCommentId}
                 onReset={resetSituation}
@@ -120,11 +122,13 @@ function App(): React.JSX.Element {
         <Separator className="separator" />
         <Panel id="right" className="panel" minSize="30%">
           <div className="right-panel">
-            <ChessGame
-              key={`${selected.id}:${instance}`}
-              initialPosition={selected.fen}
-              onMove={logMove}
-            />
+            {selected && (
+              <ChessGame
+                key={`${selected.id}:${instance}`}
+                initialPosition={selected.fen}
+                onMove={logMove}
+              />
+            )}
             <RemoteQrButton />
             {activity === 'help' && helpArticle && (
               <HelpArticleOverlay article={helpArticle} onClose={() => setHelpArticleId(null)} />

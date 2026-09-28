@@ -1,12 +1,12 @@
 import { CircleHelp, RotateCcw } from 'lucide-react'
-import { type SituationGroup } from '../situations'
+import { type SituationGroup } from '../../../shared/situations'
 
 type SituationListProps = {
   groups: SituationGroup[]
-  selectedId: string
-  onSelect: (id: string) => void
-  onShowComment: (id: string) => void
-  onReset: (id: string) => void
+  selectedId: number | null
+  onSelect: (id: number) => void
+  onShowComment: (id: number) => void
+  onReset: (id: number) => void
 }
 
 function SituationList({
@@ -19,8 +19,8 @@ function SituationList({
   return (
     <nav className="situation-list">
       {groups.map((group) => (
-        <section key={group.title} className="situation-group">
-          <h2 className="situation-group-title">{group.title}</h2>
+        <section key={group.id} className="situation-group">
+          <h2 className="situation-group-title">{group.name}</h2>
           <ul>
             {group.situations.map((situation, index) => {
               const active = situation.id === selectedId
