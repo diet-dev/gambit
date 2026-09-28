@@ -4,7 +4,7 @@ import type { RemoteApi, RemoteClient, RemoteMove, ServerInfo } from '../shared/
 import type { Player, PlayerInput, PlayersApi } from '../shared/players'
 import type { Group, GroupInput, GroupsApi } from '../shared/groups'
 import type { DatabaseApi } from '../shared/database'
-import type { SituationGroup, SituationsApi } from '../shared/situations'
+import type { Situation, SituationGroup, SituationsApi } from '../shared/situations'
 import type {
   Round,
   RoundCreateInput,
@@ -93,7 +93,8 @@ const database: DatabaseApi = {
 }
 
 const situations: SituationsApi = {
-  list: () => ipcRenderer.invoke('situations:list') as Promise<SituationGroup[]>
+  list: () => ipcRenderer.invoke('situations:list') as Promise<SituationGroup[]>,
+  create: (input) => ipcRenderer.invoke('situations:create', input) as Promise<Situation>
 }
 
 const api = { remote, players, groups, tournament, database, situations }

@@ -31,6 +31,26 @@ export function firstSituation(groups: SituationGroup[]): Situation | undefined 
   return groups[0]?.situations[0]
 }
 
+export type SituationCreateInput = {
+  groupId?: number
+  groupName?: string
+  title: string
+  description: string
+  comment: string
+  fen: string
+}
+
+export function normalizeHeadingInput(value: string): string {
+  const collapsed = value.replace(/\s{2,}/g, ' ')
+  const first = collapsed.charAt(0).toLocaleUpperCase('ru')
+  return first + collapsed.slice(1)
+}
+
+export function finalizeHeadingText(value: string): string {
+  return normalizeHeadingInput(value.trim())
+}
+
 export type SituationsApi = {
   list: () => Promise<SituationGroup[]>
+  create: (input: SituationCreateInput) => Promise<Situation>
 }

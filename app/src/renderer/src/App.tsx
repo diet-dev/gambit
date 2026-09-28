@@ -13,6 +13,7 @@ import RoundResultsOverlay from './components/RoundResultsOverlay'
 import SettingsPanel from './components/SettingsPanel'
 import SituationCommentDialog from './components/SituationCommentDialog'
 import SituationList from './components/SituationList'
+import SituationSaveOverlay from './components/SituationSaveOverlay'
 import PlayersPanel from './components/PlayersPanel'
 import RoundFormOverlay from './components/RoundFormOverlay'
 import TournamentChartOverlay from './components/TournamentChartOverlay'
@@ -24,9 +25,10 @@ import { findSituation, firstSituation } from '../../shared/situations'
 import type { Round, Tournament } from '../../shared/tournament'
 
 function App(): React.JSX.Element {
-  const { groups } = useSituations()
+  const { groups, reload } = useSituations()
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [commentId, setCommentId] = useState<number | null>(null)
+  const [savingFen, setSavingFen] = useState<string | null>(null)
   const [instance, setInstance] = useState(0)
   const [activity, setActivity] = useState<Activity>('situations')
   const [helpArticleId, setHelpArticleId] = useState<string | null>(null)
@@ -127,6 +129,7 @@ function App(): React.JSX.Element {
                 key={`${selected.id}:${instance}`}
                 initialPosition={selected.fen}
                 onMove={logMove}
+                onSaveSituation={setSavingFen}
               />
             )}
             <RemoteQrButton />
@@ -156,6 +159,16 @@ function App(): React.JSX.Element {
                 key={chartTournament.id}
                 tournament={chartTournament}
                 onClose={() => setChartTournament(null)}
+              />
+            )}
+            {savingFen !== null && (
+              <SituationSaveOverlay
+                fen={savingFen}
+                onClose={() => setSavingFen(null)}
+                onSaved={() => {
+                  setSavingFen(null)
+                  reload()
+                }}
               />
             )}
           </div>

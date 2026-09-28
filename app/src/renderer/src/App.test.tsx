@@ -52,7 +52,8 @@ const groups: SituationGroup[] = [
 ]
 
 const situationsApi: SituationsApi = {
-  list: vi.fn(async () => groups)
+  list: vi.fn(async () => groups),
+  create: vi.fn(async () => ({ ...groups[0].situations[0], id: 99 }))
 }
 
 function installApi(): void {

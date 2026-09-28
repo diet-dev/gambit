@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { Bookmark } from 'lucide-react'
 import { Chessboard } from 'react-chessboard'
 import { useChessGame, type MoveInfo } from '../hooks/useChessGame'
 import { useEngineOpponent } from '../hooks/useEngineOpponent'
@@ -13,12 +14,14 @@ import EngineControls from './EngineControls'
 type ChessGameProps = {
   initialPosition?: string
   onMove?: (move: MoveInfo, origin: EventOrigin) => void
+  onSaveSituation?: (fen: string) => void
   getEngine?: () => Engine
 }
 
 function ChessGame({
   initialPosition,
   onMove,
+  onSaveSituation,
   getEngine = getDefaultEngine
 }: ChessGameProps): React.JSX.Element {
   const {
@@ -88,6 +91,16 @@ function ChessGame({
           onToggle={toggleBot}
           onLevelChange={changeLevel}
         />
+        {onSaveSituation && (
+          <button
+            type="button"
+            className="save-situation-button"
+            aria-label="Сохранить позицию как ситуацию"
+            onClick={() => onSaveSituation(position)}
+          >
+            <Bookmark size={18} aria-hidden="true" />
+          </button>
+        )}
       </div>
     </div>
   )

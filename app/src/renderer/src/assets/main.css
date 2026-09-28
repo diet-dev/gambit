@@ -965,8 +965,36 @@ code {
 .controls {
   flex: 0 0 auto;
   display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 8px;
   padding-bottom: 8px;
+}
+
+.save-situation-button {
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--ev-c-text-1);
+  cursor: pointer;
+}
+
+.save-situation-button:hover {
+  background: var(--color-surface-hover);
+}
+
+.entity-field textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 6px;
+  background: var(--ev-c-black-mute);
+  color: var(--ev-c-text-1);
+  font: inherit;
+  resize: vertical;
 }
 
 .status-bar {

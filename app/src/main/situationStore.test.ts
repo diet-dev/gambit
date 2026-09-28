@@ -71,4 +71,109 @@ describe('situationStore', () => {
     expect(enPassant.moves({ verbose: true }).some((move) => move.flags.includes('e'))).toBe(true)
     database.close()
   })
+
+  it('creates a situation in an existing group with normalized texts', () => {
+    const database = openDatabase(':memory:')
+    const store = createSituationStore(database)
+    const group = store.list()[0]
+
+    const created = store.create({
+      groupId: group.id,
+      title: '  моя   позиция ',
+      description: '  подпись  ',
+      comment: ' разбор ',
+      fen: '8/8/8/8/8/8/8/K6k w - - 0 2'
+    })
+
+    expect(created).toMatchObject({
+      groupId: group.id,
+      title: 'Моя позиция',
+      description: 'Подпись',
+      comment: 'Разбор',
+      sortOrder: group.situations.length + 1
+    })
+    const reloaded = store.list().find((item) => item.id === group.id)
+    expect(reloaded?.situations.at(-1)?.title).toBe('Моя позиция')
+    database.close()
+  })
+
+  it('creates a new group when only a name is given', () => {
+    const database = openDatabase(':memory:')
+    const store = createSituationStore(database)
+    const groupsBefore = store.list()
+
+    store.create({
+      groupName: '  мои   позиции ',
+      title: 'Своя позиция',
+      description: '',
+      comment: '',
+      fen: '8/8/8/8/8/8/8/K6k b - - 0 2'
+    })
+
+    const groups = store.list()
+    expect(groups).toHaveLength(groupsBefore.length + 1)
+    const created = groups.at(-1)!
+    expect(created.name).toBe('Мои позиции')
+    expect(created.sortOrder).toBe(groupsBefore.length + 1)
+    expect(created.situations.map((situation) => situation.title)).toEqual(['Своя позиция'])
+    database.close()
+  })
+
+  it('rejects duplicate fen, duplicate title and empty inputs', () => {
+    const database = openDatabase(':memory:')
+    const store = createSituationStore(database)
+    const group = store.list()[0]
+    const fen = group.situations[0].fen
+
+    expect(() =>
+      store.create({
+        groupId: group.id,
+        title: 'Дубль позиции',
+        description: '',
+        comment: '',
+        fen
+      })
+    ).toThrow(/Позиция уже сохранена/)
+
+    expect(() =>
+      store.create({
+        groupId: group.id,
+        title: group.situations[0].title,
+        description: '',
+        comment: '',
+        fen: '8/8/8/8/8/8/8/K6k w - - 0 9'
+      })
+    ).toThrow(/уже есть ситуация с таким названием/)
+
+    expect(() =>
+      store.create({
+        groupName: 'Новая',
+        title: '   ',
+        description: '',
+        comment: '',
+        fen: '8/8/8/8/8/8/8/K6k w - - 0 9'
+      })
+    ).toThrow('Введите название ситуации')
+
+    expect(() =>
+      store.create({
+        groupName: '   ',
+        title: 'Позиция',
+        description: '',
+        comment: '',
+        fen: '8/8/8/8/8/8/8/K6k w - - 0 9'
+      })
+    ).toThrow('Введите название группы или выберите существующую')
+
+    expect(() =>
+      store.create({
+        groupName: group.name.toLowerCase(),
+        title: 'Позиция',
+        description: '',
+        comment: '',
+        fen: '8/8/8/8/8/8/8/K6k w - - 0 9'
+      })
+    ).toThrow(/Группа с таким именем уже есть/)
+    database.close()
+  })
 })

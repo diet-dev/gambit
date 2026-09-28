@@ -14,6 +14,25 @@ describe('ChessGame', () => {
     expect(container.querySelectorAll('[data-square]')).toHaveLength(64)
   })
 
+  it('reports the current position when the save button is clicked', () => {
+    const onSaveSituation = vi.fn()
+    const { getByRole } = render(<ChessGame onSaveSituation={onSaveSituation} />)
+
+    fireEvent.click(getByRole('button', { name: 'Сохранить позицию как ситуацию' }))
+
+    expect(onSaveSituation).toHaveBeenCalledWith(
+      'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+    )
+  })
+
+  it('hides the save button when no handler is given', () => {
+    const { queryByRole } = render(<ChessGame />)
+
+    expect(
+      queryByRole('button', { name: 'Сохранить позицию как ситуацию' })
+    ).not.toBeInTheDocument()
+  })
+
   it('renders the starting position pieces', () => {
     const { container } = render(<ChessGame />)
 

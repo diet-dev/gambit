@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { SituationGroup } from '../../../shared/situations'
 
-export function useSituations(): { groups: SituationGroup[] } {
+export function useSituations(): { groups: SituationGroup[]; reload: () => void } {
   const [groups, setGroups] = useState<SituationGroup[]>([])
+  const [reloadAt, setReloadAt] = useState(0)
+
+  const reload = useCallback(() => setReloadAt((value) => value + 1), [])
 
   useEffect(() => {
     const api = window.api?.situations
@@ -18,7 +21,7 @@ export function useSituations(): { groups: SituationGroup[] } {
     return () => {
       active = false
     }
-  }, [])
+  }, [reloadAt])
 
-  return { groups }
+  return { groups, reload }
 }

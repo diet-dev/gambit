@@ -69,7 +69,16 @@ function installApi(initial: Group[]): GroupsApi {
       exportSnapshot: vi.fn(async () => null)
     },
     situations: {
-      list: vi.fn(async () => [])
+      list: vi.fn(async () => []),
+      create: vi.fn(async () => ({
+        id: 1,
+        groupId: 1,
+        title: 'Новая ситуация',
+        description: '',
+        comment: '',
+        fen: '',
+        sortOrder: 1
+      }))
     }
   }
   return groupsApi
