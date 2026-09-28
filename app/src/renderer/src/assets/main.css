@@ -1004,6 +1004,11 @@ code {
   max-width: 760px;
 }
 
+.situation-save-board {
+  width: 200px;
+  margin: 0 0 12px auto;
+}
+
 .situation-save-form .entity-field {
   flex-direction: row;
   align-items: center;

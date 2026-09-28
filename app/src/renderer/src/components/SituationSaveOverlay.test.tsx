@@ -74,13 +74,13 @@ afterEach(() => {
 })
 
 describe('SituationSaveOverlay', () => {
-  it('shows the group select, the fields and the saved position', async () => {
+  it('shows the group select, the fields and the board preview', async () => {
     installApi({ list: vi.fn(async () => groups), create: vi.fn() })
-    const { getByRole, getByText, findByRole } = renderOverlay()
+    const { getByRole, getByText, findByRole, container } = renderOverlay()
 
     expect(await findByRole('combobox')).toBeInTheDocument()
     expect(getByText('Сохранить ситуацию')).toBeInTheDocument()
-    expect(getByText(`Позиция: ${fen}`)).toBeInTheDocument()
+    expect(container.querySelector('.situation-save-board')).toBeInTheDocument()
     expect(getByRole('button', { name: 'Сохранить' })).toBeDisabled()
   })
 

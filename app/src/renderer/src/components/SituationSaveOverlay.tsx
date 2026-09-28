@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Chessboard } from 'react-chessboard'
 import { X } from 'lucide-react'
 import type { SituationCreateInput } from '../../../shared/situations'
 import { finalizeHeadingText, normalizeHeadingInput } from '../../../shared/situations'
@@ -72,6 +73,9 @@ function SituationSaveOverlay({
         <X size={32} aria-hidden="true" />
       </button>
       <h2 className="help-overlay-title">Сохранить ситуацию</h2>
+      <div className="situation-save-board">
+        <Chessboard options={{ position: fen, allowDragging: false, showNotation: false }} />
+      </div>
       <form
         className="entity-form situation-save-form"
         onSubmit={(event) => {
@@ -162,7 +166,6 @@ function SituationSaveOverlay({
             />
           </span>
         </label>
-        <p className="entity-sub">Позиция: {fen}</p>
         {error !== null && <p className="entity-error">{error}</p>}
         <div className="entity-actions">
           <button type="button" onClick={onClose}>
