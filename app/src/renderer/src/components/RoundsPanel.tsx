@@ -56,6 +56,9 @@ function RoundsPanel({
         {tournaments.length === 0 && (
           <span className="entity-error">Сначала создайте турнир на подвкладке «Турниры»</span>
         )}
+        {tournaments.length > 0 && selectedTournamentId === null && (
+          <span className="entity-hint">Выберите турнир, чтобы увидеть раунды</span>
+        )}
       </label>
       {selectedTournamentId !== null && (
         <div className="rounds-header">

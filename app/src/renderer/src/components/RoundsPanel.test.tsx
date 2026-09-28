@@ -84,6 +84,21 @@ describe('RoundsPanel', () => {
     expect(queryByRole('list')).not.toBeInTheDocument()
   })
 
+  it('hints to select a tournament when none is chosen', async () => {
+    installApi([{ id: 1, name: 'Осенний', groupId: 1, startDate: '2026-10-01', settingsId: 1 }], [])
+    const { findByText } = render(
+      <RoundsPanel
+        selectedTournamentId={null}
+        onSelectTournament={() => {}}
+        onCreateRound={() => {}}
+        onOpenRound={() => {}}
+        savedAt={0}
+      />
+    )
+
+    expect(await findByText('Выберите турнир, чтобы увидеть раунды')).toBeInTheDocument()
+  })
+
   it('shows an empty state for a tournament without rounds', async () => {
     installApi([{ id: 1, name: 'Осенний', groupId: 1, startDate: '2026-10-01', settingsId: 1 }], [])
     const user = userEvent.setup()

@@ -620,6 +620,10 @@ code {
   color: var(--ev-c-text-2);
 }
 
+.rounds-panel .entity-hint {
+  margin-top: 4px;
+}
+
 .entity-actions {
   display: flex;
   justify-content: flex-end;
