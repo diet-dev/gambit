@@ -28,7 +28,17 @@ function createStore(): SituationStore {
       comment: input.comment,
       fen: input.fen,
       sortOrder: 1
-    }))
+    })),
+    update: vi.fn((input) => ({
+      id: input.id,
+      groupId: input.groupId ?? 1,
+      title: input.title,
+      description: input.description,
+      comment: input.comment,
+      fen: 'fen',
+      sortOrder: 1
+    })),
+    remove: vi.fn()
   }
 }
 
@@ -49,5 +59,18 @@ describe('registerSituationsIpc', () => {
     }
     invoke('situations:create', input)
     expect(store.create).toHaveBeenCalledWith(input)
+  })
+
+  it('routes update and remove to the store', () => {
+    const { ipcMain, invoke } = createIpcMain()
+    const store = createStore()
+    registerSituationsIpc({ ipcMain, store })
+
+    const input = { id: 5, groupId: 1, title: 'Обновлено', description: '', comment: '' }
+    invoke('situations:update', input)
+    expect(store.update).toHaveBeenCalledWith(input)
+
+    invoke('situations:remove', 5)
+    expect(store.remove).toHaveBeenCalledWith(5)
   })
 })

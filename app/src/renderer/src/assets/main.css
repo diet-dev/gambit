@@ -894,13 +894,16 @@ code {
   top: 50%;
   right: 8px;
   transform: translateY(-50%);
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  justify-items: end;
   gap: 2px;
 }
 
 .situation-reset,
-.situation-help {
+.situation-help,
+.situation-edit,
+.situation-delete {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -913,7 +916,9 @@ code {
 }
 
 .situation-reset:hover,
-.situation-help:hover {
+.situation-help:hover,
+.situation-edit:hover,
+.situation-delete:hover {
   color: var(--ev-c-text-1);
   background: var(--color-surface);
 }

@@ -63,7 +63,17 @@ function installApi(overrides: Partial<RemoteApi> = {}): RemoteApi {
         comment: '',
         fen: '',
         sortOrder: 1
-      }))
+      })),
+      update: vi.fn(async () => ({
+        id: 1,
+        groupId: 1,
+        title: 'Обновлено',
+        description: '',
+        comment: '',
+        fen: '',
+        sortOrder: 1
+      })),
+      remove: vi.fn(async () => undefined)
     }
   }
   return remote

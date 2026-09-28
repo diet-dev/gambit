@@ -1,4 +1,4 @@
-import type { SituationCreateInput } from '../shared/situations'
+import type { SituationCreateInput, SituationUpdateInput } from '../shared/situations'
 import type { IpcMainLike } from './remoteIpc'
 import type { SituationStore } from './situationStore'
 
@@ -12,4 +12,8 @@ export function registerSituationsIpc({ ipcMain, store }: RegisterSituationsIpcO
   ipcMain.handle('situations:create', (_event, input) =>
     store.create(input as SituationCreateInput)
   )
+  ipcMain.handle('situations:update', (_event, input) =>
+    store.update(input as SituationUpdateInput)
+  )
+  ipcMain.handle('situations:remove', (_event, id) => store.remove(id as number))
 }

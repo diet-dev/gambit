@@ -14,6 +14,7 @@ import SettingsPanel from './components/SettingsPanel'
 import SituationCommentDialog from './components/SituationCommentDialog'
 import SituationList from './components/SituationList'
 import SituationSaveOverlay from './components/SituationSaveOverlay'
+import Dialog from './components/Dialog'
 import PlayersPanel from './components/PlayersPanel'
 import RoundFormOverlay from './components/RoundFormOverlay'
 import TournamentChartOverlay from './components/TournamentChartOverlay'
@@ -21,7 +22,7 @@ import TournamentsPanel from './components/TournamentsPanel'
 import { useEventLog } from './hooks/useEventLog'
 import { useSituations } from './hooks/useSituations'
 import { findHelpArticle } from './help/articles'
-import { findSituation, firstSituation } from '../../shared/situations'
+import { findSituation, firstSituation, type Situation } from '../../shared/situations'
 import type { Round, Tournament } from '../../shared/tournament'
 
 function App(): React.JSX.Element {
@@ -29,6 +30,9 @@ function App(): React.JSX.Element {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [commentId, setCommentId] = useState<number | null>(null)
   const [savingFen, setSavingFen] = useState<string | null>(null)
+  const [editingSituation, setEditingSituation] = useState<Situation | null>(null)
+  const [deletingSituation, setDeletingSituation] = useState<Situation | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
   const [instance, setInstance] = useState(0)
   const [activity, setActivity] = useState<Activity>('situations')
   const [helpArticleId, setHelpArticleId] = useState<string | null>(null)
@@ -67,6 +71,22 @@ function App(): React.JSX.Element {
     setInstance((value) => value + 1)
   }
 
+  async function confirmSituationDelete(): Promise<void> {
+    if (deletingSituation === null) {
+      return
+    }
+    try {
+      await window.api?.situations?.remove(deletingSituation.id)
+      if (selectedId === deletingSituation.id) {
+        setSelectedId(null)
+      }
+      setDeletingSituation(null)
+      reload()
+    } catch (caught) {
+      setDeleteError(caught instanceof Error ? caught.message : 'Не удалось удалить ситуацию')
+    }
+  }
+
   return (
     <>
       <ActivityBar active={activity} onSelect={selectActivity} />
@@ -85,6 +105,8 @@ function App(): React.JSX.Element {
                 onSelect={selectSituation}
                 onShowComment={setCommentId}
                 onReset={resetSituation}
+                onEdit={setEditingSituation}
+                onDelete={setDeletingSituation}
               />
             )}
             {activity === 'devices' && <DevicesPanel />}
@@ -171,11 +193,44 @@ function App(): React.JSX.Element {
                 }}
               />
             )}
+            {editingSituation !== null && (
+              <SituationSaveOverlay
+                key={editingSituation.id}
+                fen={editingSituation.fen}
+                situation={editingSituation}
+                onClose={() => setEditingSituation(null)}
+                onSaved={() => {
+                  setEditingSituation(null)
+                  reload()
+                }}
+              />
+            )}
           </div>
         </Panel>
       </Group>
       {commentSituation && (
         <SituationCommentDialog situation={commentSituation} onClose={() => setCommentId(null)} />
+      )}
+      {deletingSituation && (
+        <Dialog
+          titleId="situation-delete-dialog"
+          className="entity-delete-dialog"
+          onClose={() => setDeletingSituation(null)}
+        >
+          <h2 id="situation-delete-dialog" className="comment-dialog-title">
+            Удалить ситуацию?
+          </h2>
+          <p className="comment-dialog-text">{deletingSituation.title}</p>
+          {deleteError && <p className="entity-error">{deleteError}</p>}
+          <div className="entity-actions">
+            <button type="button" onClick={() => setDeletingSituation(null)}>
+              Отмена
+            </button>
+            <button type="button" onClick={() => void confirmSituationDelete()}>
+              Удалить
+            </button>
+          </div>
+        </Dialog>
       )}
     </>
   )

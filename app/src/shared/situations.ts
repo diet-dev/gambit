@@ -40,6 +40,15 @@ export type SituationCreateInput = {
   fen: string
 }
 
+export type SituationUpdateInput = {
+  id: number
+  groupId?: number
+  groupName?: string
+  title: string
+  description: string
+  comment: string
+}
+
 export function normalizeHeadingInput(value: string): string {
   const collapsed = value.replace(/\s{2,}/g, ' ')
   const first = collapsed.charAt(0).toLocaleUpperCase('ru')
@@ -53,4 +62,6 @@ export function finalizeHeadingText(value: string): string {
 export type SituationsApi = {
   list: () => Promise<SituationGroup[]>
   create: (input: SituationCreateInput) => Promise<Situation>
+  update: (input: SituationUpdateInput) => Promise<Situation>
+  remove: (id: number) => Promise<void>
 }

@@ -1,5 +1,5 @@
-import { CircleHelp, RotateCcw } from 'lucide-react'
-import { type SituationGroup } from '../../../shared/situations'
+import { CircleHelp, Pencil, RotateCcw, Trash2 } from 'lucide-react'
+import { type Situation, type SituationGroup } from '../../../shared/situations'
 
 type SituationListProps = {
   groups: SituationGroup[]
@@ -7,6 +7,8 @@ type SituationListProps = {
   onSelect: (id: number) => void
   onShowComment: (id: number) => void
   onReset: (id: number) => void
+  onEdit: (situation: Situation) => void
+  onDelete: (situation: Situation) => void
 }
 
 function SituationList({
@@ -14,7 +16,9 @@ function SituationList({
   selectedId,
   onSelect,
   onShowComment,
-  onReset
+  onReset,
+  onEdit,
+  onDelete
 }: SituationListProps): React.JSX.Element {
   return (
     <nav className="situation-list">
@@ -56,6 +60,22 @@ function SituationList({
                         onClick={() => onShowComment(situation.id)}
                       >
                         <CircleHelp size={20} aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        className="situation-edit"
+                        aria-label={`Редактировать: ${situation.title}`}
+                        onClick={() => onEdit(situation)}
+                      >
+                        <Pencil size={20} aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        className="situation-delete"
+                        aria-label={`Удалить: ${situation.title}`}
+                        onClick={() => onDelete(situation)}
+                      >
+                        <Trash2 size={20} aria-hidden="true" />
                       </button>
                     </div>
                   )}

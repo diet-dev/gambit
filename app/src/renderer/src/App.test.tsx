@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { fireEvent, render } from '@testing-library/react'
+import { fireEvent, render, waitFor } from '@testing-library/react'
 import App from './App'
 import type { RemoteApi } from '../../shared/remote'
 import type { DatabaseApi } from '../../shared/database'
@@ -53,7 +53,9 @@ const groups: SituationGroup[] = [
 
 const situationsApi: SituationsApi = {
   list: vi.fn(async () => groups),
-  create: vi.fn(async () => ({ ...groups[0].situations[0], id: 99 }))
+  create: vi.fn(async () => ({ ...groups[0].situations[0], id: 99 })),
+  update: vi.fn(async () => ({ ...groups[0].situations[0] })),
+  remove: vi.fn(async () => undefined)
 }
 
 function installApi(): void {
@@ -256,5 +258,41 @@ describe('App', () => {
     fireEvent.keyDown(document, { key: 'Escape' })
 
     expect(queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('edits a situation through the overlay', async () => {
+    installApi()
+    const { getByRole, findByRole } = render(<App />)
+    await findByRole('button', { name: /^Начальная позиция/ })
+
+    fireEvent.click(getByRole('button', { name: /Редактировать: Начальная позиция/ }))
+
+    const overlay = getByRole('button', { name: 'Сохранить' }).closest('form')
+    expect(overlay).not.toBeNull()
+    const titleInput = getByRole('textbox', { name: /Название ситуации/ }) as HTMLInputElement
+    expect(titleInput.value).toBe('Начальная позиция')
+
+    fireEvent.change(titleInput, { target: { value: 'Начальная позиция — правка' } })
+    fireEvent.click(getByRole('button', { name: 'Сохранить' }))
+
+    await waitFor(() => expect(situationsApi.update).toHaveBeenCalled())
+    expect(situationsApi.create).not.toHaveBeenCalled()
+  })
+
+  it('deletes a situation after confirmation', async () => {
+    installApi()
+    const { getByRole, findByRole, queryByRole } = render(<App />)
+    await findByRole('button', { name: /^Начальная позиция/ })
+
+    fireEvent.click(getByRole('button', { name: /Удалить: Начальная позиция/ }))
+
+    const dialog = getByRole('dialog')
+    expect(dialog).toHaveTextContent('Удалить ситуацию?')
+    expect(dialog).toHaveTextContent('Начальная позиция')
+
+    fireEvent.click(getByRole('button', { name: 'Удалить' }))
+
+    await waitFor(() => expect(situationsApi.remove).toHaveBeenCalledWith(1))
+    await waitFor(() => expect(queryByRole('dialog')).not.toBeInTheDocument())
   })
 })

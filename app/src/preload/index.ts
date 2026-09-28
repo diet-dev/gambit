@@ -94,7 +94,9 @@ const database: DatabaseApi = {
 
 const situations: SituationsApi = {
   list: () => ipcRenderer.invoke('situations:list') as Promise<SituationGroup[]>,
-  create: (input) => ipcRenderer.invoke('situations:create', input) as Promise<Situation>
+  create: (input) => ipcRenderer.invoke('situations:create', input) as Promise<Situation>,
+  update: (input) => ipcRenderer.invoke('situations:update', input) as Promise<Situation>,
+  remove: (id) => ipcRenderer.invoke('situations:remove', id) as Promise<void>
 }
 
 const api = { remote, players, groups, tournament, database, situations }

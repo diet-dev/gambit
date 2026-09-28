@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Chessboard } from 'react-chessboard'
 import { X } from 'lucide-react'
-import type { SituationCreateInput } from '../../../shared/situations'
+import type {
+  Situation,
+  SituationCreateInput,
+  SituationUpdateInput
+} from '../../../shared/situations'
 import { finalizeHeadingText, normalizeHeadingInput } from '../../../shared/situations'
 import { useSituations } from '../hooks/useSituations'
 
@@ -9,21 +13,26 @@ const NEW_GROUP = 'new'
 
 type SituationSaveOverlayProps = {
   fen: string
+  situation?: Situation | null
   onClose: () => void
   onSaved: () => void
 }
 
 function SituationSaveOverlay({
   fen,
+  situation = null,
   onClose,
   onSaved
 }: SituationSaveOverlayProps): React.JSX.Element {
+  const editing = situation !== null
   const { groups } = useSituations()
-  const [groupId, setGroupId] = useState<number | typeof NEW_GROUP | null>(null)
+  const [groupId, setGroupId] = useState<number | typeof NEW_GROUP | null>(
+    situation?.groupId ?? null
+  )
   const [groupName, setGroupName] = useState('')
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [comment, setComment] = useState('')
+  const [title, setTitle] = useState(situation?.title ?? '')
+  const [description, setDescription] = useState(situation?.description ?? '')
+  const [comment, setComment] = useState(situation?.comment ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -44,21 +53,36 @@ function SituationSaveOverlay({
     (newGroupSelected ? groupName.trim() !== '' : groupId !== null)
 
   async function save(): Promise<void> {
-    const input: SituationCreateInput = {
-      title: finalizeHeadingText(title),
-      description: finalizeHeadingText(description),
-      comment: finalizeHeadingText(comment),
-      fen
-    }
-    if (newGroupSelected) {
-      input.groupName = finalizeHeadingText(groupName)
-    } else if (groupId !== null) {
-      input.groupId = groupId
-    }
     setSaving(true)
     setError(null)
     try {
-      await window.api?.situations?.create(input)
+      if (editing) {
+        const input: SituationUpdateInput = {
+          id: situation.id,
+          title: finalizeHeadingText(title),
+          description: finalizeHeadingText(description),
+          comment: finalizeHeadingText(comment)
+        }
+        if (newGroupSelected) {
+          input.groupName = finalizeHeadingText(groupName)
+        } else if (groupId !== null) {
+          input.groupId = groupId
+        }
+        await window.api?.situations?.update(input)
+      } else {
+        const input: SituationCreateInput = {
+          title: finalizeHeadingText(title),
+          description: finalizeHeadingText(description),
+          comment: finalizeHeadingText(comment),
+          fen
+        }
+        if (newGroupSelected) {
+          input.groupName = finalizeHeadingText(groupName)
+        } else if (groupId !== null) {
+          input.groupId = groupId
+        }
+        await window.api?.situations?.create(input)
+      }
       onSaved()
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Не удалось сохранить ситуацию')
@@ -72,9 +96,17 @@ function SituationSaveOverlay({
       <button type="button" className="help-overlay-close" aria-label="Закрыть" onClick={onClose}>
         <X size={32} aria-hidden="true" />
       </button>
-      <h2 className="help-overlay-title">Сохранить ситуацию</h2>
+      <h2 className="help-overlay-title">
+        {editing ? 'Редактировать ситуацию' : 'Сохранить ситуацию'}
+      </h2>
       <div className="situation-save-board">
-        <Chessboard options={{ position: fen, allowDragging: false, showNotation: false }} />
+        <Chessboard
+          options={{
+            position: editing ? situation.fen : fen,
+            allowDragging: false,
+            showNotation: false
+          }}
+        />
       </div>
       <form
         className="entity-form situation-save-form"

@@ -17,7 +17,7 @@ const groups: SituationGroup[] = [
   }
 ]
 
-function installApi(situationsApi: SituationsApi): void {
+function installApi(situationsApi: Partial<SituationsApi>): void {
   window.api = {
     remote: {
       publishPosition: vi.fn(),
@@ -59,7 +59,13 @@ function installApi(situationsApi: SituationsApi): void {
     database: {
       exportSnapshot: vi.fn(async () => null)
     } as DatabaseApi,
-    situations: situationsApi
+    situations: {
+      list: vi.fn(async () => []),
+      create: vi.fn(),
+      update: vi.fn(),
+      remove: vi.fn(),
+      ...situationsApi
+    }
   }
 }
 
@@ -159,4 +165,52 @@ describe('SituationSaveOverlay', () => {
 
     expect(await findByText('Позиция уже сохранена: «Мат»')).toBeInTheDocument()
   })
+
+  it('edits a situation: prefilled fields, update without fen', async () => {
+    const update = vi.fn(async () => ({
+      id: 5,
+      groupId: 5,
+      title: 'Мат Легаля — правка',
+      description: 'desc',
+      comment: 'comment',
+      fen,
+      sortOrder: 1
+    }))
+    const create = vi.fn()
+    installApi({ list: vi.fn(async () => groups), create, update })
+    const user = userEvent.setup()
+    const { getByRole, findByRole, getByText } = render(
+      <SituationSaveOverlay fen={fen} situation={situation} onClose={() => {}} onSaved={() => {}} />
+    )
+
+    expect(getByText('Редактировать ситуацию')).toBeInTheDocument()
+    const titleInput = getByRole('textbox', { name: /Название ситуации/ }) as HTMLInputElement
+    expect(titleInput.value).toBe(situation.title)
+    expect(await findByRole('combobox')).toHaveValue('5')
+
+    await user.clear(titleInput)
+    await user.type(titleInput, 'Мат Легаля — правка')
+    await user.click(getByRole('button', { name: 'Сохранить' }))
+
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith({
+        id: situation.id,
+        groupId: situation.groupId,
+        title: 'Мат Легаля — правка',
+        description: situation.description,
+        comment: situation.comment
+      })
+    )
+    expect(create).not.toHaveBeenCalled()
+  })
 })
+
+const situation = {
+  id: 5,
+  groupId: 5,
+  title: 'Мат Легаля',
+  description: 'Классическая ловушка в дебюте.',
+  comment: 'Комментарий',
+  fen: 'rn1q1bnr/ppp1kB1p/3p2p1/3NN3/4P3/8/PPPP1PPP/R1BbK2R b KQ - 2 7',
+  sortOrder: 1
+}

@@ -65,6 +65,8 @@ describe('SituationList', () => {
         onSelect={() => {}}
         onShowComment={() => {}}
         onReset={() => {}}
+        onEdit={() => {}}
+        onDelete={() => {}}
       />
     )
 
@@ -85,6 +87,8 @@ describe('SituationList', () => {
         onSelect={onSelect}
         onShowComment={() => {}}
         onReset={() => {}}
+        onEdit={() => {}}
+        onDelete={() => {}}
       />
     )
 
@@ -101,6 +105,8 @@ describe('SituationList', () => {
         onSelect={() => {}}
         onShowComment={() => {}}
         onReset={() => {}}
+        onEdit={() => {}}
+        onDelete={() => {}}
       />
     )
 
@@ -117,6 +123,8 @@ describe('SituationList', () => {
         onSelect={() => {}}
         onShowComment={() => {}}
         onReset={() => {}}
+        onEdit={() => {}}
+        onDelete={() => {}}
       />
     )
 
@@ -142,6 +150,8 @@ describe('SituationList', () => {
         onSelect={() => {}}
         onShowComment={onShowComment}
         onReset={() => {}}
+        onEdit={() => {}}
+        onDelete={() => {}}
       />
     )
 
@@ -158,6 +168,8 @@ describe('SituationList', () => {
         onSelect={() => {}}
         onShowComment={() => {}}
         onReset={() => {}}
+        onEdit={() => {}}
+        onDelete={() => {}}
       />
     )
 
@@ -175,11 +187,51 @@ describe('SituationList', () => {
         onSelect={() => {}}
         onShowComment={() => {}}
         onReset={onReset}
+        onEdit={() => {}}
+        onDelete={() => {}}
       />
     )
 
     fireEvent.click(getByRole('button', { name: /Сбросить: Мат Легаля/ }))
 
     expect(onReset).toHaveBeenCalledWith(2)
+  })
+
+  it('calls onEdit with the situation when edit is clicked', () => {
+    const onEdit = vi.fn()
+    const { getByRole } = render(
+      <SituationList
+        groups={groups}
+        selectedId={1}
+        onSelect={() => {}}
+        onShowComment={() => {}}
+        onReset={() => {}}
+        onEdit={onEdit}
+        onDelete={() => {}}
+      />
+    )
+
+    fireEvent.click(getByRole('button', { name: /Редактировать: Начальная позиция/ }))
+
+    expect(onEdit).toHaveBeenCalledWith(groups[0].situations[0])
+  })
+
+  it('calls onDelete with the situation when delete is clicked', () => {
+    const onDelete = vi.fn()
+    const { getByRole } = render(
+      <SituationList
+        groups={groups}
+        selectedId={1}
+        onSelect={() => {}}
+        onShowComment={() => {}}
+        onReset={() => {}}
+        onEdit={() => {}}
+        onDelete={onDelete}
+      />
+    )
+
+    fireEvent.click(getByRole('button', { name: /Удалить: Начальная позиция/ }))
+
+    expect(onDelete).toHaveBeenCalledWith(groups[0].situations[0])
   })
 })

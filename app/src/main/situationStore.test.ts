@@ -176,4 +176,90 @@ describe('situationStore', () => {
     ).toThrow(/Группа с таким именем уже есть/)
     database.close()
   })
+
+  it('updates title and moves a situation to another group', () => {
+    const database = openDatabase(':memory:')
+    const store = createSituationStore(database)
+    const first = store.list()[0]
+
+    store.create({
+      groupName: 'Мои позиции',
+      title: 'Своя позиция',
+      description: '',
+      comment: '',
+      fen: '8/8/8/8/8/8/8/K6k b - - 0 2'
+    })
+    const mine = store.list().at(-1)!.situations[0]
+
+    const updated = store.update({
+      id: mine.id,
+      groupId: first.id,
+      title: '  переименованная  ',
+      description: ' новая подпись ',
+      comment: ''
+    })
+
+    expect(updated).toMatchObject({
+      id: mine.id,
+      groupId: first.id,
+      title: 'Переименованная',
+      description: 'Новая подпись',
+      fen: mine.fen
+    })
+    const reloaded = store.list()
+    expect(reloaded[0].situations.map((situation) => situation.title)).toContain('Переименованная')
+    expect(reloaded.at(-1)!.situations).toHaveLength(0)
+    database.close()
+  })
+
+  it('rejects updating into an existing title and unknown group or situation', () => {
+    const database = openDatabase(':memory:')
+    const store = createSituationStore(database)
+    const group = store.list().find((item) => item.name === 'Маты')!
+    const [a, b] = group.situations
+
+    expect(() =>
+      store.update({
+        id: b.id,
+        groupId: group.id,
+        title: a.title,
+        description: '',
+        comment: ''
+      })
+    ).toThrow(/уже есть ситуация с таким названием/)
+
+    expect(() =>
+      store.update({
+        id: b.id,
+        groupId: 999,
+        title: 'Позиция',
+        description: '',
+        comment: ''
+      })
+    ).toThrow('Выбранная группа не найдена')
+
+    expect(() =>
+      store.update({
+        id: 999,
+        groupId: group.id,
+        title: 'Позиция',
+        description: '',
+        comment: ''
+      })
+    ).toThrow('Ситуация не найдена')
+    database.close()
+  })
+
+  it('removes a situation', () => {
+    const database = openDatabase(':memory:')
+    const store = createSituationStore(database)
+    const group = store.list()[0]
+    const before = group.situations.length
+
+    store.remove(group.situations[0].id)
+
+    expect(store.list()[0].situations).toHaveLength(before - 1)
+    expect(() => store.remove(group.situations[0].id)).not.toThrow()
+    database.close()
+  })
 })
