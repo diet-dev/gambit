@@ -12,6 +12,7 @@ import type {
   Tournament,
   TournamentApi,
   TournamentInput,
+  TournamentPositions,
   TournamentSettings,
   TournamentSettingsInput,
   TournamentSettingsWithUsage
@@ -70,6 +71,11 @@ const tournament: TournamentApi = {
       ipcRenderer.invoke('tournament:rounds:list', tournamentId) as Promise<Round[]>,
     results: (roundId: number) =>
       ipcRenderer.invoke('tournament:rounds:results', roundId) as Promise<RoundResultsRow[]>,
+    positions: (tournamentId: number) =>
+      ipcRenderer.invoke(
+        'tournament:rounds:positions',
+        tournamentId
+      ) as Promise<TournamentPositions>,
     preview: (tournamentId: number) =>
       ipcRenderer.invoke('tournament:rounds:preview', tournamentId) as Promise<RoundPairsPreview>,
     create: (input: RoundCreateInput) =>

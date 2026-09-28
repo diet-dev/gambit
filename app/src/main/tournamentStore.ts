@@ -1,6 +1,7 @@
 import type { DatabaseSync } from 'node:sqlite'
 import type {
   PairResult,
+  PlayerPositions,
   Round,
   RoundCreateInput,
   RoundOutcome,
@@ -9,6 +10,7 @@ import type {
   RoundResultsRow,
   Tournament,
   TournamentInput,
+  TournamentPositions,
   TournamentSettings,
   TournamentSettingsInput,
   TournamentSettingsWithUsage
@@ -26,6 +28,7 @@ export type TournamentStore = {
   removeTournament: (id: number) => void
   listRounds: (tournamentId: number) => Round[]
   roundResults: (roundId: number) => RoundResultsRow[]
+  positions: (tournamentId: number) => TournamentPositions
   previewPairs: (tournamentId: number) => RoundPairsPreview
   createRound: (input: RoundCreateInput) => { round: Round; pairs: RoundPair[] }
 }
@@ -104,6 +107,45 @@ export function createTournamentStore(database: DatabaseSync): TournamentStore {
       .get(roundId) as unknown as Round
   }
 
+  function ladderRows(round: Round): RoundResultsRow[] {
+    const pairs = listRoundPairs(round.id)
+    const players = listTournamentPlayers(round.tournamentId)
+    const ladder = orderFor({
+      seq: round.seq + 1,
+      players,
+      prevRound: {
+        seq: round.seq,
+        settings: getSettings(round.settingsId),
+        pairs: pairs.map((pair) => ({
+          player1Id: pair.player1Id,
+          player2Id: pair.player2Id,
+          result: pair.result
+        }))
+      }
+    })
+    const outcomes = new Map<number, RoundOutcome>()
+    for (const pair of pairs) {
+      if (pair.player2Id === null || pair.result === null) {
+        continue
+      }
+      const [first, second] = pairOutcomes(pair.result)
+      outcomes.set(pair.player1Id, first)
+      outcomes.set(pair.player2Id, second)
+    }
+    const playerById = new Map(players.map((player) => [player.id, player]))
+    return ladder.map((playerId, index) => {
+      const player = playerById.get(playerId)
+      return {
+        position: index + 1,
+        playerId,
+        lastName: player?.lastName ?? '',
+        firstName: player?.firstName ?? '',
+        middleName: player?.middleName ?? '',
+        outcome: outcomes.get(playerId) ?? 'resting'
+      }
+    })
+  }
+
   function listRoundPairs(roundId: number): RoundPair[] {
     return database
       .prepare(
@@ -143,6 +185,12 @@ export function createTournamentStore(database: DatabaseSync): TournamentStore {
         )
         .get(tournamentId) as unknown as Round | undefined) ?? null
     )
+  }
+
+  function listRounds(tournamentId: number): Round[] {
+    return database
+      .prepare(`SELECT ${ROUND_COLUMNS} FROM rounds WHERE tournament_id = ? ORDER BY seq`)
+      .all(tournamentId) as unknown as Round[]
   }
 
   function withTransaction<T>(run: () => T): T {
@@ -234,48 +282,34 @@ export function createTournamentStore(database: DatabaseSync): TournamentStore {
     removeTournament: (id) => {
       database.prepare('DELETE FROM tournaments WHERE id = ?').run(id)
     },
-    listRounds: (tournamentId) =>
-      database
-        .prepare(`SELECT ${ROUND_COLUMNS} FROM rounds WHERE tournament_id = ? ORDER BY seq`)
-        .all(tournamentId) as unknown as Round[],
-    roundResults: (roundId) => {
-      const round = getRound(roundId)
-      const pairs = listRoundPairs(roundId)
-      const players = listTournamentPlayers(round.tournamentId)
-      const ladder = orderFor({
-        seq: round.seq + 1,
-        players,
-        prevRound: {
-          seq: round.seq,
-          settings: getSettings(round.settingsId),
-          pairs: pairs.map((pair) => ({
-            player1Id: pair.player1Id,
-            player2Id: pair.player2Id,
-            result: pair.result
-          }))
+    listRounds: (tournamentId) => listRounds(tournamentId),
+    roundResults: (roundId) => ladderRows(getRound(roundId)),
+    positions: (tournamentId) => {
+      const rounds = listRounds(tournamentId)
+      const seqs = rounds.map((round) => round.seq)
+      const names = new Map<number, Omit<PlayerPositions, 'playerId' | 'positions'>>()
+      const positions = new Map<number, (number | null)[]>()
+      rounds.forEach((round, index) => {
+        for (const row of ladderRows(round)) {
+          names.set(row.playerId, {
+            lastName: row.lastName,
+            firstName: row.firstName,
+            middleName: row.middleName
+          })
+          const series =
+            positions.get(row.playerId) ?? new Array<number | null>(rounds.length).fill(null)
+          series[index] = row.position
+          positions.set(row.playerId, series)
         }
       })
-      const outcomes = new Map<number, RoundOutcome>()
-      for (const pair of pairs) {
-        if (pair.player2Id === null || pair.result === null) {
-          continue
-        }
-        const [first, second] = pairOutcomes(pair.result)
-        outcomes.set(pair.player1Id, first)
-        outcomes.set(pair.player2Id, second)
-      }
-      const playerById = new Map(players.map((player) => [player.id, player]))
-      return ladder.map((playerId, index) => {
-        const player = playerById.get(playerId)
-        return {
-          position: index + 1,
+      const series: PlayerPositions[] = [...positions.entries()].map(
+        ([playerId, playerPositions]) => ({
           playerId,
-          lastName: player?.lastName ?? '',
-          firstName: player?.firstName ?? '',
-          middleName: player?.middleName ?? '',
-          outcome: outcomes.get(playerId) ?? 'resting'
-        }
-      })
+          positions: playerPositions,
+          ...names.get(playerId)!
+        })
+      )
+      return { seqs, series }
     },
     previewPairs: (tournamentId) => {
       const players = listTournamentPlayers(tournamentId)

@@ -36,6 +36,9 @@ export function registerTournamentIpc({ ipcMain, store }: RegisterTournamentIpcO
   ipcMain.handle('tournament:rounds:results', (_event, roundId) =>
     store.roundResults(roundId as number)
   )
+  ipcMain.handle('tournament:rounds:positions', (_event, tournamentId) =>
+    store.positions(tournamentId as number)
+  )
   ipcMain.handle('tournament:rounds:preview', (_event, tournamentId) =>
     store.previewPairs(tournamentId as number)
   )

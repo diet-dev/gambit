@@ -15,11 +15,12 @@ import SituationCommentDialog from './components/SituationCommentDialog'
 import SituationList from './components/SituationList'
 import PlayersPanel from './components/PlayersPanel'
 import RoundFormOverlay from './components/RoundFormOverlay'
+import TournamentChartOverlay from './components/TournamentChartOverlay'
 import TournamentsPanel from './components/TournamentsPanel'
 import { useEventLog } from './hooks/useEventLog'
 import { findHelpArticle } from './help/articles'
 import { DEFAULT_SITUATION_ID, SITUATION_GROUPS, findSituation } from './situations'
-import type { Round } from '../../shared/tournament'
+import type { Round, Tournament } from '../../shared/tournament'
 
 function App(): React.JSX.Element {
   const [selectedId, setSelectedId] = useState(DEFAULT_SITUATION_ID)
@@ -31,6 +32,7 @@ function App(): React.JSX.Element {
   const [roundFormOpen, setRoundFormOpen] = useState(false)
   const [roundFormSavedAt, setRoundFormSavedAt] = useState(0)
   const [viewingRound, setViewingRound] = useState<Round | null>(null)
+  const [chartTournament, setChartTournament] = useState<Tournament | null>(null)
   const { events, logMove } = useEventLog()
   const selected = findSituation(selectedId) ?? findSituation(DEFAULT_SITUATION_ID)!
   const commentSituation = commentId ? findSituation(commentId) : undefined
@@ -83,7 +85,15 @@ function App(): React.JSX.Element {
             )}
             {activity === 'devices' && <DevicesPanel />}
             {activity === 'groups' && <GroupsPanel />}
-            {activity === 'tournaments' && <TournamentsPanel />}
+            {activity === 'tournaments' && (
+              <TournamentsPanel
+                onOpenChart={(tournament) =>
+                  setChartTournament((previous) =>
+                    previous?.id === tournament.id ? null : tournament
+                  )
+                }
+              />
+            )}
             {activity === 'rounds' && (
               <RoundsPanel
                 selectedTournamentId={selectedTournamentId}
@@ -135,6 +145,13 @@ function App(): React.JSX.Element {
                 key={viewingRound.id}
                 round={viewingRound}
                 onClose={() => setViewingRound(null)}
+              />
+            )}
+            {activity === 'tournaments' && chartTournament !== null && (
+              <TournamentChartOverlay
+                key={chartTournament.id}
+                tournament={chartTournament}
+                onClose={() => setChartTournament(null)}
               />
             )}
           </div>

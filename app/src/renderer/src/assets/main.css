@@ -396,6 +396,55 @@ code {
   color: var(--ev-c-text-2);
 }
 
+.tournament-chart-overlay {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chart-canvas-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 280px;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--ev-c-text-1);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.chart-legend-item:hover {
+  border-color: var(--color-border-strong);
+}
+
+.chart-legend-item.off {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.chart-legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
 .round-form-overlay {
   position: absolute;
   inset: 0;

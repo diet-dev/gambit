@@ -83,6 +83,19 @@ export type RoundPairsPreview = {
   restingPlayerIds: number[]
 }
 
+export type PlayerPositions = {
+  playerId: number
+  lastName: string
+  firstName: string
+  middleName: string
+  positions: (number | null)[]
+}
+
+export type TournamentPositions = {
+  seqs: number[]
+  series: PlayerPositions[]
+}
+
 export type RoundCreateInput = {
   tournamentId: number
   playedDate: string
@@ -93,6 +106,7 @@ export type RoundCreateInput = {
 export type RoundsApi = {
   list: (tournamentId: number) => Promise<Round[]>
   results: (roundId: number) => Promise<RoundResultsRow[]>
+  positions: (tournamentId: number) => Promise<TournamentPositions>
   preview: (tournamentId: number) => Promise<RoundPairsPreview>
   create: (input: RoundCreateInput) => Promise<{ round: Round; pairs: RoundPair[] }>
 }

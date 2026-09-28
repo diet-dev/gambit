@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Pencil, Trash2 } from 'lucide-react'
+import { LineChart, Pencil, Trash2 } from 'lucide-react'
 import type {
   AbsenceScoring,
   DrawScoring,
@@ -48,7 +48,11 @@ function formatDate(isoDate: string): string {
   return `${day}.${month}.${year}`
 }
 
-function TournamentsPanel(): React.JSX.Element {
+type TournamentsPanelProps = {
+  onOpenChart: (tournament: Tournament) => void
+}
+
+function TournamentsPanel({ onOpenChart }: TournamentsPanelProps): React.JSX.Element {
   const [tab, setTab] = useState<TournamentsTab>('tournaments')
   const {
     settings,
@@ -146,6 +150,14 @@ function TournamentsPanel(): React.JSX.Element {
                     settingsNames.get(tournament.settingsId) ?? '—'
                   ].join(' · ')}
                 </span>
+                <button
+                  type="button"
+                  className="entity-action"
+                  aria-label={`График: ${tournament.name}`}
+                  onClick={() => onOpenChart(tournament)}
+                >
+                  <LineChart size={16} aria-hidden="true" />
+                </button>
                 <button
                   type="button"
                   className="entity-action"

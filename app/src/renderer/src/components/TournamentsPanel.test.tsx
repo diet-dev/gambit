@@ -94,6 +94,7 @@ function installApi(
       rounds: {
         list: vi.fn(async () => []),
         results: vi.fn(async () => []),
+        positions: vi.fn(async () => ({ seqs: [], series: [] })),
         preview: vi.fn(async () => ({ seq: 1, pairs: [], restingPlayerIds: [] })),
         create: vi.fn(async () => ({
           round: { id: 1, tournamentId: 1, seq: 1, playedDate: '', settingsId: 1 },
@@ -116,9 +117,11 @@ const standard: TournamentSettingsWithUsage = {
 }
 
 describe('TournamentsPanel', () => {
+  const onOpenChart = vi.fn()
+
   it('shows the tournaments sub-tab by default', () => {
     installApi([])
-    const { container, getByRole } = render(<TournamentsPanel />)
+    const { container, getByRole } = render(<TournamentsPanel onOpenChart={onOpenChart} />)
 
     expect(getByRole('tab', { name: 'Турниры' })).toHaveAttribute('aria-selected', 'true')
     expect(getByRole('tabpanel', { name: 'Турниры' })).toBeInTheDocument()
@@ -138,16 +141,30 @@ describe('TournamentsPanel', () => {
         }
       ]
     )
-    const { findByText } = render(<TournamentsPanel />)
+    const { findByText } = render(<TournamentsPanel onOpenChart={onOpenChart} />)
 
     expect(await findByText('Осенний')).toBeInTheDocument()
     expect(await findByText('7А · 01.10.2026 · Стандарт')).toBeInTheDocument()
   })
 
+  it('opens the chart overlay from the tournament row', async () => {
+    const onOpenChart = vi.fn()
+    installApi(
+      [standard],
+      [{ id: 1, name: 'Осенний', groupId: 1, startDate: '2026-10-01', settingsId: 1 }]
+    )
+    const user = userEvent.setup()
+    const { findByRole } = render(<TournamentsPanel onOpenChart={onOpenChart} />)
+
+    await user.click(await findByRole('button', { name: 'График: Осенний' }))
+
+    expect(onOpenChart).toHaveBeenCalledWith(expect.objectContaining({ id: 1, name: 'Осенний' }))
+  })
+
   it('creates a tournament through the form', async () => {
     const { tournamentsApi } = installApi([standard])
     const user = userEvent.setup()
-    const { findByRole } = render(<TournamentsPanel />)
+    const { findByRole } = render(<TournamentsPanel onOpenChart={onOpenChart} />)
 
     await user.click(await findByRole('button', { name: 'Добавить турнир' }))
     const dialog = await findByRole('dialog')
@@ -183,7 +200,7 @@ describe('TournamentsPanel', () => {
       ]
     )
     const user = userEvent.setup()
-    const { findByRole, queryByText } = render(<TournamentsPanel />)
+    const { findByRole, queryByText } = render(<TournamentsPanel onOpenChart={onOpenChart} />)
 
     await user.click(await findByRole('button', { name: 'Удалить: Осенний' }))
     await user.click(await findByRole('button', { name: 'Удалить' }))
@@ -195,7 +212,7 @@ describe('TournamentsPanel', () => {
   it('lists settings in the settings sub-tab', async () => {
     installApi([standard])
     const user = userEvent.setup()
-    const { getByRole, findByText } = render(<TournamentsPanel />)
+    const { getByRole, findByText } = render(<TournamentsPanel onOpenChart={onOpenChart} />)
 
     await user.click(getByRole('tab', { name: 'Настройки' }))
 
@@ -207,7 +224,9 @@ describe('TournamentsPanel', () => {
   it('creates a setting through the form', async () => {
     const { settingsApi } = installApi([])
     const user = userEvent.setup()
-    const { getByRole, findByRole, findByText } = render(<TournamentsPanel />)
+    const { getByRole, findByRole, findByText } = render(
+      <TournamentsPanel onOpenChart={onOpenChart} />
+    )
 
     await user.click(getByRole('tab', { name: 'Настройки' }))
     await user.click(await findByRole('button', { name: 'Добавить настройку' }))
@@ -229,7 +248,9 @@ describe('TournamentsPanel', () => {
   it('deletes a setting after confirmation', async () => {
     const { settingsApi } = installApi([standard])
     const user = userEvent.setup()
-    const { getByRole, findByRole, queryByText } = render(<TournamentsPanel />)
+    const { getByRole, findByRole, queryByText } = render(
+      <TournamentsPanel onOpenChart={onOpenChart} />
+    )
 
     await user.click(getByRole('tab', { name: 'Настройки' }))
     await user.click(await findByRole('button', { name: 'Удалить: Стандарт' }))

@@ -330,4 +330,68 @@ describe('tournamentStore settings', () => {
     })
     expect(store.listRounds(tournament.id)).toHaveLength(2)
   })
+
+  it('tracks player positions across rounds', () => {
+    const database = openDatabase(':memory:')
+    const store = createTournamentStore(database)
+    const groups = createGroupStore(database)
+    const playersDb = database.prepare("INSERT INTO players (last_name, first_name) VALUES (?, '')")
+    const ids = ['Абрамов', 'Борисов', 'Волков'].map((lastName) =>
+      Number(playersDb.run(lastName).lastInsertRowid)
+    )
+    const group = groups.create({ name: '7А', comment: '' })
+    const join = database.prepare(
+      'INSERT INTO group_memberships (group_id, player_id) VALUES (?, ?)'
+    )
+    ids.forEach((id) => join.run(group.id, id))
+    const settings = store.listSettings()[0]
+    const tournament = store.createTournament({
+      name: 'Осенний',
+      groupId: group.id,
+      startDate: '2026-10-01',
+      settingsId: settings.id
+    })
+
+    expect(store.positions(tournament.id)).toEqual({ seqs: [], series: [] })
+
+    store.createRound({
+      tournamentId: tournament.id,
+      playedDate: '2026-10-05',
+      settingsId: settings.id,
+      pairs: [{ player1Id: ids[0], player2Id: ids[1], result: 'player1_win' }]
+    })
+    store.createRound({
+      tournamentId: tournament.id,
+      playedDate: '2026-10-12',
+      settingsId: settings.id,
+      pairs: [{ player1Id: ids[1], player2Id: ids[2], result: 'draw' }]
+    })
+
+    expect(store.positions(tournament.id)).toEqual({
+      seqs: [1, 2],
+      series: [
+        {
+          playerId: ids[0],
+          lastName: 'Абрамов',
+          firstName: '',
+          middleName: '',
+          positions: [1, 1]
+        },
+        {
+          playerId: ids[1],
+          lastName: 'Борисов',
+          firstName: '',
+          middleName: '',
+          positions: [2, 3]
+        },
+        {
+          playerId: ids[2],
+          lastName: 'Волков',
+          firstName: '',
+          middleName: '',
+          positions: [3, 2]
+        }
+      ]
+    })
+  })
 })
