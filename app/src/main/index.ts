@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, Menu, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, Menu, dialog, ipcMain } from 'electron'
 import { join } from 'path'
 import { networkInterfaces } from 'os'
 import QRCode from 'qrcode'
@@ -8,6 +8,7 @@ import { createRemoteServer, type RemoteServer } from './remoteServer'
 import { getLanAddress } from './lan'
 import { registerRemoteIpc } from './remoteIpc'
 import { openDatabase } from './database'
+import { exportDatabaseSnapshot } from './databaseExport'
 import { createPlayerStore } from './playerStore'
 import { registerPlayersIpc } from './playersIpc'
 import { createGroupStore } from './groupStore'
@@ -89,6 +90,26 @@ app.whenReady().then(async () => {
   registerPlayersIpc({ ipcMain, store: createPlayerStore(database) })
   registerGroupsIpc({ ipcMain, store: createGroupStore(database) })
   registerTournamentIpc({ ipcMain, store: createTournamentStore(database) })
+
+  ipcMain.handle('database:export', async () => {
+    if (database === null) {
+      return null
+    }
+    const mainWindow = BrowserWindow.getAllWindows()[0]
+    return exportDatabaseSnapshot(database, {
+      showSaveDialog: async (defaultFileName) => {
+        const result = await dialog.showSaveDialog(mainWindow, {
+          title: 'Экспорт базы данных',
+          defaultPath: defaultFileName,
+          filters: [{ name: 'База данных SQLite', extensions: ['db'] }]
+        })
+        if (result.canceled || result.filePath === undefined) {
+          return null
+        }
+        return result.filePath
+      }
+    })
+  })
 
   try {
     await startRemoteServer()

@@ -62,6 +62,9 @@ function installApi(tournaments: Tournament[], rounds: Round[]): RoundsApi {
         remove: vi.fn()
       },
       rounds: roundsApi
+    },
+    database: {
+      exportSnapshot: vi.fn(async () => null)
     }
   }
   return roundsApi

@@ -1324,6 +1324,26 @@ code {
   color: var(--ev-c-text-2);
 }
 
+.settings-export-button {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background: var(--color-surface-hover);
+  color: var(--ev-c-text-1);
+  font: inherit;
+  cursor: pointer;
+}
+
+.settings-export-button:hover:not(:disabled) {
+  background: var(--color-border);
+}
+
+.settings-export-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .theme-toggle {
   position: relative;
   display: grid;

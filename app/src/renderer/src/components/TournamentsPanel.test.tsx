@@ -101,6 +101,9 @@ function installApi(
           pairs: []
         }))
       }
+    },
+    database: {
+      exportSnapshot: vi.fn(async () => null)
     }
   }
   return { settingsApi, tournamentsApi }

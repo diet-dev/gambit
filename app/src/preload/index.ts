@@ -3,6 +3,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 import type { RemoteApi, RemoteClient, RemoteMove, ServerInfo } from '../shared/remote'
 import type { Player, PlayerInput, PlayersApi } from '../shared/players'
 import type { Group, GroupInput, GroupsApi } from '../shared/groups'
+import type { DatabaseApi } from '../shared/database'
 import type {
   Round,
   RoundCreateInput,
@@ -86,7 +87,11 @@ const tournament: TournamentApi = {
   }
 }
 
-const api = { remote, players, groups, tournament }
+const database: DatabaseApi = {
+  exportSnapshot: () => ipcRenderer.invoke('database:export') as Promise<string | null>
+}
+
+const api = { remote, players, groups, tournament, database }
 
 if (process.contextIsolated) {
   try {

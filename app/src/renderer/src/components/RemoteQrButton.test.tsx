@@ -54,6 +54,9 @@ function installApi(serverInfo: ServerInfo | null): RemoteApi {
           pairs: []
         }))
       }
+    },
+    database: {
+      exportSnapshot: vi.fn(async () => null)
     }
   }
   return remote

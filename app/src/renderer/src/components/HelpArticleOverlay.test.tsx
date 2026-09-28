@@ -3,7 +3,7 @@ import { fireEvent, render } from '@testing-library/react'
 import HelpArticleOverlay from './HelpArticleOverlay'
 import { helpArticles } from '../help/articles'
 
-const article = helpArticles[0]
+const article = helpArticles.find((item) => item.id === 'license')!
 
 describe('HelpArticleOverlay', () => {
   it('renders the article title and markdown body', () => {

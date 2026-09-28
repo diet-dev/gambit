@@ -77,6 +77,9 @@ function installApi(
           pairs: []
         }))
       }
+    },
+    database: {
+      exportSnapshot: vi.fn(async () => null)
     }
   }
   return { playersApi, groupsApi }

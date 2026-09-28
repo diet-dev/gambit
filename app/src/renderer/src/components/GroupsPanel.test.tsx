@@ -64,6 +64,9 @@ function installApi(initial: Group[]): GroupsApi {
           pairs: []
         }))
       }
+    },
+    database: {
+      exportSnapshot: vi.fn(async () => null)
     }
   }
   return groupsApi
