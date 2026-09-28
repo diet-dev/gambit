@@ -8,8 +8,8 @@ export type SwapSettings = {
 
 export type GenerationPairInput = {
   player1Id: number
-  player2Id: number
-  result: PairResult
+  player2Id: number | null
+  result: PairResult | null
 }
 
 export type GenerationInput = {
@@ -24,9 +24,11 @@ export type GenerationInput = {
 
 export type GeneratedPair = { player1Id: number; player2Id: number }
 
+export type GenerationResting = { playerId: number; boardNo: number }
+
 export type GenerationResult = {
   pairs: GeneratedPair[]
-  restingPlayerId: number | null
+  resting: GenerationResting[]
 }
 
 export function swapFor(result: PairResult, settings: SwapSettings): boolean {
@@ -52,27 +54,27 @@ export function generateRound(input: GenerationInput): GenerationResult {
 }
 
 export function orderFor(input: GenerationInput): number[] {
+  const roster = input.players
   if (input.seq === 1 || input.prevRound === null) {
-    return [...input.players]
+    return [...roster]
       .sort((a, b) => a.lastName.localeCompare(b.lastName, 'ru') || a.id - b.id)
       .map((player) => player.id)
   }
-  const { prevRound } = input
+  const rosterIds = new Set(roster.map((player) => player.id))
   const order: number[] = []
-  for (const pair of prevRound.pairs) {
-    if (swapFor(pair.result, prevRound.settings)) {
-      order.push(pair.player2Id, pair.player1Id)
-    } else {
-      order.push(pair.player1Id, pair.player2Id)
+  for (const pair of input.prevRound.pairs) {
+    if (pair.player2Id === null || pair.result === null) {
+      if (rosterIds.has(pair.player1Id)) {
+        order.push(pair.player1Id)
+      }
+      continue
     }
-  }
-  const paired = new Set(order)
-  const resting = input.players.map((player) => player.id).find((id) => !paired.has(id))
-  if (resting !== undefined) {
-    if (prevRound.seq % 2 === 0) {
-      order.unshift(resting)
-    } else {
-      order.push(resting)
+    const upperFirst = !swapFor(pair.result, input.prevRound.settings)
+    const slots = upperFirst ? [pair.player1Id, pair.player2Id] : [pair.player2Id, pair.player1Id]
+    for (const slot of slots) {
+      if (rosterIds.has(slot)) {
+        order.push(slot)
+      }
     }
   }
   return order
@@ -80,18 +82,21 @@ export function orderFor(input: GenerationInput): number[] {
 
 function pairUp(order: number[], seq: number): GenerationResult {
   const pairs: GeneratedPair[] = []
-  const resting: number[] = []
+  const resting: GenerationResting[] = []
   let index = 0
   if (seq % 2 === 0 && order.length > 0) {
-    resting.push(order[0])
+    resting.push({ playerId: order[0], boardNo: 0 })
     index = 1
   }
   while (index + 1 < order.length) {
     pairs.push({ player1Id: order[index], player2Id: order[index + 1] })
     index += 2
   }
-  if (index < order.length) {
-    resting.push(order[index])
+  let tailBoardNo = pairs.length + 1
+  while (index < order.length) {
+    resting.push({ playerId: order[index], boardNo: tailBoardNo })
+    tailBoardNo += 1
+    index += 1
   }
-  return { pairs, restingPlayerId: resting[0] ?? null }
+  return { pairs, resting }
 }

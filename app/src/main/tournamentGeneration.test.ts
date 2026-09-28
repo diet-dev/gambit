@@ -57,7 +57,7 @@ describe('generateRound', () => {
 
     expect(result).toEqual({
       pairs: [{ player1Id: 1, player2Id: 2 }],
-      restingPlayerId: 3
+      resting: [{ playerId: 3, boardNo: 2 }]
     })
   })
 
@@ -72,7 +72,7 @@ describe('generateRound', () => {
       { player1Id: 1, player2Id: 2 },
       { player1Id: 3, player2Id: 4 }
     ])
-    expect(result.restingPlayerId).toBe(null)
+    expect(result.resting).toEqual([])
   })
 
   it('rests the top player in an even round', () => {
@@ -90,7 +90,10 @@ describe('generateRound', () => {
     })
 
     expect(result.pairs).toEqual([{ player1Id: 2, player2Id: 3 }])
-    expect(result.restingPlayerId).toBe(1)
+    expect(result.resting).toEqual([
+      { playerId: 1, boardNo: 0 },
+      { playerId: 4, boardNo: 2 }
+    ])
   })
 
   it('swaps pair slots when the lower player won the previous game', () => {
@@ -105,21 +108,66 @@ describe('generateRound', () => {
     })
 
     expect(result.pairs).toEqual([{ player1Id: 2, player2Id: 1 }])
-    expect(result.restingPlayerId).toBe(null)
+    expect(result.resting).toEqual([])
   })
 
-  it('re-enters the previous resting player at the top after an even round', () => {
+  it('restores the ladder from incomplete pairs of the previous round', () => {
     const result = generateRound({
       seq: 3,
       players: players([1, 2, 3]),
       prevRound: {
         seq: 2,
         settings: defaultSettings,
-        pairs: [{ player1Id: 2, player2Id: 3, result: 'draw' }]
+        pairs: [
+          { player1Id: 1, player2Id: null, result: null },
+          { player1Id: 2, player2Id: 3, result: 'draw' }
+        ]
       }
     })
 
     expect(result.pairs).toEqual([{ player1Id: 1, player2Id: 3 }])
-    expect(result.restingPlayerId).toBe(2)
+    expect(result.resting).toEqual([{ playerId: 2, boardNo: 2 }])
+  })
+
+  it('pairs all six players again after an even round rested two of them', () => {
+    const result = generateRound({
+      seq: 3,
+      players: players([1, 2, 3, 4, 5, 6]),
+      prevRound: {
+        seq: 2,
+        settings: defaultSettings,
+        pairs: [
+          { player1Id: 1, player2Id: null, result: null },
+          { player1Id: 2, player2Id: 3, result: 'player1_win' },
+          { player1Id: 4, player2Id: 5, result: 'player1_win' },
+          { player1Id: 6, player2Id: null, result: null }
+        ]
+      }
+    })
+
+    expect(result.pairs).toEqual([
+      { player1Id: 1, player2Id: 2 },
+      { player1Id: 3, player2Id: 4 },
+      { player1Id: 5, player2Id: 6 }
+    ])
+    expect(result.resting).toEqual([])
+  })
+
+  it('drops players who left the group from the ladder', () => {
+    const result = generateRound({
+      seq: 2,
+      players: players([1, 2, 3]),
+      prevRound: {
+        seq: 1,
+        settings: defaultSettings,
+        pairs: [
+          { player1Id: 1, player2Id: 2, result: 'player1_win' },
+          { player1Id: 4, player2Id: 3, result: 'player1_win' }
+        ]
+      }
+    })
+
+    expect(result.pairs).toEqual([{ player1Id: 2, player2Id: 3 }])
+    expect(result.resting).toEqual([{ playerId: 1, boardNo: 0 }])
   })
 })

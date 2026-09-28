@@ -27,7 +27,7 @@ function installApi(tournaments: Tournament[], rounds: Round[]): RoundsApi {
   const roundsApi = {
     list: vi.fn(async () => rounds),
     results: vi.fn(async () => []),
-    preview: vi.fn(async () => ({ seq: 1, pairs: [], restingPlayerId: null })),
+    preview: vi.fn(async () => ({ seq: 1, pairs: [], restingPlayerIds: [] })),
     create: vi.fn(async () => ({
       round: { id: 1, tournamentId: 1, seq: 1, playedDate: '', settingsId: 1 },
       pairs: []

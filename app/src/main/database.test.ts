@@ -26,7 +26,7 @@ describe('openDatabase', () => {
     ])
 
     const version = database.prepare('PRAGMA user_version').get() as { user_version: number }
-    expect(version.user_version).toBe(2)
+    expect(version.user_version).toBe(3)
 
     const foreignKeys = database.prepare('PRAGMA foreign_keys').get() as { foreign_keys: number }
     expect(foreignKeys.foreign_keys).toBe(1)
@@ -106,7 +106,56 @@ describe('openDatabase', () => {
     ])
 
     const version = database.prepare('PRAGMA user_version').get() as { user_version: number }
-    expect(version.user_version).toBe(2)
+    expect(version.user_version).toBe(3)
+
+    database.close()
+  })
+
+  it('stores incomplete pairs with empty opponent and result', () => {
+    const database = openDatabase(':memory:')
+
+    const groupInfo = database.prepare("INSERT INTO groups (name) VALUES ('7А')").run()
+    const groupId = Number(groupInfo.lastInsertRowid)
+    const players = ['Первов', 'Второв', 'Третьев'].map((lastName) =>
+      Number(
+        database.prepare("INSERT INTO players (last_name, first_name) VALUES (?, '')").run(lastName)
+          .lastInsertRowid
+      )
+    )
+    const join = database.prepare(
+      'INSERT INTO group_memberships (group_id, player_id) VALUES (?, ?)'
+    )
+    players.forEach((playerId) => join.run(groupId, playerId))
+    const settingsId = Number(
+      (database.prepare('SELECT id FROM tournament_settings LIMIT 1').get() as { id: number }).id
+    )
+    const tournamentId = Number(
+      database
+        .prepare(
+          'INSERT INTO tournaments (name, group_id, start_date, settings_id) VALUES (?, ?, ?, ?)'
+        )
+        .run('Осенний', groupId, '2026-10-01', settingsId).lastInsertRowid
+    )
+    const roundId = Number(
+      database
+        .prepare(
+          'INSERT INTO rounds (tournament_id, seq, played_date, settings_id) VALUES (?, ?, ?, ?)'
+        )
+        .run(tournamentId, 1, '2026-10-01', settingsId).lastInsertRowid
+    )
+    const insert = database.prepare(
+      'INSERT INTO round_pairs (round_id, board_no, player1_id, player2_id, result) VALUES (?, ?, ?, ?, ?)'
+    )
+    insert.run(roundId, 1, players[1], players[2], 'player1_win')
+    insert.run(roundId, 0, players[0], null, null)
+
+    const rows = database
+      .prepare('SELECT board_no, player1_id, player2_id, result FROM round_pairs ORDER BY board_no')
+      .all() as { board_no: number; player1_id: number; player2_id: number | null }[]
+    expect(rows.map((row) => row.board_no)).toEqual([0, 1])
+    expect(rows[0].player2_id).toBe(null)
+
+    expect(() => insert.run(roundId, 9, players[0], null, 'player1_win')).toThrow()
 
     database.close()
   })

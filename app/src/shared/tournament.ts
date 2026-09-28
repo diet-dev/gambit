@@ -67,8 +67,8 @@ export type RoundPair = {
   roundId: number
   boardNo: number
   player1Id: number
-  player2Id: number
-  result: PairResult
+  player2Id: number | null
+  result: PairResult | null
 }
 
 export type RoundPairInput = {
@@ -80,7 +80,7 @@ export type RoundPairInput = {
 export type RoundPairsPreview = {
   seq: number
   pairs: { player1Id: number; player2Id: number }[]
-  restingPlayerId: number | null
+  restingPlayerIds: number[]
 }
 
 export type RoundCreateInput = {

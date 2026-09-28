@@ -39,7 +39,7 @@ function createStore(): TournamentStore {
     removeTournament: vi.fn(),
     listRounds: vi.fn(() => []),
     roundResults: vi.fn(() => []),
-    previewPairs: vi.fn(() => ({ seq: 1, pairs: [], restingPlayerId: null })),
+    previewPairs: vi.fn(() => ({ seq: 1, pairs: [], restingPlayerIds: [] })),
     createRound: vi.fn(() => ({
       round: {
         id: 1,

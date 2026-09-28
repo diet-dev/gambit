@@ -88,6 +88,24 @@ function migrate(database: DatabaseSync): void {
     `)
     database.exec('PRAGMA user_version = 2')
   }
+
+  if (currentVersion(database) < 3) {
+    database.exec('DROP TABLE round_pairs')
+    database.exec('DELETE FROM rounds')
+    database.exec(`
+      CREATE TABLE round_pairs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        round_id INTEGER NOT NULL REFERENCES rounds(id) ON DELETE CASCADE,
+        board_no INTEGER NOT NULL,
+        player1_id INTEGER NOT NULL REFERENCES players(id),
+        player2_id INTEGER REFERENCES players(id),
+        result TEXT,
+        UNIQUE (round_id, board_no),
+        CHECK ((player2_id IS NULL) = (result IS NULL))
+      );
+    `)
+    database.exec('PRAGMA user_version = 3')
+  }
 }
 
 function currentVersion(database: DatabaseSync): number {

@@ -257,6 +257,9 @@ export function createTournamentStore(database: DatabaseSync): TournamentStore {
       })
       const outcomes = new Map<number, RoundOutcome>()
       for (const pair of pairs) {
+        if (pair.player2Id === null || pair.result === null) {
+          continue
+        }
         const [first, second] = pairOutcomes(pair.result)
         outcomes.set(pair.player1Id, first)
         outcomes.set(pair.player2Id, second)
@@ -296,7 +299,7 @@ export function createTournamentStore(database: DatabaseSync): TournamentStore {
       return {
         seq: (prev?.seq ?? 0) + 1,
         pairs: generation.pairs,
-        restingPlayerId: generation.restingPlayerId
+        restingPlayerIds: generation.resting.map((slot) => slot.playerId)
       }
     },
     createRound: (input) =>
@@ -320,23 +323,27 @@ export function createTournamentStore(database: DatabaseSync): TournamentStore {
           throw new Error('Игрок не может играть в двух парах одного раунда')
         }
 
+        const expected = generateRound({
+          seq,
+          players,
+          prevRound:
+            prev === null
+              ? null
+              : {
+                  seq: prev.seq,
+                  settings: getSettings(prev.settingsId),
+                  pairs: listRoundPairs(prev.id).map((pair) => ({
+                    player1Id: pair.player1Id,
+                    player2Id: pair.player2Id,
+                    result: pair.result
+                  }))
+                }
+        })
+
         if (seq > 1) {
           if (prev === null) {
             throw new Error('Предыдущий раунд не найден')
           }
-          const expected = generateRound({
-            seq,
-            players,
-            prevRound: {
-              seq: prev.seq,
-              settings: getSettings(prev.settingsId),
-              pairs: listRoundPairs(prev.id).map((pair) => ({
-                player1Id: pair.player1Id,
-                player2Id: pair.player2Id,
-                result: pair.result
-              }))
-            }
-          })
           const matches =
             expected.pairs.length === submitted.length &&
             expected.pairs.every(
@@ -361,6 +368,9 @@ export function createTournamentStore(database: DatabaseSync): TournamentStore {
         submitted.forEach((pair, index) => {
           insertPair.run(roundId, index + 1, pair.player1Id, pair.player2Id, pair.result)
         })
+        for (const slot of expected.resting) {
+          insertPair.run(roundId, slot.boardNo, slot.playerId, null, null)
+        }
 
         return {
           round: {

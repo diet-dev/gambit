@@ -258,7 +258,7 @@ describe('tournamentStore settings', () => {
       { player1Id: ids[1], player2Id: ids[2] },
       { player1Id: ids[0], player2Id: ids[3] }
     ])
-    expect(preview.restingPlayerId).toBe(null)
+    expect(preview.restingPlayerIds).toEqual([])
 
     const { round, pairs } = store.createRound({
       tournamentId: tournament.id,
@@ -311,7 +311,7 @@ describe('tournamentStore settings', () => {
     const preview = store.previewPairs(tournament.id)
     expect(preview.seq).toBe(2)
     expect(preview.pairs).toEqual([{ player1Id: ids[1], player2Id: ids[2] }])
-    expect(preview.restingPlayerId).toBe(ids[0])
+    expect(preview.restingPlayerIds).toEqual([ids[0]])
 
     expect(() =>
       store.createRound({

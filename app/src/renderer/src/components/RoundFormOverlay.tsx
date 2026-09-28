@@ -185,8 +185,9 @@ function RoundFormOverlay({
     }
   }
 
-  const restingLabel =
-    preview?.restingPlayerId != null ? playerLabel(playerById, preview.restingPlayerId) : null
+  const restingLabels = (preview?.restingPlayerIds ?? []).map((playerId) =>
+    playerLabel(playerById, playerId)
+  )
 
   if (tournament === null) {
     return (
@@ -324,7 +325,7 @@ function RoundFormOverlay({
             ))}
           </div>
           <p className="entity-sub">
-            {restingLabel ? `Не играет: ${restingLabel}` : 'Отдыхающих нет'}
+            {restingLabels.length > 0 ? `Не играет: ${restingLabels.join(', ')}` : 'Отдыхающих нет'}
             {reorderEnabled ? ' · стрелками можно менять пары (только для первого раунда)' : ''}
           </p>
           {error && <p className="entity-error">{error}</p>}
