@@ -49,7 +49,7 @@ async function startRemoteServer(): Promise<void> {
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
-    width: 900,
+    width: 1100,
     height: 670,
     minWidth: 900,
     minHeight: 600,
