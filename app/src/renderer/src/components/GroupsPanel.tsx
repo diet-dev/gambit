@@ -55,8 +55,10 @@ function GroupsPanel(): React.JSX.Element {
         <ul className="entity-list">
           {groups.map((group) => (
             <li key={group.id} className="entity-item">
-              <span className="entity-name">{group.name}</span>
-              <span className="entity-sub">{group.comment}</span>
+              <span className="entity-name">
+                {group.name}
+                {group.comment !== '' && <span className="entity-sub"> ({group.comment})</span>}
+              </span>
               <button
                 type="button"
                 className="entity-action"
