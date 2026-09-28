@@ -25,6 +25,8 @@ export const helpArticles: HelpArticle[] = Object.entries(modules)
     }
   })
   .sort((a, b) => a.title.localeCompare(b.title, 'ru'))
+  .sort((a, b) => Number(a.id === 'license') - Number(b.id === 'license'))
+  .sort((a, b) => Number(b.id === 'groups-players') - Number(a.id === 'groups-players'))
 
 export function findHelpArticle(id: string | null): HelpArticle | undefined {
   return id ? helpArticles.find((article) => article.id === id) : undefined

@@ -769,6 +769,8 @@ code {
   font-size: 16px;
   line-height: 1.6;
   color: var(--ev-c-text-1);
+  user-select: text;
+  cursor: auto;
 }
 
 .help-markdown h2 {

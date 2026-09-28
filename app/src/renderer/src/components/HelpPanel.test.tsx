@@ -4,8 +4,16 @@ import HelpPanel from './HelpPanel'
 
 describe('HelpPanel', () => {
   it('lists the bundled articles and marks the open one', () => {
-    const { getByRole } = render(<HelpPanel openArticleId="license" onOpen={() => {}} />)
+    const { getByRole, getAllByRole } = render(
+      <HelpPanel openArticleId="license" onOpen={() => {}} />
+    )
 
+    expect(getAllByRole('button').map((button) => button.textContent)).toEqual([
+      'Группы и игроки',
+      'Турниры',
+      'Управление со смартфона',
+      'Лицензия'
+    ])
     expect(getByRole('button', { name: 'Лицензия' })).toHaveAttribute('aria-current', 'true')
   })
 
