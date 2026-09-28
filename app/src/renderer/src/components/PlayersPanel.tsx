@@ -16,8 +16,13 @@ function PlayersPanel(): React.JSX.Element {
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Player | null>(null)
   const [deleting, setDeleting] = useState<Player | null>(null)
+  const [groupFilter, setGroupFilter] = useState<number | null>(null)
 
   const groupNames = new Map(groups.map((group) => [group.id, group.name]))
+  const visiblePlayers =
+    groupFilter === null
+      ? players
+      : players.filter((player) => player.groupIds.includes(groupFilter))
 
   function openCreate(): void {
     setEditing(null)
@@ -51,12 +56,30 @@ function PlayersPanel(): React.JSX.Element {
         <button type="button" className="entity-add" onClick={openCreate}>
           Добавить игрока
         </button>
+        <label className="players-filter">
+          <span>Группа:</span>
+          <select
+            value={groupFilter ?? ''}
+            onChange={(event) =>
+              setGroupFilter(event.target.value === '' ? null : Number(event.target.value))
+            }
+          >
+            <option value="">Все группы</option>
+            {groups.map((group) => (
+              <option key={group.id} value={group.id}>
+                {group.name}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
       {players.length === 0 ? (
         <p className="entity-empty">Игроков пока нет</p>
+      ) : visiblePlayers.length === 0 ? (
+        <p className="entity-empty">В этой группе пока нет игроков</p>
       ) : (
         <ul className="entity-list">
-          {players.map((player) => (
+          {visiblePlayers.map((player) => (
             <li key={player.id} className="entity-item">
               <span className="entity-name">{playerName(player)}</span>
               <span className="entity-sub">

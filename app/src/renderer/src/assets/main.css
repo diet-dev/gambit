@@ -562,6 +562,31 @@ code {
   background: var(--color-surface-hover);
 }
 
+.players-panel .entity-header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.players-filter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ev-c-text-2);
+}
+
+.players-filter select {
+  padding: 6px 8px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 6px;
+  background: var(--ev-c-black-mute);
+  color: var(--ev-c-text-1);
+  font: inherit;
+}
+
 .entity-empty {
   font-size: 14px;
   color: var(--ev-c-text-2);

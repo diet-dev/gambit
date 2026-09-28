@@ -111,6 +111,39 @@ describe('PlayersPanel', () => {
     expect(container).toHaveTextContent('7А, 8Б')
   })
 
+  it('filters players by group', async () => {
+    installApi(
+      [ivanov, { id: 2, lastName: 'Петров', firstName: 'Пётр', middleName: '', groupIds: [3] }],
+      [...groups, { id: 3, name: '9В', comment: '' }]
+    )
+    const user = userEvent.setup()
+    const { getByLabelText, findByText, queryByText } = render(<PlayersPanel />)
+
+    await findByText('Иванов Иван Иванович')
+
+    await user.selectOptions(getByLabelText(/Группа/), '1')
+    expect(queryByText('Петров Пётр')).not.toBeInTheDocument()
+
+    await user.selectOptions(getByLabelText(/Группа/), '3')
+    expect(queryByText('Иванов Иван Иванович')).not.toBeInTheDocument()
+    expect(await findByText('Петров Пётр')).toBeInTheDocument()
+
+    await user.selectOptions(getByLabelText(/Группа/), '')
+    expect(await findByText('Иванов Иван Иванович')).toBeInTheDocument()
+    expect(await findByText('Петров Пётр')).toBeInTheDocument()
+  })
+
+  it('shows an empty message when the filtered group has no players', async () => {
+    installApi([ivanov], [...groups, { id: 3, name: '9В', comment: '' }])
+    const user = userEvent.setup()
+    const { getByLabelText, findByText } = render(<PlayersPanel />)
+
+    await findByText('Иванов Иван Иванович')
+    await user.selectOptions(getByLabelText(/Группа/), '3')
+
+    expect(await findByText('В этой группе пока нет игроков')).toBeInTheDocument()
+  })
+
   it('creates a player with the selected groups', async () => {
     const { playersApi } = installApi([], groups)
     const user = userEvent.setup()
