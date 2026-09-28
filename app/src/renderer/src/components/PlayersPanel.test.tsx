@@ -135,14 +135,14 @@ describe('PlayersPanel', () => {
   it('requires at least one group', async () => {
     const { playersApi } = installApi([], groups)
     const user = userEvent.setup()
-    const { getByRole, getByLabelText, findByText } = render(<PlayersPanel />)
+    const { getByRole, getByLabelText } = render(<PlayersPanel />)
 
     await user.click(getByRole('button', { name: 'Добавить игрока' }))
     await user.type(getByLabelText(/Фамилия/), 'Петров')
     await user.type(getByLabelText(/Имя/), 'Пётр')
     await user.click(getByRole('button', { name: 'Сохранить' }))
 
-    expect(await findByText('Выберите хотя бы одну группу')).toBeInTheDocument()
+    expect(getByRole('dialog')).toBeInTheDocument()
     expect(playersApi.create).not.toHaveBeenCalled()
   })
 

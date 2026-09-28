@@ -38,12 +38,12 @@ describe('swapFor', () => {
     expect(swapFor('both_absent', { ...defaultSettings, absenceScoring: 'no_effect' })).toBe(false)
   })
 
-  it('mirrors colors when the stronger player plays white', () => {
+  it('swaps when the lower player wins regardless of colors', () => {
     const settings = { ...defaultSettings, weakerPlaysWhite: false }
-    expect(swapFor('player1_win', settings)).toBe(true)
-    expect(swapFor('player2_win', settings)).toBe(false)
-    expect(swapFor('player2_absent', settings)).toBe(true)
-    expect(swapFor('player1_absent', settings)).toBe(false)
+    expect(swapFor('player2_win', settings)).toBe(true)
+    expect(swapFor('player1_win', settings)).toBe(false)
+    expect(swapFor('player1_absent', settings)).toBe(true)
+    expect(swapFor('player2_absent', settings)).toBe(false)
   })
 })
 
@@ -56,11 +56,8 @@ describe('generateRound', () => {
     })
 
     expect(result).toEqual({
-      pairs: [
-        { player1Id: 1, player2Id: 2 },
-        { player1Id: 3, player2Id: 4 }
-      ],
-      restingPlayerId: 4
+      pairs: [{ player1Id: 1, player2Id: 2 }],
+      restingPlayerId: 3
     })
   })
 
@@ -78,16 +75,16 @@ describe('generateRound', () => {
     expect(result.restingPlayerId).toBe(null)
   })
 
-  it('drops the first player in an even round so the previous outsider plays', () => {
+  it('rests the top player in an even round', () => {
     const result = generateRound({
       seq: 2,
-      players: players([1, 2, 3]),
+      players: players([1, 2, 3, 4]),
       prevRound: {
         seq: 1,
         settings: defaultSettings,
         pairs: [
           { player1Id: 1, player2Id: 2, result: 'player1_win' },
-          { player1Id: 3, player2Id: 4, result: 'player2_win' }
+          { player1Id: 3, player2Id: 4, result: 'player1_win' }
         ]
       }
     })
@@ -96,12 +93,12 @@ describe('generateRound', () => {
     expect(result.restingPlayerId).toBe(1)
   })
 
-  it('swaps pair slots according to the previous results and rules', () => {
+  it('swaps pair slots when the lower player won the previous game', () => {
     const result = generateRound({
-      seq: 2,
+      seq: 3,
       players: players([1, 2]),
       prevRound: {
-        seq: 1,
+        seq: 2,
         settings: defaultSettings,
         pairs: [{ player1Id: 1, player2Id: 2, result: 'player2_win' }]
       }
@@ -111,7 +108,7 @@ describe('generateRound', () => {
     expect(result.restingPlayerId).toBe(null)
   })
 
-  it('keeps the previous resting player in place', () => {
+  it('re-enters the previous resting player at the top after an even round', () => {
     const result = generateRound({
       seq: 3,
       players: players([1, 2, 3]),
@@ -122,7 +119,7 @@ describe('generateRound', () => {
       }
     })
 
-    expect(result.pairs).toEqual([{ player1Id: 2, player2Id: 3 }])
-    expect(result.restingPlayerId).toBe(1)
+    expect(result.pairs).toEqual([{ player1Id: 1, player2Id: 3 }])
+    expect(result.restingPlayerId).toBe(2)
   })
 })

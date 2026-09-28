@@ -41,9 +41,9 @@ describe('TournamentDialog', () => {
 
     expect(getByRole('heading', { name: 'Новый турнир' })).toBeInTheDocument()
     fireEvent.change(getByLabelText(/Название/), { target: { value: 'Осенний' } })
-    fireEvent.change(getByLabelText('Группа'), { target: { value: '1' } })
-    fireEvent.change(getByLabelText('Дата начала'), { target: { value: '2026-10-01' } })
-    fireEvent.change(getByLabelText('Настройки'), { target: { value: '2' } })
+    fireEvent.change(getByLabelText(/^Группа/), { target: { value: '1' } })
+    fireEvent.change(getByLabelText(/^Дата начала/), { target: { value: '2026-10-01' } })
+    fireEvent.change(getByLabelText(/^Настройки/), { target: { value: '2' } })
     fireEvent.click(getByRole('button', { name: 'Создать' }))
 
     expect(onSubmit).toHaveBeenCalledWith({
@@ -93,7 +93,7 @@ describe('TournamentDialog', () => {
     )
 
     expect(getByRole('button', { name: 'Создать' })).toBeDisabled()
-    expect(getByTextSafe('Сначала добавьте группу')).toBeInTheDocument()
+    expect(getByTextSafe('сначала добавьте игроков')).toBeInTheDocument()
     expect(getByTextSafe('Сначала добавьте настройку')).toBeInTheDocument()
     expect(onSubmit).not.toHaveBeenCalled()
   })
@@ -114,7 +114,7 @@ describe('TournamentDialog', () => {
     )
 
     const nameInput = getByLabelText(/Название/) as HTMLInputElement
-    const groupSelect = getByLabelText('Группа')
+    const groupSelect = getByLabelText(/^Группа/)
 
     expect(nameInput).toHaveValue('')
     fireEvent.change(groupSelect, { target: { value: '1' } })

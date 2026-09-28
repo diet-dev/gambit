@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { render, waitFor } from '@testing-library/react'
+import { render, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import TournamentsPanel from './TournamentsPanel'
 import type { RemoteApi } from '../../../shared/remote'
@@ -153,7 +153,9 @@ describe('TournamentsPanel', () => {
     const dialog = await findByRole('dialog')
     await user.type(dialog.querySelector('input')!, 'Осенний')
     await user.selectOptions(dialog.querySelectorAll('select')[0]!, '1')
-    await user.type(dialog.querySelector('input[type="date"]')!, '2026-10-01')
+    fireEvent.change(dialog.querySelector('input[type="date"]')!, {
+      target: { value: '2026-10-01' }
+    })
     await user.selectOptions(dialog.querySelectorAll('select')[1]!, '1')
     await user.click(await findByRole('button', { name: 'Создать' }))
 
