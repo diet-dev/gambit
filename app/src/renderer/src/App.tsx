@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Group, Panel, Separator, useDefaultLayout } from 'react-resizable-panels'
-import ActivityBar, { type Activity } from './components/ActivityBar'
+import ActivityBar from './components/ActivityBar'
+import { ACTIVITY_TITLES, type Activity } from './components/activities'
 import ChessGame from './components/ChessGame'
 import GroupsPanel from './components/GroupsPanel'
 import DevicesPanel from './components/DevicesPanel'
@@ -47,8 +48,9 @@ function App(): React.JSX.Element {
   const helpArticle = findHelpArticle(helpArticleId)
 
   useEffect(() => {
-    document.title = selected ? `Гамбит — ${selected.title}` : 'Гамбит'
-  }, [selected])
+    const suffix = activity === 'situations' ? selected?.title : ACTIVITY_TITLES[activity]
+    document.title = suffix ? `Гамбит — ${suffix}` : 'Гамбит'
+  }, [selected, activity])
 
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: 'gambit-layout',

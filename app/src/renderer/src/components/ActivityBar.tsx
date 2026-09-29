@@ -11,16 +11,7 @@ import {
   type LucideIcon
 } from 'lucide-react'
 
-export type Activity =
-  | 'situations'
-  | 'groups'
-  | 'players'
-  | 'tournaments'
-  | 'rounds'
-  | 'devices'
-  | 'events'
-  | 'settings'
-  | 'help'
+import { ACTIVITY_TITLES, type Activity } from './activities'
 
 type ActivityBarProps = {
   active: Activity
@@ -30,18 +21,18 @@ type ActivityBarProps = {
 type Item = { id: Activity; icon: LucideIcon; title: string }
 
 const TOP_ITEMS: Item[] = [
-  { id: 'situations', icon: ListChecks, title: 'Ситуации' },
-  { id: 'groups', icon: School, title: 'Группы' },
-  { id: 'players', icon: GraduationCap, title: 'Игроки' },
-  { id: 'tournaments', icon: Trophy, title: 'Турниры' },
-  { id: 'rounds', icon: Swords, title: 'Раунды' },
-  { id: 'devices', icon: MonitorSmartphone, title: 'Устройства' },
-  { id: 'events', icon: ScrollText, title: 'События' }
+  { id: 'situations', icon: ListChecks, title: ACTIVITY_TITLES.situations },
+  { id: 'groups', icon: School, title: ACTIVITY_TITLES.groups },
+  { id: 'players', icon: GraduationCap, title: ACTIVITY_TITLES.players },
+  { id: 'tournaments', icon: Trophy, title: ACTIVITY_TITLES.tournaments },
+  { id: 'rounds', icon: Swords, title: ACTIVITY_TITLES.rounds },
+  { id: 'devices', icon: MonitorSmartphone, title: ACTIVITY_TITLES.devices },
+  { id: 'events', icon: ScrollText, title: ACTIVITY_TITLES.events }
 ]
 
 const BOTTOM_ITEMS: Item[] = [
-  { id: 'settings', icon: Settings, title: 'Настройки' },
-  { id: 'help', icon: CircleHelp, title: 'Справка' }
+  { id: 'settings', icon: Settings, title: ACTIVITY_TITLES.settings },
+  { id: 'help', icon: CircleHelp, title: ACTIVITY_TITLES.help }
 ]
 
 function ActivityButton({

@@ -244,6 +244,23 @@ describe('App', () => {
     expect(document.title).toBe('Гамбит — Мат в один ход')
   })
 
+  it('reflects the active tab in the window title', async () => {
+    installApi()
+    const { getByRole, findByRole } = render(<App />)
+
+    await findByRole('button', { name: /^Начальная позиция/ })
+    expect(document.title).toBe('Гамбит — Начальная позиция')
+
+    fireEvent.click(getByRole('button', { name: 'Группы' }))
+    expect(document.title).toBe('Гамбит — Группы')
+
+    fireEvent.click(getByRole('button', { name: 'Турниры' }))
+    expect(document.title).toBe('Гамбит — Турниры')
+
+    fireEvent.click(getByRole('button', { name: 'Ситуации' }))
+    expect(document.title).toBe('Гамбит — Начальная позиция')
+  })
+
   it('opens the comment dialog for the active situation and closes it on Escape', async () => {
     installApi()
     const { queryByRole, getByRole, findByRole } = render(<App />)
