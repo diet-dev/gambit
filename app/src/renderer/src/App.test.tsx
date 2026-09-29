@@ -269,7 +269,7 @@ describe('App', () => {
 
     const overlay = getByRole('button', { name: 'Сохранить' }).closest('form')
     expect(overlay).not.toBeNull()
-    const titleInput = getByRole('textbox', { name: /Название ситуации/ }) as HTMLInputElement
+    const titleInput = getByRole('textbox', { name: 'Название' }) as HTMLInputElement
     expect(titleInput.value).toBe('Начальная позиция')
 
     fireEvent.change(titleInput, { target: { value: 'Начальная позиция — правка' } })
@@ -287,7 +287,7 @@ describe('App', () => {
     fireEvent.click(getByRole('button', { name: /Удалить: Начальная позиция/ }))
 
     const dialog = getByRole('dialog')
-    expect(dialog).toHaveTextContent('Удалить ситуацию?')
+    expect(dialog).toHaveTextContent('Удалить пример?')
     expect(dialog).toHaveTextContent('Начальная позиция')
 
     fireEvent.click(getByRole('button', { name: 'Удалить' }))

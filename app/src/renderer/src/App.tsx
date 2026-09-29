@@ -218,7 +218,7 @@ function App(): React.JSX.Element {
           onClose={() => setDeletingSituation(null)}
         >
           <h2 id="situation-delete-dialog" className="comment-dialog-title">
-            Удалить ситуацию?
+            Удалить пример?
           </h2>
           <p className="comment-dialog-text">{deletingSituation.title}</p>
           {deleteError && <p className="entity-error">{deleteError}</p>}

@@ -85,7 +85,7 @@ describe('SituationSaveOverlay', () => {
     const { getByRole, getByText, findByRole, container } = renderOverlay()
 
     expect(await findByRole('combobox')).toBeInTheDocument()
-    expect(getByText('Сохранить ситуацию')).toBeInTheDocument()
+    expect(getByText('Сохранить пример')).toBeInTheDocument()
     expect(container.querySelector('.situation-save-board')).toBeInTheDocument()
     expect(getByRole('button', { name: 'Сохранить' })).toBeDisabled()
   })
@@ -105,7 +105,7 @@ describe('SituationSaveOverlay', () => {
     const { getByRole, findByRole } = renderOverlay()
 
     await user.selectOptions(await findByRole('combobox'), '5')
-    await user.type(getByRole('textbox', { name: /Название ситуации/ }), 'Мат на диагонали')
+    await user.type(getByRole('textbox', { name: 'Название' }), 'Мат на диагонали')
     await user.click(getByRole('button', { name: 'Сохранить' }))
 
     await waitFor(() =>
@@ -136,7 +136,7 @@ describe('SituationSaveOverlay', () => {
     await findByRole('combobox')
     await user.selectOptions(getByRole('combobox'), 'new')
     await user.type(getByRole('textbox', { name: /Название группы/ }), '  мои   позиции ')
-    await user.type(getByRole('textbox', { name: /Название ситуации/ }), '  моя   позиция ')
+    await user.type(getByRole('textbox', { name: 'Название' }), '  моя   позиция ')
     await user.click(getByRole('button', { name: 'Сохранить' }))
 
     await waitFor(() =>
@@ -160,7 +160,7 @@ describe('SituationSaveOverlay', () => {
 
     await findByRole('combobox')
     await user.selectOptions(getByRole('combobox'), '5')
-    await user.type(getByRole('textbox', { name: /Название ситуации/ }), 'Мат на диагонали')
+    await user.type(getByRole('textbox', { name: 'Название' }), 'Мат на диагонали')
     await user.click(getByRole('button', { name: 'Сохранить' }))
 
     expect(await findByText('Позиция уже сохранена: «Мат»')).toBeInTheDocument()
@@ -183,8 +183,8 @@ describe('SituationSaveOverlay', () => {
       <SituationSaveOverlay fen={fen} situation={situation} onClose={() => {}} onSaved={() => {}} />
     )
 
-    expect(getByText('Редактировать ситуацию')).toBeInTheDocument()
-    const titleInput = getByRole('textbox', { name: /Название ситуации/ }) as HTMLInputElement
+    expect(getByText('Редактировать пример')).toBeInTheDocument()
+    const titleInput = getByRole('textbox', { name: 'Название' }) as HTMLInputElement
     expect(titleInput.value).toBe(situation.title)
     expect(await findByRole('combobox')).toHaveValue('5')
 

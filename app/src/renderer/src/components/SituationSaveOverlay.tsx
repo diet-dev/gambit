@@ -85,7 +85,7 @@ function SituationSaveOverlay({
       }
       onSaved()
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Не удалось сохранить ситуацию')
+      setError(caught instanceof Error ? caught.message : 'Не удалось сохранить пример')
     } finally {
       setSaving(false)
     }
@@ -97,7 +97,7 @@ function SituationSaveOverlay({
         <X size={32} aria-hidden="true" />
       </button>
       <h2 className="help-overlay-title">
-        {editing ? 'Редактировать ситуацию' : 'Сохранить ситуацию'}
+        {editing ? 'Редактировать пример' : 'Сохранить пример'}
       </h2>
       <div className="situation-save-board">
         <Chessboard
@@ -163,7 +163,7 @@ function SituationSaveOverlay({
         )}
         <label className="entity-field">
           <span className="entity-field-label">
-            Название ситуации{' '}
+            Название{' '}
             <span className="entity-required" aria-hidden="true">
               *
             </span>
